@@ -702,7 +702,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 </head>
 <body>
 <script>
-// Age gate — standalone, no dependencies, runs immediately
+// Age gate  -  standalone, no dependencies, runs immediately
 window.confirmAge = function() {
   var ag = document.getElementById('age-gate');
   if (ag) ag.style.display = 'none';
@@ -711,7 +711,7 @@ window.confirmAge = function() {
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
 };
-// Global error catcher — shows real error on screen for debugging
+// Global error catcher  -  shows real error on screen for debugging
 window.onerror = function(msg, src, line, col, err) {
   var d = document.getElementById('_dbg');
   if (!d) {
@@ -720,7 +720,7 @@ window.onerror = function(msg, src, line, col, err) {
     d.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#ff0040;color:#fff;font-family:monospace;font-size:11px;padding:8px;z-index:99999;max-height:200px;overflow:auto;';
     document.body.appendChild(d);
   }
-  d.innerHTML += '<div><b>' + msg + '</b> — ' + (src||'') + ':' + line + ':' + col + '</div>';
+  d.innerHTML += '<div><b>' + msg + '</b>  -  ' + (src||'') + ':' + line + ':' + col + '</div>';
   return false;
 };
 </script>
@@ -1587,7 +1587,7 @@ const pb=document.getElementById(‘rdm-prog’);if(pb)pb.style.width=pct+’%�
 const pp=document.getElementById(‘rdm-pct’);if(pp)pp.textContent=pct+’%’;
 const rn=document.getElementById(‘rdm-note’);
 if(rn){
-if(dailyLeft<=0)rn.textContent=‘⏰ Daily limit reached — resets tomorrow’;
+if(dailyLeft<=0)rn.textContent=‘⏰ Daily limit reached  -  resets tomorrow’;
 else if(SATS<=0)rn.textContent=‘Earn ₿ through daily streaks and milestones!’;
 else rn.textContent=‘₿’+dailyLeft+’ remaining today · You have ₿’+SATS;
 }
@@ -1864,7 +1864,7 @@ if(SATS<=0){hubToast(‘You have no ₿ to redeem!’);return;}
 const today=new Date().toDateString();
 if(DAILY_REDEEM_DATE!==today){DAILY_REDEEMED=0;DAILY_REDEEM_DATE=today;}
 const dailyLeft=Math.max(0,300-DAILY_REDEEMED);
-if(dailyLeft<=0){hubToast(‘Daily limit reached — resets tomorrow!’);return;}
+if(dailyLeft<=0){hubToast(‘Daily limit reached  -  resets tomorrow!’);return;}
 const inputEl=document.getElementById(‘rdm-amt-input’);
 let amt=parseInt(inputEl?inputEl.value:SATS)||1;
 amt=Math.max(1,Math.min(amt,SATS,dailyLeft));
@@ -1873,7 +1873,7 @@ SATS-=amt;DAILY_REDEEMED+=amt;DAILY_REDEEM_DATE=today;
 REDEEM_HIST.unshift({addr:short,date:new Date().toLocaleDateString(),amount:amt,status:‘pending’});
 syncAll();saveState();document.getElementById(‘ln-addr’).value=’’;
 if(inputEl)inputEl.value=1;
-document.getElementById(‘rs-desc’).textContent=`₿${amt.toLocaleString()} requested to ${short}. Processing within 24–72 hours.`;
+document.getElementById(‘rs-desc’).textContent=`₿${amt.toLocaleString()} requested to ${short}. Processing within 24-72 hours.`;
 document.getElementById(‘rs-ov’).classList.add(‘show’);renderRedeemHist();confetti();
 }
 function renderRedeemHist(){
@@ -1970,7 +1970,7 @@ function sClearHolds(){SS.held.fill(false);for(let i=0;i<9;i++){const el=documen
 function sBuildPaytable(){const pg=document.getElementById(‘s-pay-grid’);if(!pg)return;pg.innerHTML=SYMS.filter(s=>s.m>0).map(s=>`<div class="s-pay-row"><span class="s-pay-syms">${s.e}${s.e}${s.e}</span><span class="s-pay-rew">${s.m}× Bet</span></div>`).join(’’);}
 function sSpin(){if(SS.spinning)return;const isFree=SS.freeSpins>0;if(!isFree&&!spendCoins(SS.bet))return;if(isFree){SS.freeSpins–;sFreeUI();}SS.spinning=true;const btn=document.getElementById(‘s-spin-btn’);btn.disabled=true;btn.classList.add(‘spinning’);btn.textContent=‘⏳…’;sSetResult(’’,’’);for(let i=0;i<9;i++){const el=document.getElementById(‘sc’+i);if(el)el.classList.remove(‘winning’);}const ns=[…SS.symbols];for(let i=0;i<9;i++)if(!SS.held[i])ns[i]=sRand();const toSpin=[];for(let i=0;i<9;i++)if(!SS.held[i])toSpin.push(i);if(!toSpin.length){sFinalize(ns);return;}let done=0;toSpin.forEach(i=>{const cell=document.getElementById(‘sc’+i),em=document.getElementById(‘se’+i);if(!cell||!em)return;cell.classList.add(‘spinning’);const dur=560+(i%3)*150+Math.random()*100,maxF=~(dur/75);let f=0;const iv=setInterval(()=>{em.textContent=SYMS[sRand()].e;f++;if(f>=maxF){clearInterval(iv);cell.classList.remove(‘spinning’);em.textContent=SYMS[ns[i]].e;done++;if(done===toSpin.length)sFinalize(ns);}},75);});}
 function sFinalize(ns){SS.symbols=ns;SS.spinning=false;const btn=document.getElementById(‘s-spin-btn’);btn.disabled=false;btn.classList.remove(‘spinning’);btn.textContent=‘🎰 SPIN’;sClearHolds();syncAll();sEval();if(SS.autoActive&&SS.autoCount>0){SS.autoCount–;sAutoUI();if(SS.autoCount===0)sStopAuto();else SS.autoTimer=setTimeout(sSpin,750);}}
-function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById(‘sc’+i);if(el)el.classList.add(‘winning’);});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,‘SatSlots Jackpot’);const jel=document.getElementById(‘s-jp-amt’);if(jel)jel.textContent=SS.jackpot+’ COINS’;sSetResult(‘₿ JACKPOT! +’+jp+’!’,‘win’);sAddHist(‘JACKPOT!’,‘win’);triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,‘SatSlots’);parts.push(’+’+coinWin+’ COINS’);}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push(’+’+freeWin+’ FREE’);}const txt=parts.join(’ · ‘);sSetResult(txt,‘win’);sAddHist(txt,‘win’);if(coinWin>=SS.bet*5){document.getElementById(‘s-modal-icon’).textContent=‘🎉’;document.getElementById(‘s-modal-title’).textContent=‘Big Win!’;document.getElementById(‘s-modal-title’).style.color=’#FFD700’;document.getElementById(‘s-modal-desc’).textContent=txt;document.getElementById(‘s-win-modal’).classList.add(‘show’);sStopAuto();}}else{sSetResult(‘No match – try again!’,‘lose’);sAddHist(’—’,‘lose’);}}
+function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById(‘sc’+i);if(el)el.classList.add(‘winning’);});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,‘SatSlots Jackpot’);const jel=document.getElementById(‘s-jp-amt’);if(jel)jel.textContent=SS.jackpot+’ COINS’;sSetResult(‘₿ JACKPOT! +’+jp+’!’,‘win’);sAddHist(‘JACKPOT!’,‘win’);triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,‘SatSlots’);parts.push(’+’+coinWin+’ COINS’);}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push(’+’+freeWin+’ FREE’);}const txt=parts.join(’ · ‘);sSetResult(txt,‘win’);sAddHist(txt,‘win’);if(coinWin>=SS.bet*5){document.getElementById(‘s-modal-icon’).textContent=‘🎉’;document.getElementById(‘s-modal-title’).textContent=‘Big Win!’;document.getElementById(‘s-modal-title’).style.color=’#FFD700’;document.getElementById(‘s-modal-desc’).textContent=txt;document.getElementById(‘s-win-modal’).classList.add(‘show’);sStopAuto();}}else{sSetResult(‘No match - try again!’,‘lose’);sAddHist(’ - ‘,‘lose’);}}
 function sSetResult(t,c){const el=document.getElementById(‘s-result’);if(el){el.textContent=t||‘🎰 Good Luck!’;el.className=‘s-result ‘+(c||’’);}}
 function sChangeBet(d){SS.bet=Math.max(10,Math.min(250,SS.bet+d));document.getElementById(‘s-bet’).textContent=SS.bet;}
 function sSetBet(v){SS.bet=v;const el=document.getElementById(‘s-bet’);if(el)el.textContent=v;}
@@ -1992,7 +1992,7 @@ function aResult(id,m,c){const el=document.getElementById(id);if(!el)return;el.t
 const AW_SLICES=[{l:‘0×’,m:0,c:’#1a1a1a’},{l:‘1.5×’,m:1.5,c:’#2a1800’},{l:‘0×’,m:0,c:’#1a1a1a’},{l:‘2×’,m:2,c:’#3a2000’},{l:‘0×’,m:0,c:’#1a1a1a’},{l:‘3×’,m:3,c:’#8a4500’},{l:‘0×’,m:0,c:’#1a1a1a’},{l:‘5×’,m:5,c:’#a86000’}];
 let awAngle=0,awSpinning=false;
 function aDrawWheel(angle=0){const c=document.getElementById(‘a-wheel-canvas’);if(!c)return;const ctx=c.getContext(‘2d’),W=c.width,H=c.height,cx=W/2,cy=H/2,r=cx-10,n=AW_SLICES.length,arc=Math.PI*2/n;ctx.clearRect(0,0,W,H);for(let i=0;i<n;i++){const s=angle+i*arc;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,s+arc);ctx.fillStyle=AW_SLICES[i].c;ctx.fill();ctx.strokeStyle=’#F7931A33’;ctx.lineWidth=1.5;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(s+arc/2);ctx.textAlign=‘right’;ctx.fillStyle=’#F0E6D3’;ctx.font=‘bold 14px Bebas Neue,sans-serif’;ctx.fillText(AW_SLICES[i].l,r-10,5);ctx.restore();}ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);ctx.fillStyle=’#F7931A’;ctx.fill();ctx.beginPath();ctx.moveTo(cx+r+8,cy);ctx.lineTo(cx+r-8,cy-8);ctx.lineTo(cx+r-8,cy+8);ctx.fillStyle=’#F7931A’;ctx.fill();}
-function aSpinWheel(){if(awSpinning)return;if(!spendCoins(8))return;aResult(‘a-wheel-result’,’’,’’);awSpinning=true;document.getElementById(‘a-wheel-btn’).disabled=true;const total=5*Math.PI*2+Math.random()*Math.PI*2,dur=3000,start=performance.now(),sa=awAngle;function tick(now){const t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,4);awAngle=sa+total*ease;aDrawWheel(awAngle);if(t<1){requestAnimationFrame(tick);return;}awSpinning=false;document.getElementById(‘a-wheel-btn’).disabled=false;const n=AW_SLICES.length,arc=Math.PI*2/n,norm=(((-awAngle)%(Math.PI*2))+Math.PI*2)%(Math.PI*2),idx=~(norm/arc)%n,sl=AW_SLICES[idx];if(sl.m>0){const w=~(8*sl.m);earnCoins(w,‘Wheel’);aResult(‘a-wheel-result’,`🎡 ${sl.l} — +${w} coins!`,‘win’);}else aResult(‘a-wheel-result’,‘No luck this spin!’,‘lose’);}requestAnimationFrame(tick);}
+function aSpinWheel(){if(awSpinning)return;if(!spendCoins(8))return;aResult(‘a-wheel-result’,’’,’’);awSpinning=true;document.getElementById(‘a-wheel-btn’).disabled=true;const total=5*Math.PI*2+Math.random()*Math.PI*2,dur=3000,start=performance.now(),sa=awAngle;function tick(now){const t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,4);awAngle=sa+total*ease;aDrawWheel(awAngle);if(t<1){requestAnimationFrame(tick);return;}awSpinning=false;document.getElementById(‘a-wheel-btn’).disabled=false;const n=AW_SLICES.length,arc=Math.PI*2/n,norm=(((-awAngle)%(Math.PI*2))+Math.PI*2)%(Math.PI*2),idx=~(norm/arc)%n,sl=AW_SLICES[idx];if(sl.m>0){const w=~(8*sl.m);earnCoins(w,‘Wheel’);aResult(‘a-wheel-result’,`🎡 ${sl.l}  -  +${w} coins!`,‘win’);}else aResult(‘a-wheel-result’,‘No luck this spin!’,‘lose’);}requestAnimationFrame(tick);}
 
 /* Coin Flip */
 let aFlipping=false;
@@ -2008,7 +2008,7 @@ const AVALS=[‘A’,‘2’,‘3’,‘4’,‘5’,‘6’,‘7’,‘8’,‘
 const ASUITS=[’\u2660’,’\u2665’,’\u2666’,’\u2663’];const ARED={’\u2665’:true,’\u2666’:true};
 let aHiLoCurrent=0,aHiLoActive=false;
 function aHiLoNewCard(){aHiLoCurrent=~(Math.random()*13);const suit=ASUITS[~(Math.random()*4)];document.getElementById(‘a-hilo-val’).textContent=AVALS[aHiLoCurrent];document.getElementById(‘a-hilo-suit’).textContent=suit;document.getElementById(‘a-hilo-card’).className=‘a-card-display’+(ARED[suit]?’ a-card-red’:’’);aHiLoActive=true;document.getElementById(‘a-hilo-hi’).disabled=false;document.getElementById(‘a-hilo-lo’).disabled=false;}
-function aHiLo(guess){if(!aHiLoActive)return;if(!spendCoins(6))return;aHiLoActive=false;document.getElementById(‘a-hilo-hi’).disabled=true;document.getElementById(‘a-hilo-lo’).disabled=true;const nv=~(Math.random()*13),ns=ASUITS[~(Math.random()*4)];setTimeout(()=>{document.getElementById(‘a-hilo-val’).textContent=AVALS[nv];document.getElementById(‘a-hilo-suit’).textContent=ns;document.getElementById(‘a-hilo-card’).className=‘a-card-display’+(ARED[ns]?’ a-card-red’:’’);const ok=(guess===‘hi’&&nv>aHiLoCurrent)||(guess===‘lo’&&nv<aHiLoCurrent);if(ok){const w=~~(6*1.85);earnCoins(w,‘HiLo’);aResult(‘a-hilo-result’,`Correct! +${w} coins!`,‘win’);}else if(nv===aHiLoCurrent){COINS+=6;syncAll();aResult(‘a-hilo-result’,‘Same card — Push!’,’’);}else aResult(‘a-hilo-result’,‘Wrong!’,‘lose’);aHiLoCurrent=nv;setTimeout(()=>{aHiLoActive=true;document.getElementById(‘a-hilo-hi’).disabled=false;document.getElementById(‘a-hilo-lo’).disabled=false;aResult(‘a-hilo-result’,’’,’’);},1200);},380);}
+function aHiLo(guess){if(!aHiLoActive)return;if(!spendCoins(6))return;aHiLoActive=false;document.getElementById(‘a-hilo-hi’).disabled=true;document.getElementById(‘a-hilo-lo’).disabled=true;const nv=~(Math.random()*13),ns=ASUITS[~(Math.random()*4)];setTimeout(()=>{document.getElementById(‘a-hilo-val’).textContent=AVALS[nv];document.getElementById(‘a-hilo-suit’).textContent=ns;document.getElementById(‘a-hilo-card’).className=‘a-card-display’+(ARED[ns]?’ a-card-red’:’’);const ok=(guess===‘hi’&&nv>aHiLoCurrent)||(guess===‘lo’&&nv<aHiLoCurrent);if(ok){const w=~~(6*1.85);earnCoins(w,‘HiLo’);aResult(‘a-hilo-result’,`Correct! +${w} coins!`,‘win’);}else if(nv===aHiLoCurrent){COINS+=6;syncAll();aResult(‘a-hilo-result’,‘Same card  -  Push!’,’’);}else aResult(‘a-hilo-result’,‘Wrong!’,‘lose’);aHiLoCurrent=nv;setTimeout(()=>{aHiLoActive=true;document.getElementById(‘a-hilo-hi’).disabled=false;document.getElementById(‘a-hilo-lo’).disabled=false;aResult(‘a-hilo-result’,’’,’’);},1200);},380);}
 
 /* Keno */
 let aKenoSel=new Set(),aKenoDone=false;
@@ -2020,7 +2020,7 @@ function aDrawKeno(){if(aKenoSel.size===0){aToast(‘Pick numbers first!’);ret
 /* Crash */
 let aCrashRunning=false,aCrashMult=1,aCrashTarget=2,aCrashCashed=false,aCrashWager=10,aCrashAF=null;
 function aCrashBet(){if(aCrashRunning)return;if(!spendCoins(10))return;aCrashWager=10;aCrashMult=1;aCrashCashed=false;aCrashTarget=Math.random()<.3?1+Math.random()*.4:1+Math.random()*9;aCrashRunning=true;document.getElementById(‘a-crash-bet’).disabled=true;document.getElementById(‘a-crash-cash’).disabled=false;document.getElementById(‘a-crash-mult’).className=‘a-crash-mult’;aResult(‘a-crash-result’,’’,’’);const can=document.getElementById(‘a-crash-canvas’),ctx=can.getContext(‘2d’),W=can.width,H=can.height,pts=[],t0=performance.now();function tick(now){const el=(now-t0)/1000;aCrashMult=Math.pow(Math.E,.15*el);document.getElementById(‘a-crash-mult’).textContent=aCrashMult.toFixed(2)+‘×’;ctx.clearRect(0,0,W,H);ctx.fillStyle=’#161616’;ctx.fillRect(0,0,W,H);pts.push({x:Math.min(el/20*W,W),y:H-Math.min((aCrashMult-1)/9*H,H)});ctx.beginPath();ctx.strokeStyle=’#F7931A’;ctx.lineWidth=2;pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();if(pts.length){const l=pts[pts.length-1];ctx.beginPath();ctx.arc(l.x,l.y,5,0,Math.PI*2);ctx.fillStyle=’#F7931A’;ctx.fill();}if(aCrashMult>=aCrashTarget){aCrashRunning=false;document.getElementById(‘a-crash-cash’).disabled=true;document.getElementById(‘a-crash-bet’).disabled=false;document.getElementById(‘a-crash-mult’).className=‘a-crash-mult crashed’;document.getElementById(‘a-crash-mult’).textContent=’CRASHED @ ’+aCrashTarget.toFixed(2)+‘×’;if(!aCrashCashed)aResult(‘a-crash-result’,`Crashed! Lost 10 coins.`,‘lose’);return;}aCrashAF=requestAnimationFrame(tick);}requestAnimationFrame(tick);}
-function aCrashCashout(){if(!aCrashRunning||aCrashCashed)return;aCrashCashed=true;const w=~~(aCrashWager*aCrashMult);earnCoins(w,‘Crash’);aResult(‘a-crash-result’,`Cashed out @ ${aCrashMult.toFixed(2)}× — +${w} coins!`,‘win’);}
+function aCrashCashout(){if(!aCrashRunning||aCrashCashed)return;aCrashCashed=true;const w=~~(aCrashWager*aCrashMult);earnCoins(w,‘Crash’);aResult(‘a-crash-result’,`Cashed out @ ${aCrashMult.toFixed(2)}×  -  +${w} coins!`,‘win’);}
 
 /* Mines */
 let aMinesBoard=[],aMinesActive=false,aMinesSafe=0;
@@ -2039,7 +2039,7 @@ function aFlipMem(i,card){if(aMemLock||aMemFlipped[i]||card.classList.contains(�
 
 /* Reaction */
 let aReactState=‘idle’,aReactTO=null,aReactStart=0,aReactBest=null,aReactEarned=0;
-function aHandleReact(){const area=document.getElementById(‘a-react’);if(!area)return;if(aReactState===‘idle’||aReactState===‘result’){aReactState=‘waiting’;area.className=‘a-react waiting’;area.textContent=‘WAIT FOR GREEN…’;aResult(‘a-react-result’,’’,’’);aReactTO=setTimeout(()=>{aReactState=‘active’;area.className=‘a-react ready’;area.textContent=‘CLICK NOW!’;aReactStart=performance.now();},1500+Math.random()*3500);}else if(aReactState===‘waiting’){clearTimeout(aReactTO);aReactState=‘result’;area.className=‘a-react early’;area.textContent=‘TOO EARLY! Click to retry’;aResult(‘a-react-result’,‘Too early!’,‘lose’);}else if(aReactState===‘active’){const t=~~(performance.now()-aReactStart);aReactState=‘result’;area.className=‘a-react waiting’;area.textContent=t+‘ms! Click to play again’;document.getElementById(‘a-react-time’).textContent=t;if(aReactBest===null||t<aReactBest){aReactBest=t;document.getElementById(‘a-react-best’).textContent=t;}let rew=0;if(t<200)rew=15;else if(t<300)rew=8;else if(t<500)rew=3;if(rew>0){earnCoins(rew,‘Reaction’);aReactEarned+=rew;document.getElementById(‘a-react-earn’).textContent=aReactEarned;aResult(‘a-react-result’,`${t}ms! +${rew} coins!`,‘win’);}else aResult(‘a-react-result’,`${t}ms — too slow`,’’);}}
+function aHandleReact(){const area=document.getElementById(‘a-react’);if(!area)return;if(aReactState===‘idle’||aReactState===‘result’){aReactState=‘waiting’;area.className=‘a-react waiting’;area.textContent=‘WAIT FOR GREEN…’;aResult(‘a-react-result’,’’,’’);aReactTO=setTimeout(()=>{aReactState=‘active’;area.className=‘a-react ready’;area.textContent=‘CLICK NOW!’;aReactStart=performance.now();},1500+Math.random()*3500);}else if(aReactState===‘waiting’){clearTimeout(aReactTO);aReactState=‘result’;area.className=‘a-react early’;area.textContent=‘TOO EARLY! Click to retry’;aResult(‘a-react-result’,‘Too early!’,‘lose’);}else if(aReactState===‘active’){const t=~~(performance.now()-aReactStart);aReactState=‘result’;area.className=‘a-react waiting’;area.textContent=t+‘ms! Click to play again’;document.getElementById(‘a-react-time’).textContent=t;if(aReactBest===null||t<aReactBest){aReactBest=t;document.getElementById(‘a-react-best’).textContent=t;}let rew=0;if(t<200)rew=15;else if(t<300)rew=8;else if(t<500)rew=3;if(rew>0){earnCoins(rew,‘Reaction’);aReactEarned+=rew;document.getElementById(‘a-react-earn’).textContent=aReactEarned;aResult(‘a-react-result’,`${t}ms! +${rew} coins!`,‘win’);}else aResult(‘a-react-result’,`${t}ms  -  too slow`,’’);}}
 
 /* Snake */
 let snakeIv=null;
@@ -2327,7 +2327,7 @@ function pkShuffle(d){
   return a;
 }
 
-/* Full hand evaluator — returns {rank:0-9, score:bigint-like number for comparison, name, cards} */
+/* Full hand evaluator  -  returns {rank:0-9, score:bigint-like number for comparison, name, cards} */
 function pkEval(cards){
   // Work with best 5 from N cards
   const best=pkBest5(cards);
@@ -2487,7 +2487,7 @@ function txSetButtons(state){
     // check vs call depends on whether CPU raised
     if(els['tx-check-btn'])els['tx-check-btn'].disabled=txRaised;
     if(els['tx-call-btn'])els['tx-call-btn'].disabled=!txRaised;
-  } else { // 'waiting' — CPU is thinking
+  } else { // 'waiting'  -  CPU is thinking
     ids.forEach(id=>{if(els[id])els[id].disabled=true;});
   }
 }
@@ -2559,17 +2559,17 @@ function txDeal(){
   txPlayer=[txDeck.pop(),txDeck.pop()];
   txDealer=[txDeck.pop(),txDeck.pop()];
   txCommunity=[txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop()];
-  txRenderHands(false);txSetResult('Pre-Flop — CPU deciding…','');
+  txRenderHands(false);txSetResult('Pre-Flop  -  CPU deciding...','');
   txUpdateStats();txSetButtons('waiting');
   setTimeout(()=>{
     const action=txCpuDecide();
     if(action==='raise'){
       const r=Math.min(txBet,COINS);
       txPot+=r;txCpuBet+=r;txRaised=true;
-      txSetResult('CPU raised +'+r+' — Call or Fold?','');
+      txSetResult('CPU raised +'+r+'  -  Call or Fold?','');
       hubToast('Dealer raises!');
     } else {
-      txSetResult('CPU checks — your action','');
+      txSetResult('CPU checks  -  your action','');
     }
     txSetButtons('player');
   },900);
@@ -2591,14 +2591,14 @@ function txRaise(){
   if(!spendCoins(raiseAmt))return;
   txPot+=raiseAmt;txRaised=false;
   txSetButtons('waiting');
-  txSetResult('You raised — CPU deciding…','');
+  txSetResult('You raised  -  CPU deciding...','');
   setTimeout(()=>{
     const action=txCpuDecide();
     if(action==='fold'){
-      // CPU folds — player wins pot
+      // CPU folds  -  player wins pot
       txPlaying=false;txWins++;txStreak++;
       earnCoins(txPot,'Texas Hold\'em');
-      txSetResult('CPU FOLDED — YOU WIN! 🏆','win');
+      txSetResult('CPU FOLDED  -  YOU WIN! 🏆','win');
       txSetButtons('idle');txUpdateStats();txBet=0;
       confetti();
     } else if(action==='raise'){
@@ -2623,15 +2623,15 @@ function txAdvanceStreet(){
   txRenderHands(false);
   txSetButtons('waiting');
   const streetName=TX_STREETS[txStreet];
-  txSetResult(streetName+' — CPU deciding…','');
+  txSetResult(streetName+'  -  CPU deciding...','');
   setTimeout(()=>{
     const action=txCpuDecide();
     if(action==='raise'){
       const r=Math.min(txBet,COINS);txPot+=r;txCpuBet+=r;txRaised=true;
-      txSetResult('CPU bets +'+r+' — Call, Raise or Fold?','');
+      txSetResult('CPU bets +'+r+'  -  Call, Raise or Fold?','');
       hubToast('Dealer bets!');
     } else {
-      txSetResult(streetName+' — your action','');
+      txSetResult(streetName+'  -  your action','');
     }
     txSetButtons('player');
     txUpdateStats();
@@ -2715,7 +2715,7 @@ function fcRenderHands(revealDealer=false){
   const hint=document.getElementById('fc-draw-hint');
   if(hint&&fcPhase==='dealt'){
     const n=fcDiscards.length;
-    hint.textContent=n===0?'Tap cards to discard, or Stand Pat':'Discarding '+n+' card'+(n>1?'s':'')+' — tap to deselect';
+    hint.textContent=n===0?'Tap cards to discard, or Stand Pat':'Discarding '+n+' card'+(n>1?'s':'')+'  -  tap to deselect';
   }
 }
 function fcToggleDiscard(i){
@@ -2762,7 +2762,7 @@ function fcDraw(){
   fcDiscards.sort((a,b)=>b-a).forEach(i=>{
     if(fcDeck.length>0)fcPlayer.splice(i,1,fcDeck.pop());
   });
-  // CPU draw — smart: discard based on hand strength
+  // CPU draw  -  smart: discard based on hand strength
   const cpuEval=pkEval(fcDealer);
   let cpuDiscardCount=0;
   if(cpuEval.rank===0)cpuDiscardCount=~~(Math.random()*3)+1;        // high card: draw 1-3
@@ -2778,7 +2778,7 @@ function fcDraw(){
   }
   fcDiscards=[];fcPhase='drawn';
   fcRenderHands(false);
-  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Cards drawn — showdown!';
+  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Cards drawn  -  showdown!';
   setTimeout(fcShowdown,700);
 }
 function fcStand(){
@@ -2794,7 +2794,7 @@ function fcStand(){
     for(let i=0;i<canDraw2;i++)if(fcDeck.length>0)fcDealer.push(fcDeck.pop());
   }
   fcPhase='drawn';fcRenderHands(false);
-  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Standing Pat — showdown!';
+  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Standing Pat  -  showdown!';
   setTimeout(fcShowdown,700);
 }
 function fcShowdown(){
@@ -2820,7 +2820,7 @@ function fcShowdown(){
   } else {
     earnCoins(fcPot,'5-Card Draw Push');
     fcPushes++;
-    fcSetResult('SPLIT POT','push');if(hint)hint.textContent='Exactly tied — split!';
+    fcSetResult('SPLIT POT','push');if(hint)hint.textContent='Exactly tied  -  split!';
   }
   fcBet=0;fcSetButtons('idle');fcUpdateStats();
 }
@@ -2956,12 +2956,12 @@ function rlSpin(){
       const prize=rlBet*mult;
       earnCoins(prize,'Roulette');
       rlWins++;rlStreak++;rlProfit+=prize-rlBet;
-      res.textContent=col+' '+landNum+' — WIN! +'+prize+'🪙';
+      res.textContent=col+' '+landNum+'  -  WIN! +'+prize+'🪙';
       res.className='rl-result win';confetti();
       if(rlStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,'Roulette');}
     } else {
       rlLosses++;rlStreak=0;rlProfit-=rlBet;
-      res.textContent=col+' '+landNum+' — No win';
+      res.textContent=col+' '+landNum+'  -  No win';
       res.className='rl-result lose';
     }
     rlBet=0;document.getElementById('rl-bet-display').textContent=0;
@@ -2971,7 +2971,7 @@ function rlSpin(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   VIDEO POKER — JACKS OR BETTER
+   VIDEO POKER  -  JACKS OR BETTER
    ═══════════════════════════════════════════════════════════ */
 const VP_PAY=[
   {name:'Royal Flush',   rank:9,mult:800},
@@ -3052,7 +3052,7 @@ function vpJoBRank(ev){
     // pair: only pays if Jacks or better
     const pairVal=ev.tiebreakers?ev.tiebreakers[0]:0;
     if(pairVal>=11)return -1; // jacks or better → index 8 in pay table
-    return -2; // pair below jacks — no pay
+    return -2; // pair below jacks  -  no pay
   }
   return -2;
 }
@@ -3101,7 +3101,7 @@ function vpDraw(){
     else if(vpStreak>=3&&Math.random()<.1){const s=~~(Math.random()*3)+1;earnSats(s);showSatDrop(s,'Video Poker');}
   } else {
     vpLosses++;vpStreak=0;vpProfit-=vpBet;
-    res.textContent='No Win — Deal Again';
+    res.textContent='No Win  -  Deal Again';
     res.className='vp-result lose';
     hint.textContent='Better luck next hand!';
   }
@@ -3118,7 +3118,7 @@ function vpDraw(){
 <!-- SCRATCH + BJ JS injected here -->
 <script>
 /* ═══════════════════════════════════════════════════════════
-   SCRATCH CARD — canvas-based real scratch reveal
+   SCRATCH CARD  -  canvas-based real scratch reveal
    ═══════════════════════════════════════════════════════════ */
 const SC_TYPES={
   classic:{cost:10,grid:3,prizes:[
@@ -3198,7 +3198,7 @@ ctx.textAlign=‘center’;ctx.fillText(‘SCRATCH’,w/2,h/2+4);
 ctx.restore();
 }
 
-/* Scratch at a point — erase canvas with destination-out */
+/* Scratch at a point  -  erase canvas with destination-out */
 function scErase(ctx,x,y){
 ctx.save();
 ctx.globalCompositeOperation=‘destination-out’;
@@ -3237,7 +3237,7 @@ cell.appendChild(can);
 grid.appendChild(cell);
 scCanvases.push(can);
 if(scScratched[i]){
-// already done — hide canvas completely
+// already done  -  hide canvas completely
 can.style.display=‘none’;
 } else {
 // size and paint after layout
@@ -3331,7 +3331,7 @@ banner.className=‘sc-result-banner win’;
 confetti();
 if(Math.random()<.08){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,‘Scratch Card’);}
 } else {
-banner.textContent=‘No match — try again!’;
+banner.textContent=‘No match  -  try again!’;
 banner.className=‘sc-result-banner lose’;
 }
 scTickets++;scHist.unshift({type:scType,win});
@@ -3344,7 +3344,7 @@ Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)
 }
 function scRenderHist(){
 const el=document.getElementById(‘sc-hist’);if(!el)return;
-el.innerHTML=scHist.map(h=>`<div class="sc-hist-row"><span class="sc-hist-type">${h.type.toUpperCase()}</span><span class="${h.win>0?'sc-hist-win':'sc-hist-lose'}">${h.win>0?'+'+h.win+' 🪙':'—'}</span></div>`).join(’’);
+el.innerHTML=scHist.map(h=>`<div class="sc-hist-row"><span class="sc-hist-type">${h.type.toUpperCase()}</span><span class="${h.win>0?'sc-hist-win':'sc-hist-lose'}">${h.win>0?'+'+h.win+' 🪙':' - '}</span></div>`).join(’’);
 }
 function scNewCard(){
 const t=SC_TYPES[scType];
@@ -3470,11 +3470,11 @@ function bjResolve(){
 const pv=bjHandVal(bjPlayerHand),dv=bjHandVal(bjDealerHand);
 const pBJ=pv===21&&bjPlayerHand.length===2,dBJ=dv===21&&bjDealerHand.length===2;
 let win=0,msg=’’,cls=’’;
-if(pBJ&&dBJ){win=bjBet;msg=‘PUSH — Both Blackjack!’;cls=‘push’;bjPushes++;}
+if(pBJ&&dBJ){win=bjBet;msg=‘PUSH  -  Both Blackjack!’;cls=‘push’;bjPushes++;}
 else if(pBJ){win=Math.floor(bjBet*2.5);msg=‘BLACKJACK! 🂡’;cls=‘bj-win’;bjWins++;bjWinStreak++;}
-else if(dBJ){win=0;msg=‘DEALER BJ — You Lose’;cls=‘lose’;bjLosses++;bjWinStreak=0;}
+else if(dBJ){win=0;msg=‘DEALER BJ  -  You Lose’;cls=‘lose’;bjLosses++;bjWinStreak=0;}
 else if(pv>21){win=0;msg=‘BUST! 💥’;cls=‘lose’;bjLosses++;bjWinStreak=0;}
-else if(dv>21){win=bjBet*2;msg=‘DEALER BUST — WIN! 🎉’;cls=‘win’;bjWins++;bjWinStreak++;}
+else if(dv>21){win=bjBet*2;msg=‘DEALER BUST  -  WIN! 🎉’;cls=‘win’;bjWins++;bjWinStreak++;}
 else if(pv>dv){win=bjBet*2;msg=‘YOU WIN! 🎉’;cls=‘win’;bjWins++;bjWinStreak++;}
 else if(dv>pv){win=0;msg=‘DEALER WINS’;cls=‘lose’;bjLosses++;bjWinStreak=0;}
 else{win=bjBet;msg=‘PUSH’;cls=‘push’;bjPushes++;}
