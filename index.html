@@ -1508,17 +1508,18 @@ window.onerror = function(msg, src, line, col, err) {
   </div>
 </div>
 <script>
+
 /* ═══════════════════════════════════════════════════════════
-   STATE
-   COINS = entertainment only (no real value, can buy/earn)
-   SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
-   ═══════════════════════════════════════════════════════════ */
+STATE
+COINS = entertainment only (no real value, can buy/earn)
+SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
+═══════════════════════════════════════════════════════════ */
 let COINS=1000, SATS=0, JACKPOT=1247;
-let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
+let STREAK=0, LAST_CLAIM=’’, CLAIMED_TODAY=false;
 let WEEKLY_CLAIMS={}, MONTHLY_CLAIMS={};
 let SESSION_START=Date.now(), SESSION_MINS=0;
 let TIME_CLAIMED={30:false,60:false,120:false,240:false};
-let AD_WATCH_NEXT=0, REDEEM_HIST=[], DAILY_REDEEMED=0, DAILY_REDEEM_DATE="";
+let AD_WATCH_NEXT=0, REDEEM_HIST=[], DAILY_REDEEMED=0, DAILY_REDEEM_DATE=””;
 const AD_INTERVALS=[3*60000,5*60000];
 let adIdx=0, adSkipTimer=null;
 
@@ -2247,590 +2248,527 @@ if(ag)ag.style.display=‘none’;
 }
 }catch(e){}
 });
-</script>
 
-<!-- PROFILE SHEET -->
-
-<div id="profile-sheet" onclick="e=>{if(e.target===this)closeProfile()}">
-  <div class="ps-card" onclick="event.stopPropagation()">
-    <div class="ps-handle"></div>
-    <div class="ps-top">
-      <div class="ps-ava-wrap" onclick="document.getElementById('ps-emoji-section').scrollIntoView({behavior:'smooth'})">
-        <div class="ps-ava" id="ps-ava-display"><span id="ps-ava-inner">🎮</span></div>
-        <div class="ps-ava-edit">✏️</div>
-      </div>
-      <div class="ps-info">
-        <div class="ps-name-row">
-          <div class="ps-name" id="ps-name-display">Player One</div>
-          <button class="ps-name-edit" onclick="toggleNameEdit()">✏️</button>
-        </div>
-        <div class="ps-rank" id="ps-rank-display">🌱 Newcomer</div>
-        <div class="ps-xp-row">
-          <span id="ps-xp-label">0 XP</span>
-          <span id="ps-xp-next">Next: 100 XP</span>
-        </div>
-        <div class="ps-xp-bg"><div class="ps-xp-bar" id="ps-xp-bar" style="width:0%"></div></div>
-      </div>
-    </div>
-    <div class="ps-name-input-wrap" id="ps-name-input-wrap">
-      <input class="ps-name-input" id="ps-name-input" type="text" maxlength="18" placeholder="Enter your name..."/>
-      <button class="ps-name-save" onclick="saveName()">SAVE</button>
-    </div>
-    <div class="ps-stats">
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-games-played">0</div><div class="ps-stat-lbl">Games</div></div>
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-streak-stat">0</div><div class="ps-stat-lbl">Streak</div></div>
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-level-stat">1</div><div class="ps-stat-lbl">Level</div></div>
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-coins-stat">0</div><div class="ps-stat-lbl">Lifetime🪙</div></div>
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-sats-stat">0</div><div class="ps-stat-lbl">₿ Earned</div></div>
-      <div class="ps-stat"><div class="ps-stat-val" id="ps-xp-stat">0</div><div class="ps-stat-lbl">Total XP</div></div>
-    </div>
-    <div class="ps-section" id="ps-emoji-section">
-      <div class="ps-sec-title">Choose Avatar</div>
-      <div class="ps-emoji-grid" id="ps-emoji-grid"></div>
-    </div>
-    <div class="ps-section">
-      <div class="ps-sec-title">Or Upload Photo</div>
-      <label class="ps-upload-btn" for="ps-file-input">📷 Upload Photo</label>
-      <input type="file" id="ps-file-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(event)"/>
-    </div>
-    <button class="ps-close-btn" onclick="closeProfile()">CLOSE</button>
-  </div>
-</div>
-<!-- LEVEL UP -->
-<div class="level-up-ov" id="level-up-ov">
-  <div class="luo-card">
-    <div class="luo-label">Level Up!</div>
-    <div class="luo-level" id="luo-level">2</div>
-    <div class="luo-rank" id="luo-rank">🌱 Newcomer</div>
-    <button class="luo-close" onclick="document.getElementById('level-up-ov').classList.remove('show')">AWESOME! 🎉</button>
-  </div>
-</div>
-<input type="file" id="ps-file-input-hidden" accept="image/*" style="display:none"/>
-
-<script>
 /* ═══════════════════════════════════════════════════════════
-   SHARED POKER ENGINE
-   ═══════════════════════════════════════════════════════════ */
-const PK_SUITS=['\u2660','\u2665','\u2666','\u2663'];
-const PK_RED={'\u2665':true,'\u2666':true};
-const PK_RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-const PK_VALS={'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14};
-const HAND_NAMES=['High Card','One Pair','Two Pair','Three of a Kind','Straight','Flush','Full House','Four of a Kind','Straight Flush','Royal Flush'];
+SHARED POKER ENGINE
+═══════════════════════════════════════════════════════════ */
+const PK_SUITS=[’\u2660’,’\u2665’,’\u2666’,’\u2663’];
+const PK_RED={’\u2665’:true,’\u2666’:true};
+const PK_RANKS=[‘2’,‘3’,‘4’,‘5’,‘6’,‘7’,‘8’,‘9’,‘10’,‘J’,‘Q’,‘K’,‘A’];
+const PK_VALS={‘2’:2,‘3’:3,‘4’:4,‘5’:5,‘6’:6,‘7’:7,‘8’:8,‘9’:9,‘10’:10,‘J’:11,‘Q’:12,‘K’:13,‘A’:14};
+const HAND_NAMES=[‘High Card’,‘One Pair’,‘Two Pair’,‘Three of a Kind’,‘Straight’,‘Flush’,‘Full House’,‘Four of a Kind’,‘Straight Flush’,‘Royal Flush’];
 
 function pkBuildDeck(){
-  const d=[];
-  for(let s=0;s<4;s++)for(let r=0;r<13;r++)d.push({rank:PK_RANKS[r],suit:PK_SUITS[s],val:PK_VALS[PK_RANKS[r]]});
-  return pkShuffle(d);
+const d=[];
+for(let s=0;s<4;s++)for(let r=0;r<13;r++)d.push({rank:PK_RANKS[r],suit:PK_SUITS[s],val:PK_VALS[PK_RANKS[r]]});
+return pkShuffle(d);
 }
 function pkShuffle(d){
-  const a=[...d];for(let i=a.length-1;i>0;i--){const j=~~(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
+const a=[…d];for(let i=a.length-1;i>0;i–){const j=~~(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+return a;
 }
 
 /* Full hand evaluator  -  returns {rank:0-9, score:bigint-like number for comparison, name, cards} */
 function pkEval(cards){
-  // Work with best 5 from N cards
-  const best=pkBest5(cards);
-  return best;
+// Work with best 5 from N cards
+const best=pkBest5(cards);
+return best;
 }
 function pkBest5(cards){
-  if(cards.length<=5)return pkEval5(cards);
-  let best=null;
-  // Try all C(n,5) combinations
-  const combos=pkCombinations(cards,5);
-  for(const c of combos){
-    const e=pkEval5(c);
-    if(!best||pkCompare(e,best)>0)best=e;
-  }
-  return best;
+if(cards.length<=5)return pkEval5(cards);
+let best=null;
+// Try all C(n,5) combinations
+const combos=pkCombinations(cards,5);
+for(const c of combos){
+const e=pkEval5(c);
+if(!best||pkCompare(e,best)>0)best=e;
+}
+return best;
 }
 function pkCombinations(arr,k){
-  if(k===1)return arr.map(x=>[x]);
-  const result=[];
-  for(let i=0;i<=arr.length-k;i++){
-    const rest=pkCombinations(arr.slice(i+1),k-1);
-    for(const r of rest)result.push([arr[i],...r]);
-  }
-  return result;
+if(k===1)return arr.map(x=>[x]);
+const result=[];
+for(let i=0;i<=arr.length-k;i++){
+const rest=pkCombinations(arr.slice(i+1),k-1);
+for(const r of rest)result.push([arr[i],…r]);
+}
+return result;
 }
 function pkEval5(hand){
-  const vals=hand.map(c=>c.val).sort((a,b)=>b-a);
-  const suits=hand.map(c=>c.suit);
-  const rankCounts={};
-  vals.forEach(v=>{rankCounts[v]=(rankCounts[v]||0)+1;});
-  const counts=Object.values(rankCounts).sort((a,b)=>b-a);
-  const isFlush=suits.every(s=>s===suits[0]);
-  const isStraight=pkIsStraight(vals);
-  const isWheel=(vals[0]===14&&vals[1]===5&&vals[2]===4&&vals[3]===3&&vals[4]===2);
-  let rank,tiebreakers;
-  if((isFlush&&isStraight)||(isFlush&&isWheel)){
-    rank=vals[0]===14&&vals[1]===13?9:8;
-    tiebreakers=isWheel?[5,4,3,2,1]:vals;
-  } else if(counts[0]===4){
-    rank=7;
-    const quad=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===4));
-    const kicker=vals.find(v=>v!==quad);
-    tiebreakers=[quad,quad,quad,quad,kicker];
-  } else if(counts[0]===3&&counts[1]===2){
-    rank=6;
-    const trip=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===3));
-    const pair=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===2));
-    tiebreakers=[trip,trip,trip,pair,pair];
-  } else if(isFlush){
-    rank=5;tiebreakers=vals;
-  } else if(isStraight||isWheel){
-    rank=4;tiebreakers=isWheel?[5,4,3,2,1]:vals;
-  } else if(counts[0]===3){
-    rank=3;
-    const trip=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===3));
-    const kickers=vals.filter(v=>v!==trip).sort((a,b)=>b-a);
-    tiebreakers=[trip,trip,trip,...kickers];
-  } else if(counts[0]===2&&counts[1]===2){
-    rank=2;
-    const pairs=Object.keys(rankCounts).filter(k=>rankCounts[k]===2).map(Number).sort((a,b)=>b-a);
-    const kicker=vals.find(v=>v!==pairs[0]&&v!==pairs[1]);
-    tiebreakers=[pairs[0],pairs[0],pairs[1],pairs[1],kicker];
-  } else if(counts[0]===2){
-    rank=1;
-    const pair=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===2));
-    const kickers=vals.filter(v=>v!==pair||rankCounts[v]--<=0).sort((a,b)=>b-a);
-    // reset counts
-    vals.forEach(v=>{rankCounts[v]=(rankCounts[v]||0)+1;});
-    const ks=vals.filter((v,i,a)=>v!==pair||(a.splice(a.indexOf(v),1)&&false)||(rankCounts[v]--,rankCounts[v]>=0)).slice(0,3);
-    tiebreakers=[pair,pair,...vals.filter(v=>v!==pair).slice(0,3)];
-  } else {
-    rank=0;tiebreakers=vals;
-  }
-  // score = rank * 15^5 + tiebreakers encoded
-  let score=rank*Math.pow(15,5);
-  tiebreakers.slice(0,5).forEach((v,i)=>score+=v*Math.pow(15,4-i));
-  return{rank,score,name:HAND_NAMES[rank],cards:hand,tiebreakers};
+const vals=hand.map(c=>c.val).sort((a,b)=>b-a);
+const suits=hand.map(c=>c.suit);
+const rankCounts={};
+vals.forEach(v=>{rankCounts[v]=(rankCounts[v]||0)+1;});
+const counts=Object.values(rankCounts).sort((a,b)=>b-a);
+const isFlush=suits.every(s=>s===suits[0]);
+const isStraight=pkIsStraight(vals);
+const isWheel=(vals[0]===14&&vals[1]===5&&vals[2]===4&&vals[3]===3&&vals[4]===2);
+let rank,tiebreakers;
+if((isFlush&&isStraight)||(isFlush&&isWheel)){
+rank=vals[0]===14&&vals[1]===13?9:8;
+tiebreakers=isWheel?[5,4,3,2,1]:vals;
+} else if(counts[0]===4){
+rank=7;
+const quad=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===4));
+const kicker=vals.find(v=>v!==quad);
+tiebreakers=[quad,quad,quad,quad,kicker];
+} else if(counts[0]===3&&counts[1]===2){
+rank=6;
+const trip=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===3));
+const pair=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===2));
+tiebreakers=[trip,trip,trip,pair,pair];
+} else if(isFlush){
+rank=5;tiebreakers=vals;
+} else if(isStraight||isWheel){
+rank=4;tiebreakers=isWheel?[5,4,3,2,1]:vals;
+} else if(counts[0]===3){
+rank=3;
+const trip=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===3));
+const kickers=vals.filter(v=>v!==trip).sort((a,b)=>b-a);
+tiebreakers=[trip,trip,trip,…kickers];
+} else if(counts[0]===2&&counts[1]===2){
+rank=2;
+const pairs=Object.keys(rankCounts).filter(k=>rankCounts[k]===2).map(Number).sort((a,b)=>b-a);
+const kicker=vals.find(v=>v!==pairs[0]&&v!==pairs[1]);
+tiebreakers=[pairs[0],pairs[0],pairs[1],pairs[1],kicker];
+} else if(counts[0]===2){
+rank=1;
+const pair=parseInt(Object.keys(rankCounts).find(k=>rankCounts[k]===2));
+const kickers=vals.filter(v=>v!==pair||rankCounts[v]–<=0).sort((a,b)=>b-a);
+// reset counts
+vals.forEach(v=>{rankCounts[v]=(rankCounts[v]||0)+1;});
+const ks=vals.filter((v,i,a)=>v!==pair||(a.splice(a.indexOf(v),1)&&false)||(rankCounts[v]–,rankCounts[v]>=0)).slice(0,3);
+tiebreakers=[pair,pair,…vals.filter(v=>v!==pair).slice(0,3)];
+} else {
+rank=0;tiebreakers=vals;
+}
+// score = rank * 15^5 + tiebreakers encoded
+let score=rank*Math.pow(15,5);
+tiebreakers.slice(0,5).forEach((v,i)=>score+=v*Math.pow(15,4-i));
+return{rank,score,name:HAND_NAMES[rank],cards:hand,tiebreakers};
 }
 function pkIsStraight(sortedVals){
-  for(let i=0;i<sortedVals.length-1;i++)if(sortedVals[i]-sortedVals[i+1]!==1)return false;
-  return true;
+for(let i=0;i<sortedVals.length-1;i++)if(sortedVals[i]-sortedVals[i+1]!==1)return false;
+return true;
 }
 function pkCompare(a,b){return a.score-b.score;}
 
 /* Render a card element */
 function pkCardEl(card,faceDown=false,selected=false){
-  const el=document.createElement('div');
-  el.className='pk-card deal-in'+(faceDown?' back':'')+(PK_RED[card.suit]?' red':'')+(selected?' selected':'');
-  if(faceDown){el.innerHTML='<div class="pk-face-down">🂠</div>';return el;}
-  el.innerHTML=`<div class="pk-rank">${card.rank}</div><div class="pk-suit">${card.suit}</div><div class="pk-suit-c">${card.suit}</div>`;
-  return el;
+const el=document.createElement(‘div’);
+el.className=‘pk-card deal-in’+(faceDown?’ back’:’’)+(PK_RED[card.suit]?’ red’:’’)+(selected?’ selected’:’’);
+if(faceDown){el.innerHTML=’<div class="pk-face-down">🂠</div>’;return el;}
+el.innerHTML=`<div class="pk-rank">${card.rank}</div><div class="pk-suit">${card.suit}</div><div class="pk-suit-c">${card.suit}</div>`;
+return el;
 }
 
 /* CPU decision: given hand strength (0-9) and community info, decide action */
 function pkCpuDecide(handRank,street,pot,toCall){
-  // probability of calling/raising based on hand strength
-  const strong=handRank>=3; // pair or better
-  const vstrong=handRank>=5; // flush or better
-  if(toCall===0){
-    // check or raise
-    if(vstrong)return Math.random()<.7?'raise':'check';
-    if(strong)return Math.random()<.3?'raise':'check';
-    return 'check';
-  } else {
-    // fold, call, or raise
-    if(vstrong)return Math.random()<.5?'raise':'call';
-    if(strong)return Math.random()<.8?'call':'fold';
-    if(handRank===1)return Math.random()<.45?'call':'fold';
-    return Math.random()<.2?'call':'fold'; // bluff sometimes
-  }
+// probability of calling/raising based on hand strength
+const strong=handRank>=3; // pair or better
+const vstrong=handRank>=5; // flush or better
+if(toCall===0){
+// check or raise
+if(vstrong)return Math.random()<.7?‘raise’:‘check’;
+if(strong)return Math.random()<.3?‘raise’:‘check’;
+return ‘check’;
+} else {
+// fold, call, or raise
+if(vstrong)return Math.random()<.5?‘raise’:‘call’;
+if(strong)return Math.random()<.8?‘call’:‘fold’;
+if(handRank===1)return Math.random()<.45?‘call’:‘fold’;
+return Math.random()<.2?‘call’:‘fold’; // bluff sometimes
+}
 }
 
 /* ═══════════════════════════════════════════════════════════
-   TEXAS HOLD'EM
-   ═══════════════════════════════════════════════════════════ */
+TEXAS HOLD’EM
+═══════════════════════════════════════════════════════════ */
 let txDeck=[],txPlayer=[],txDealer=[],txCommunity=[];
 let txBet=0,txPot=0,txCpuBet=0,txStreet=0,txPlaying=false,txRaised=false;
 let txWins=0,txLosses=0,txPushes=0,txStreak=0;
-const TX_STREETS=['Pre-Flop','Flop','Turn','River','Showdown'];
+const TX_STREETS=[‘Pre-Flop’,‘Flop’,‘Turn’,‘River’,‘Showdown’];
 
 function txInit(){
-  if(txDeck.length<20)txDeck=pkBuildDeck();
-  txPlaying=false;txBet=0;txPot=0;txRaised=false;txStreet=0;
-  txUpdateStats();txSetButtons('idle');
-  txSetResult('','');
-  const dh=document.getElementById('tx-dealer-hand');if(dh)dh.innerHTML='';
-  const ph=document.getElementById('tx-player-hand');if(ph)ph.innerHTML='';
-  const cc=document.getElementById('tx-community');if(cc)cc.innerHTML='';
-  const sl=document.getElementById('tx-street-lbl');if(sl)sl.textContent='';
-  const ps=document.getElementById('tx-player-score');if(ps)ps.textContent='';
-  const ds=document.getElementById('tx-dealer-score');if(ds)ds.textContent='';
-  const pt=document.getElementById('tx-pot');if(pt)pt.textContent='POT: 0 🪙';
+if(txDeck.length<20)txDeck=pkBuildDeck();
+txPlaying=false;txBet=0;txPot=0;txRaised=false;txStreet=0;
+txUpdateStats();txSetButtons(‘idle’);
+txSetResult(’’,’’);
+const dh=document.getElementById(‘tx-dealer-hand’);if(dh)dh.innerHTML=’’;
+const ph=document.getElementById(‘tx-player-hand’);if(ph)ph.innerHTML=’’;
+const cc=document.getElementById(‘tx-community’);if(cc)cc.innerHTML=’’;
+const sl=document.getElementById(‘tx-street-lbl’);if(sl)sl.textContent=’’;
+const ps=document.getElementById(‘tx-player-score’);if(ps)ps.textContent=’’;
+const ds=document.getElementById(‘tx-dealer-score’);if(ds)ds.textContent=’’;
+const pt=document.getElementById(‘tx-pot’);if(pt)pt.textContent=‘POT: 0 🪙’;
 }
 function txUpdateStats(){
-  const m={
-    'tx-wins':txWins,'tx-losses':txLosses,'tx-pushes':txPushes,
-    'tx-streak':txStreak,'tx-bet-display':txBet
-  };
-  Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
-  const pt=document.getElementById('tx-pot');if(pt)pt.textContent='POT: '+txPot+' 🪙';
+const m={
+‘tx-wins’:txWins,‘tx-losses’:txLosses,‘tx-pushes’:txPushes,
+‘tx-streak’:txStreak,‘tx-bet-display’:txBet
+};
+Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+const pt=document.getElementById(‘tx-pot’);if(pt)pt.textContent=‘POT: ‘+txPot+’ 🪙’;
 }
 function txAddBet(n){
-  if(txPlaying)return;
-  if(COINS<txBet+n){hubToast('Not enough coins!');return;}
-  txBet+=n;txUpdateStats();
+if(txPlaying)return;
+if(COINS<txBet+n){hubToast(‘Not enough coins!’);return;}
+txBet+=n;txUpdateStats();
 }
 function txSetButtons(state){
-  const ids=['tx-deal-btn','tx-fold-btn','tx-check-btn','tx-call-btn','tx-raise-btn'];
-  const els=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
-  if(state==='idle'){
-    if(els['tx-deal-btn'])els['tx-deal-btn'].disabled=false;
-    ['tx-fold-btn','tx-check-btn','tx-call-btn','tx-raise-btn'].forEach(id=>{if(els[id])els[id].disabled=true;});
-  } else if(state==='player'){
-    if(els['tx-deal-btn'])els['tx-deal-btn'].disabled=true;
-    if(els['tx-fold-btn'])els['tx-fold-btn'].disabled=false;
-    if(els['tx-raise-btn'])els['tx-raise-btn'].disabled=false;
-    // check vs call depends on whether CPU raised
-    if(els['tx-check-btn'])els['tx-check-btn'].disabled=txRaised;
-    if(els['tx-call-btn'])els['tx-call-btn'].disabled=!txRaised;
-  } else { // 'waiting'  -  CPU is thinking
-    ids.forEach(id=>{if(els[id])els[id].disabled=true;});
-  }
+const ids=[‘tx-deal-btn’,‘tx-fold-btn’,‘tx-check-btn’,‘tx-call-btn’,‘tx-raise-btn’];
+const els=Object.fromEntries(ids.map(id=>[id,document.getElementById(id)]));
+if(state===‘idle’){
+if(els[‘tx-deal-btn’])els[‘tx-deal-btn’].disabled=false;
+[‘tx-fold-btn’,‘tx-check-btn’,‘tx-call-btn’,‘tx-raise-btn’].forEach(id=>{if(els[id])els[id].disabled=true;});
+} else if(state===‘player’){
+if(els[‘tx-deal-btn’])els[‘tx-deal-btn’].disabled=true;
+if(els[‘tx-fold-btn’])els[‘tx-fold-btn’].disabled=false;
+if(els[‘tx-raise-btn’])els[‘tx-raise-btn’].disabled=false;
+// check vs call depends on whether CPU raised
+if(els[‘tx-check-btn’])els[‘tx-check-btn’].disabled=txRaised;
+if(els[‘tx-call-btn’])els[‘tx-call-btn’].disabled=!txRaised;
+} else { // ‘waiting’  -  CPU is thinking
+ids.forEach(id=>{if(els[id])els[id].disabled=true;});
+}
 }
 function txRenderHands(revealDealer=false){
-  const ph=document.getElementById('tx-player-hand');
-  const dh=document.getElementById('tx-dealer-hand');
-  const cc=document.getElementById('tx-community');
-  if(!ph||!dh||!cc)return;
-  ph.innerHTML='';
-  txPlayer.forEach(c=>ph.appendChild(pkCardEl(c)));
-  dh.innerHTML='';
-  txDealer.forEach((c,i)=>dh.appendChild(pkCardEl(c,!revealDealer&&i===1)));
-  cc.innerHTML='';
-  const shown=txStreet===1?3:txStreet===2?4:txStreet>=3?5:0;
-  txCommunity.slice(0,shown).forEach(c=>cc.appendChild(pkCardEl(c)));
-  for(let i=shown;i<5;i++){
-    const ph2=document.createElement('div');
-    ph2.className='pk-card back';
-    ph2.innerHTML='<div class="pk-face-down">🂠</div>';
-    cc.appendChild(ph2);
-  }
-  const streetLbl=document.getElementById('tx-street-lbl');
-  if(streetLbl)streetLbl.textContent=TX_STREETS[Math.min(txStreet,4)];
-  // Show player hand name when community cards are available
-  if(shown>=3){
-    const combined=[...txPlayer,...txCommunity.slice(0,shown)];
-    const pHand=pkEval(combined);
-    const ps=document.getElementById('tx-player-score');
-    if(ps){ps.textContent=pHand?pHand.name:'';ps.className='pk-score'+(pHand&&pHand.rank>=5?' strong':'');}
-  }
-  if(revealDealer&&shown>=3){
-    const dEval=pkEval([...txDealer,...txCommunity]);
-    const ds=document.getElementById('tx-dealer-score');
-    if(ds){ds.textContent=dEval?'Dealer: '+dEval.name:'';ds.className='pk-score'+(dEval&&dEval.rank>=5?' strong':'');}
-  }
+const ph=document.getElementById(‘tx-player-hand’);
+const dh=document.getElementById(‘tx-dealer-hand’);
+const cc=document.getElementById(‘tx-community’);
+if(!ph||!dh||!cc)return;
+ph.innerHTML=’’;
+txPlayer.forEach(c=>ph.appendChild(pkCardEl(c)));
+dh.innerHTML=’’;
+txDealer.forEach((c,i)=>dh.appendChild(pkCardEl(c,!revealDealer&&i===1)));
+cc.innerHTML=’’;
+const shown=txStreet===1?3:txStreet===2?4:txStreet>=3?5:0;
+txCommunity.slice(0,shown).forEach(c=>cc.appendChild(pkCardEl(c)));
+for(let i=shown;i<5;i++){
+const ph2=document.createElement(‘div’);
+ph2.className=‘pk-card back’;
+ph2.innerHTML=’<div class="pk-face-down">🂠</div>’;
+cc.appendChild(ph2);
+}
+const streetLbl=document.getElementById(‘tx-street-lbl’);
+if(streetLbl)streetLbl.textContent=TX_STREETS[Math.min(txStreet,4)];
+// Show player hand name when community cards are available
+if(shown>=3){
+const combined=[…txPlayer,…txCommunity.slice(0,shown)];
+const pHand=pkEval(combined);
+const ps=document.getElementById(‘tx-player-score’);
+if(ps){ps.textContent=pHand?pHand.name:’’;ps.className=‘pk-score’+(pHand&&pHand.rank>=5?’ strong’:’’);}
+}
+if(revealDealer&&shown>=3){
+const dEval=pkEval([…txDealer,…txCommunity]);
+const ds=document.getElementById(‘tx-dealer-score’);
+if(ds){ds.textContent=dEval?‘Dealer: ‘+dEval.name:’’;ds.className=‘pk-score’+(dEval&&dEval.rank>=5?’ strong’:’’);}
+}
 }
 function txSetResult(msg,cls){
-  const el=document.getElementById('tx-result');
-  if(el){el.textContent=msg;el.className='pk-result '+(cls||'');}
+const el=document.getElementById(‘tx-result’);
+if(el){el.textContent=msg;el.className=‘pk-result ‘+(cls||’’);}
 }
 /* Pre-flop CPU hand strength (0-9 scale) from just 2 hole cards */
 function txPreFlopStrength(c1,c2){
-  if(c1.val===c2.val)return c1.val>=10?7:c1.val>=7?5:3; // pair
-  const hi=Math.max(c1.val,c2.val);
-  const suited=c1.suit===c2.suit;
-  if(hi===14)return suited?6:4; // ace
-  if(hi>=12)return suited?4:3;
-  return suited?2:1;
+if(c1.val===c2.val)return c1.val>=10?7:c1.val>=7?5:3; // pair
+const hi=Math.max(c1.val,c2.val);
+const suited=c1.suit===c2.suit;
+if(hi===14)return suited?6:4; // ace
+if(hi>=12)return suited?4:3;
+return suited?2:1;
 }
 function txCpuDecide(){
-  let strength;
-  if(txStreet===0){
-    // Pre-flop: use 2-card heuristic
-    strength=txPreFlopStrength(txDealer[0],txDealer[1]);
-  } else {
-    // Post-flop: evaluate full board
-    const shown=txStreet===1?3:txStreet===2?4:5;
-    const combined=[...txDealer,...txCommunity.slice(0,shown)];
-    const ev=pkEval(combined);
-    strength=ev?ev.rank*1.5:0;
-  }
-  return pkCpuDecide(strength,txStreet,txPot,txRaised?txBet:0);
+let strength;
+if(txStreet===0){
+// Pre-flop: use 2-card heuristic
+strength=txPreFlopStrength(txDealer[0],txDealer[1]);
+} else {
+// Post-flop: evaluate full board
+const shown=txStreet===1?3:txStreet===2?4:5;
+const combined=[…txDealer,…txCommunity.slice(0,shown)];
+const ev=pkEval(combined);
+strength=ev?ev.rank*1.5:0;
+}
+return pkCpuDecide(strength,txStreet,txPot,txRaised?txBet:0);
 }
 function txDeal(){
-  if(txBet<=0){hubToast('Place a bet first!');return;}
-  if(!spendCoins(txBet))return;
-  if(txDeck.length<20)txDeck=pkBuildDeck();
-  txPot=txBet;txCpuBet=0;txStreet=0;txRaised=false;txPlaying=true;
-  txPlayer=[txDeck.pop(),txDeck.pop()];
-  txDealer=[txDeck.pop(),txDeck.pop()];
-  txCommunity=[txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop()];
-  txRenderHands(false);txSetResult('Pre-Flop  -  CPU deciding...','');
-  txUpdateStats();txSetButtons('waiting');
-  setTimeout(()=>{
-    const action=txCpuDecide();
-    if(action==='raise'){
-      const r=Math.min(txBet,COINS);
-      txPot+=r;txCpuBet+=r;txRaised=true;
-      txSetResult('CPU raised +'+r+'  -  Call or Fold?','');
-      hubToast('Dealer raises!');
-    } else {
-      txSetResult('CPU checks  -  your action','');
-    }
-    txSetButtons('player');
-  },900);
+if(txBet<=0){hubToast(‘Place a bet first!’);return;}
+if(!spendCoins(txBet))return;
+if(txDeck.length<20)txDeck=pkBuildDeck();
+txPot=txBet;txCpuBet=0;txStreet=0;txRaised=false;txPlaying=true;
+txPlayer=[txDeck.pop(),txDeck.pop()];
+txDealer=[txDeck.pop(),txDeck.pop()];
+txCommunity=[txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop(),txDeck.pop()];
+txRenderHands(false);txSetResult(‘Pre-Flop  -  CPU deciding…’,’’);
+txUpdateStats();txSetButtons(‘waiting’);
+setTimeout(()=>{
+const action=txCpuDecide();
+if(action===‘raise’){
+const r=Math.min(txBet,COINS);
+txPot+=r;txCpuBet+=r;txRaised=true;
+txSetResult(‘CPU raised +’+r+’  -  Call or Fold?’,’’);
+hubToast(‘Dealer raises!’);
+} else {
+txSetResult(‘CPU checks  -  your action’,’’);
+}
+txSetButtons(‘player’);
+},900);
 }
 function txCheck(){
-  if(!txPlaying||txRaised)return;
-  txAdvanceStreet();
+if(!txPlaying||txRaised)return;
+txAdvanceStreet();
 }
 function txCall(){
-  if(!txPlaying||!txRaised)return;
-  const amount=Math.min(txBet,COINS);
-  if(!spendCoins(amount))return;
-  txPot+=amount;txRaised=false;
-  txAdvanceStreet();
+if(!txPlaying||!txRaised)return;
+const amount=Math.min(txBet,COINS);
+if(!spendCoins(amount))return;
+txPot+=amount;txRaised=false;
+txAdvanceStreet();
 }
 function txRaise(){
-  if(!txPlaying)return;
-  const raiseAmt=txBet;
-  if(!spendCoins(raiseAmt))return;
-  txPot+=raiseAmt;txRaised=false;
-  txSetButtons('waiting');
-  txSetResult('You raised  -  CPU deciding...','');
-  setTimeout(()=>{
-    const action=txCpuDecide();
-    if(action==='fold'){
-      // CPU folds  -  player wins pot
-      txPlaying=false;txWins++;txStreak++;
-      earnCoins(txPot,'Texas Hold\'em');
-      txSetResult('CPU FOLDED  -  YOU WIN! 🏆','win');
-      txSetButtons('idle');txUpdateStats();txBet=0;
-      confetti();
-    } else if(action==='raise'){
-      const r=Math.min(txBet,COINS);txPot+=r;txCpuBet+=r;txRaised=true;
-      txSetResult('CPU re-raised! Call or Fold?','');
-      hubToast('CPU re-raises!');txSetButtons('player');
-    } else {
-      txAdvanceStreet();
-    }
-  },900);
+if(!txPlaying)return;
+const raiseAmt=txBet;
+if(!spendCoins(raiseAmt))return;
+txPot+=raiseAmt;txRaised=false;
+txSetButtons(‘waiting’);
+txSetResult(‘You raised  -  CPU deciding…’,’’);
+setTimeout(()=>{
+const action=txCpuDecide();
+if(action===‘fold’){
+// CPU folds  -  player wins pot
+txPlaying=false;txWins++;txStreak++;
+earnCoins(txPot,‘Texas Hold'em’);
+txSetResult(‘CPU FOLDED  -  YOU WIN! 🏆’,‘win’);
+txSetButtons(‘idle’);txUpdateStats();txBet=0;
+confetti();
+} else if(action===‘raise’){
+const r=Math.min(txBet,COINS);txPot+=r;txCpuBet+=r;txRaised=true;
+txSetResult(‘CPU re-raised! Call or Fold?’,’’);
+hubToast(‘CPU re-raises!’);txSetButtons(‘player’);
+} else {
+txAdvanceStreet();
+}
+},900);
 }
 function txFold(){
-  if(!txPlaying)return;
-  txPlaying=false;txLosses++;txStreak=0;
-  txRenderHands(true);
-  txSetResult('YOU FOLDED','lose');
-  txSetButtons('idle');txUpdateStats();txBet=0;
+if(!txPlaying)return;
+txPlaying=false;txLosses++;txStreak=0;
+txRenderHands(true);
+txSetResult(‘YOU FOLDED’,‘lose’);
+txSetButtons(‘idle’);txUpdateStats();txBet=0;
 }
 function txAdvanceStreet(){
-  txRaised=false;txStreet++;
-  if(txStreet>=4){txShowdown();return;}
-  txRenderHands(false);
-  txSetButtons('waiting');
-  const streetName=TX_STREETS[txStreet];
-  txSetResult(streetName+'  -  CPU deciding...','');
-  setTimeout(()=>{
-    const action=txCpuDecide();
-    if(action==='raise'){
-      const r=Math.min(txBet,COINS);txPot+=r;txCpuBet+=r;txRaised=true;
-      txSetResult('CPU bets +'+r+'  -  Call, Raise or Fold?','');
-      hubToast('Dealer bets!');
-    } else {
-      txSetResult(streetName+'  -  your action','');
-    }
-    txSetButtons('player');
-    txUpdateStats();
-  },700);
+txRaised=false;txStreet++;
+if(txStreet>=4){txShowdown();return;}
+txRenderHands(false);
+txSetButtons(‘waiting’);
+const streetName=TX_STREETS[txStreet];
+txSetResult(streetName+’  -  CPU deciding…’,’’);
+setTimeout(()=>{
+const action=txCpuDecide();
+if(action===‘raise’){
+const r=Math.min(txBet,COINS);txPot+=r;txCpuBet+=r;txRaised=true;
+txSetResult(‘CPU bets +’+r+’  -  Call, Raise or Fold?’,’’);
+hubToast(‘Dealer bets!’);
+} else {
+txSetResult(streetName+’  -  your action’,’’);
+}
+txSetButtons(‘player’);
+txUpdateStats();
+},700);
 }
 function txShowdown(){
-  txPlaying=false;txStreet=4;
-  txRenderHands(true);
-  const pEval=pkEval([...txPlayer,...txCommunity]);
-  const dEval=pkEval([...txDealer,...txCommunity]);
-  const ps=document.getElementById('tx-player-score');
-  const ds=document.getElementById('tx-dealer-score');
-  if(ps){ps.textContent='You: '+(pEval?pEval.name:'?');ps.className='pk-score'+(pEval&&pEval.rank>=5?' strong':'');}
-  if(ds){ds.textContent='Dealer: '+(dEval?dEval.name:'?');ds.className='pk-score'+(dEval&&dEval.rank>=5?' strong':'');}
-  const cmp=pEval&&dEval?pkCompare(pEval,dEval):0;
-  if(cmp>0){
-    earnCoins(txPot*2,'Texas Hold\'em');
-    txWins++;txStreak++;
-    txSetResult('YOU WIN! 🏆','win');confetti();
-    if(txStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,'Hold\'em');}
-  } else if(cmp<0){
-    txLosses++;txStreak=0;
-    txSetResult('DEALER WINS','lose');
-  } else {
-    earnCoins(txPot,'Texas Hold\'em Push');
-    txPushes++;
-    txSetResult('SPLIT POT','push');
-  }
-  txBet=0;txSetButtons('idle');txUpdateStats();
+txPlaying=false;txStreet=4;
+txRenderHands(true);
+const pEval=pkEval([…txPlayer,…txCommunity]);
+const dEval=pkEval([…txDealer,…txCommunity]);
+const ps=document.getElementById(‘tx-player-score’);
+const ds=document.getElementById(‘tx-dealer-score’);
+if(ps){ps.textContent=‘You: ‘+(pEval?pEval.name:’?’);ps.className=‘pk-score’+(pEval&&pEval.rank>=5?’ strong’:’’);}
+if(ds){ds.textContent=‘Dealer: ‘+(dEval?dEval.name:’?’);ds.className=‘pk-score’+(dEval&&dEval.rank>=5?’ strong’:’’);}
+const cmp=pEval&&dEval?pkCompare(pEval,dEval):0;
+if(cmp>0){
+earnCoins(txPot*2,‘Texas Hold'em’);
+txWins++;txStreak++;
+txSetResult(‘YOU WIN! 🏆’,‘win’);confetti();
+if(txStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,‘Hold'em’);}
+} else if(cmp<0){
+txLosses++;txStreak=0;
+txSetResult(‘DEALER WINS’,‘lose’);
+} else {
+earnCoins(txPot,‘Texas Hold'em Push’);
+txPushes++;
+txSetResult(‘SPLIT POT’,‘push’);
+}
+txBet=0;txSetButtons(‘idle’);txUpdateStats();
 }
 /* ═══════════════════════════════════════════════════════════
-   5-CARD DRAW
-   ═══════════════════════════════════════════════════════════ */
+5-CARD DRAW
+═══════════════════════════════════════════════════════════ */
 let fcDeck=[],fcPlayer=[],fcDealer=[],fcDiscards=[];
-let fcBet=0,fcPot=0,fcPhase='idle'; // idle, dealt, drawn
+let fcBet=0,fcPot=0,fcPhase=‘idle’; // idle, dealt, drawn
 let fcWins=0,fcLosses=0,fcPushes=0,fcStreak=0;
 
 function fcInit(){
-  if(fcDeck.length<20)fcDeck=pkBuildDeck();
-  fcUpdateStats();
+if(fcDeck.length<20)fcDeck=pkBuildDeck();
+fcUpdateStats();
 }
 function fcUpdateStats(){
-  const m={'fc-wins':fcWins,'fc-losses':fcLosses,'fc-pushes':fcPushes,'fc-streak':fcStreak,'fc-bet-display':fcBet,'fc-pot':'POT: '+fcPot+' 🪙'};
-  Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+const m={‘fc-wins’:fcWins,‘fc-losses’:fcLosses,‘fc-pushes’:fcPushes,‘fc-streak’:fcStreak,‘fc-bet-display’:fcBet,‘fc-pot’:‘POT: ‘+fcPot+’ 🪙’};
+Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
 }
 function fcAddBet(n){
-  if(fcPhase!=='idle')return;
-  if(COINS<fcBet+n){hubToast('Not enough coins!');return;}
-  fcBet+=n;fcUpdateStats();
+if(fcPhase!==‘idle’)return;
+if(COINS<fcBet+n){hubToast(‘Not enough coins!’);return;}
+fcBet+=n;fcUpdateStats();
 }
 function fcSetButtons(phase){
-  const deal=document.getElementById('fc-deal-btn');
-  const fold=document.getElementById('fc-fold-btn');
-  const draw=document.getElementById('fc-draw-btn');
-  const stand=document.getElementById('fc-stand-btn');
-  const idle=phase==='idle';
-  if(deal)deal.disabled=!idle;
-  if(fold)fold.disabled=idle;
-  if(draw)draw.disabled=phase!=='dealt';
-  if(stand)stand.disabled=phase!=='dealt';
+const deal=document.getElementById(‘fc-deal-btn’);
+const fold=document.getElementById(‘fc-fold-btn’);
+const draw=document.getElementById(‘fc-draw-btn’);
+const stand=document.getElementById(‘fc-stand-btn’);
+const idle=phase===‘idle’;
+if(deal)deal.disabled=!idle;
+if(fold)fold.disabled=idle;
+if(draw)draw.disabled=phase!==‘dealt’;
+if(stand)stand.disabled=phase!==‘dealt’;
 }
 function fcRenderHands(revealDealer=false){
-  const ph=document.getElementById('fc-player-hand');
-  const dh=document.getElementById('fc-dealer-hand');
-  if(!ph||!dh)return;
-  ph.innerHTML='';
-  fcPlayer.forEach((c,i)=>{
-    const el=pkCardEl(c,false,fcDiscards.includes(i));
-    el.onclick=()=>fcToggleDiscard(i);
-    ph.appendChild(el);
-  });
-  dh.innerHTML='';fcDealer.forEach((c,i)=>dh.appendChild(pkCardEl(c,!revealDealer)));
-  if(!revealDealer){
-    const ds=document.getElementById('fc-dealer-score');if(ds)ds.textContent='';
-  }
-  if(fcPlayer.length>0){
-    const pEval=pkEval(fcPlayer);
-    const ps=document.getElementById('fc-player-score');
-    if(ps){ps.textContent=pEval.name;ps.className='pk-score'+(pEval.rank>=3?' strong':'');}
-  }
-  const hint=document.getElementById('fc-draw-hint');
-  if(hint&&fcPhase==='dealt'){
-    const n=fcDiscards.length;
-    hint.textContent=n===0?'Tap cards to discard, or Stand Pat':'Discarding '+n+' card'+(n>1?'s':'')+'  -  tap to deselect';
-  }
+const ph=document.getElementById(‘fc-player-hand’);
+const dh=document.getElementById(‘fc-dealer-hand’);
+if(!ph||!dh)return;
+ph.innerHTML=’’;
+fcPlayer.forEach((c,i)=>{
+const el=pkCardEl(c,false,fcDiscards.includes(i));
+el.onclick=()=>fcToggleDiscard(i);
+ph.appendChild(el);
+});
+dh.innerHTML=’’;fcDealer.forEach((c,i)=>dh.appendChild(pkCardEl(c,!revealDealer)));
+if(!revealDealer){
+const ds=document.getElementById(‘fc-dealer-score’);if(ds)ds.textContent=’’;
+}
+if(fcPlayer.length>0){
+const pEval=pkEval(fcPlayer);
+const ps=document.getElementById(‘fc-player-score’);
+if(ps){ps.textContent=pEval.name;ps.className=‘pk-score’+(pEval.rank>=3?’ strong’:’’);}
+}
+const hint=document.getElementById(‘fc-draw-hint’);
+if(hint&&fcPhase===‘dealt’){
+const n=fcDiscards.length;
+hint.textContent=n===0?‘Tap cards to discard, or Stand Pat’:‘Discarding ‘+n+’ card’+(n>1?‘s’:’’)+’  -  tap to deselect’;
+}
 }
 function fcToggleDiscard(i){
-  if(fcPhase!=='dealt')return;
-  // Max 3 discards, or 4 if holding an ace
-  const hasAce=fcPlayer.some(c=>c.rank==='A');
-  const maxDiscard=hasAce?4:3;
-  if(fcDiscards.includes(i)){
-    fcDiscards=fcDiscards.filter(x=>x!==i);
-  } else {
-    if(fcDiscards.length>=maxDiscard){hubToast('Max '+(hasAce?'4':'3')+' discards'+(hasAce?' (Ace bonus)':''));return;}
-    fcDiscards.push(i);
-  }
-  fcRenderHands(false);
+if(fcPhase!==‘dealt’)return;
+// Max 3 discards, or 4 if holding an ace
+const hasAce=fcPlayer.some(c=>c.rank===‘A’);
+const maxDiscard=hasAce?4:3;
+if(fcDiscards.includes(i)){
+fcDiscards=fcDiscards.filter(x=>x!==i);
+} else {
+if(fcDiscards.length>=maxDiscard){hubToast(‘Max ‘+(hasAce?‘4’:‘3’)+’ discards’+(hasAce?’ (Ace bonus)’:’’));return;}
+fcDiscards.push(i);
 }
-function fcSetResult(msg,cls){const el=document.getElementById('fc-result');if(el){el.textContent=msg;el.className='pk-result '+(cls||'');}}
+fcRenderHands(false);
+}
+function fcSetResult(msg,cls){const el=document.getElementById(‘fc-result’);if(el){el.textContent=msg;el.className=‘pk-result ‘+(cls||’’);}}
 
 function fcDeal(){
-  if(fcBet<=0){hubToast('Place a bet first!');return;}
-  if(!spendCoins(fcBet))return;
-  if(fcDeck.length<20)fcDeck=pkBuildDeck();
-  fcPot=fcBet;fcDiscards=[];fcPhase='dealt';
-  fcPlayer=[fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop()];
-  fcDealer=[fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop()];
-  fcRenderHands(false);fcSetResult('','');
-  fcUpdateStats();fcSetButtons('dealt');
-  const hint=document.getElementById('fc-draw-hint');
-  if(hint)hint.textContent='Tap cards to discard, or Stand Pat';
+if(fcBet<=0){hubToast(‘Place a bet first!’);return;}
+if(!spendCoins(fcBet))return;
+if(fcDeck.length<20)fcDeck=pkBuildDeck();
+fcPot=fcBet;fcDiscards=[];fcPhase=‘dealt’;
+fcPlayer=[fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop()];
+fcDealer=[fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop(),fcDeck.pop()];
+fcRenderHands(false);fcSetResult(’’,’’);
+fcUpdateStats();fcSetButtons(‘dealt’);
+const hint=document.getElementById(‘fc-draw-hint’);
+if(hint)hint.textContent=‘Tap cards to discard, or Stand Pat’;
 }
 function fcFold(){
-  if(fcPhase==='idle')return;
-  fcLosses++;fcStreak=0;fcPhase='idle';
-  fcRenderHands(true);
-  fcSetResult('YOU FOLDED','lose');
-  fcSetButtons('idle');fcUpdateStats();
-  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='';
-  const ds=document.getElementById('fc-dealer-score');
-  const dEval=pkEval(fcDealer);if(ds)ds.textContent='Dealer: '+dEval.name;
-  fcBet=0;
+if(fcPhase===‘idle’)return;
+fcLosses++;fcStreak=0;fcPhase=‘idle’;
+fcRenderHands(true);
+fcSetResult(‘YOU FOLDED’,‘lose’);
+fcSetButtons(‘idle’);fcUpdateStats();
+const hint=document.getElementById(‘fc-draw-hint’);if(hint)hint.textContent=’’;
+const ds=document.getElementById(‘fc-dealer-score’);
+const dEval=pkEval(fcDealer);if(ds)ds.textContent=‘Dealer: ‘+dEval.name;
+fcBet=0;
 }
 function fcDraw(){
-  if(fcPhase!=='dealt')return;
-  // Replace discarded cards (sort descending so splice indices stay valid)
-  fcDiscards.sort((a,b)=>b-a).forEach(i=>{
-    if(fcDeck.length>0)fcPlayer.splice(i,1,fcDeck.pop());
-  });
-  // CPU draw  -  smart: discard based on hand strength
-  const cpuEval=pkEval(fcDealer);
-  let cpuDiscardCount=0;
-  if(cpuEval.rank===0)cpuDiscardCount=~~(Math.random()*3)+1;        // high card: draw 1-3
-  else if(cpuEval.rank===1)cpuDiscardCount=~~(Math.random()*2)+1;   // one pair: draw 1-2
-  else if(cpuEval.rank===2)cpuDiscardCount=1;                       // two pair: draw 1 kicker
-  // trips/better: stand pat
-  const canDraw=Math.min(cpuDiscardCount,fcDeck.length);
-  // Remove worst cards and draw
-  if(canDraw>0){
-    fcDealer.sort((a,b)=>a.val-b.val);
-    fcDealer.splice(0,canDraw);
-    for(let i=0;i<canDraw;i++)if(fcDeck.length>0)fcDealer.push(fcDeck.pop());
-  }
-  fcDiscards=[];fcPhase='drawn';
-  fcRenderHands(false);
-  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Cards drawn  -  showdown!';
-  setTimeout(fcShowdown,700);
+if(fcPhase!==‘dealt’)return;
+// Replace discarded cards (sort descending so splice indices stay valid)
+fcDiscards.sort((a,b)=>b-a).forEach(i=>{
+if(fcDeck.length>0)fcPlayer.splice(i,1,fcDeck.pop());
+});
+// CPU draw  -  smart: discard based on hand strength
+const cpuEval=pkEval(fcDealer);
+let cpuDiscardCount=0;
+if(cpuEval.rank===0)cpuDiscardCount=~(Math.random()*3)+1;        // high card: draw 1-3
+else if(cpuEval.rank===1)cpuDiscardCount=~(Math.random()*2)+1;   // one pair: draw 1-2
+else if(cpuEval.rank===2)cpuDiscardCount=1;                       // two pair: draw 1 kicker
+// trips/better: stand pat
+const canDraw=Math.min(cpuDiscardCount,fcDeck.length);
+// Remove worst cards and draw
+if(canDraw>0){
+fcDealer.sort((a,b)=>a.val-b.val);
+fcDealer.splice(0,canDraw);
+for(let i=0;i<canDraw;i++)if(fcDeck.length>0)fcDealer.push(fcDeck.pop());
+}
+fcDiscards=[];fcPhase=‘drawn’;
+fcRenderHands(false);
+const hint=document.getElementById(‘fc-draw-hint’);if(hint)hint.textContent=‘Cards drawn  -  showdown!’;
+setTimeout(fcShowdown,700);
 }
 function fcStand(){
-  if(fcPhase!=='dealt')return;
-  fcDiscards=[];
-  // CPU still draws
-  const cpuEval=pkEval(fcDealer);
-  let cpuDiscardCount=cpuEval.rank===0?~~(Math.random()*3)+1:cpuEval.rank===1?~~(Math.random()*2):0;
-  const canDraw2=Math.min(cpuDiscardCount,fcDeck.length);
-  if(canDraw2>0){
-    fcDealer.sort((a,b)=>a.val-b.val);
-    fcDealer.splice(0,canDraw2);
-    for(let i=0;i<canDraw2;i++)if(fcDeck.length>0)fcDealer.push(fcDeck.pop());
-  }
-  fcPhase='drawn';fcRenderHands(false);
-  const hint=document.getElementById('fc-draw-hint');if(hint)hint.textContent='Standing Pat  -  showdown!';
-  setTimeout(fcShowdown,700);
+if(fcPhase!==‘dealt’)return;
+fcDiscards=[];
+// CPU still draws
+const cpuEval=pkEval(fcDealer);
+let cpuDiscardCount=cpuEval.rank===0?~(Math.random()*3)+1:cpuEval.rank===1?~(Math.random()*2):0;
+const canDraw2=Math.min(cpuDiscardCount,fcDeck.length);
+if(canDraw2>0){
+fcDealer.sort((a,b)=>a.val-b.val);
+fcDealer.splice(0,canDraw2);
+for(let i=0;i<canDraw2;i++)if(fcDeck.length>0)fcDealer.push(fcDeck.pop());
+}
+fcPhase=‘drawn’;fcRenderHands(false);
+const hint=document.getElementById(‘fc-draw-hint’);if(hint)hint.textContent=‘Standing Pat  -  showdown!’;
+setTimeout(fcShowdown,700);
 }
 function fcShowdown(){
-  fcPhase='idle';
-  fcRenderHands(true);
-  const pEval=pkEval(fcPlayer);
-  const dEval=pkEval(fcDealer);
-  const ps=document.getElementById('fc-player-score');
-  const ds=document.getElementById('fc-dealer-score');
-  if(ps){ps.textContent='You: '+pEval.name;ps.className='pk-score'+(pEval.rank>=3?' strong':'');}
-  if(ds){ds.textContent='Dealer: '+dEval.name;ds.className='pk-score'+(dEval.rank>=3?' strong':'');}
-  const cmp=pkCompare(pEval,dEval);
-  const hint=document.getElementById('fc-draw-hint');
-  if(cmp>0){
-    earnCoins(fcPot*2,'5-Card Draw');
-    fcWins++;fcStreak++;
-    fcSetResult('YOU WIN! 🏆','win');confetti();if(hint)hint.textContent='';
-    if(pEval.rank>=7&&Math.random()<.25){const s=~~(Math.random()*8)+1;earnSats(s);showSatDrop(s,'5-Card Draw');}
-    else if(fcStreak>=3&&Math.random()<.12){const s=~~(Math.random()*3)+1;earnSats(s);showSatDrop(s,'5-Card Draw');}
-  } else if(cmp<0){
-    fcLosses++;fcStreak=0;
-    fcSetResult('DEALER WINS','lose');if(hint)hint.textContent='Better luck next hand!';
-  } else {
-    earnCoins(fcPot,'5-Card Draw Push');
-    fcPushes++;
-    fcSetResult('SPLIT POT','push');if(hint)hint.textContent='Exactly tied  -  split!';
-  }
-  fcBet=0;fcSetButtons('idle');fcUpdateStats();
+fcPhase=‘idle’;
+fcRenderHands(true);
+const pEval=pkEval(fcPlayer);
+const dEval=pkEval(fcDealer);
+const ps=document.getElementById(‘fc-player-score’);
+const ds=document.getElementById(‘fc-dealer-score’);
+if(ps){ps.textContent=‘You: ‘+pEval.name;ps.className=‘pk-score’+(pEval.rank>=3?’ strong’:’’);}
+if(ds){ds.textContent=‘Dealer: ‘+dEval.name;ds.className=‘pk-score’+(dEval.rank>=3?’ strong’:’’);}
+const cmp=pkCompare(pEval,dEval);
+const hint=document.getElementById(‘fc-draw-hint’);
+if(cmp>0){
+earnCoins(fcPot*2,‘5-Card Draw’);
+fcWins++;fcStreak++;
+fcSetResult(‘YOU WIN! 🏆’,‘win’);confetti();if(hint)hint.textContent=’’;
+if(pEval.rank>=7&&Math.random()<.25){const s=~(Math.random()*8)+1;earnSats(s);showSatDrop(s,‘5-Card Draw’);}
+else if(fcStreak>=3&&Math.random()<.12){const s=~(Math.random()*3)+1;earnSats(s);showSatDrop(s,‘5-Card Draw’);}
+} else if(cmp<0){
+fcLosses++;fcStreak=0;
+fcSetResult(‘DEALER WINS’,‘lose’);if(hint)hint.textContent=‘Better luck next hand!’;
+} else {
+earnCoins(fcPot,‘5-Card Draw Push’);
+fcPushes++;
+fcSetResult(‘SPLIT POT’,‘push’);if(hint)hint.textContent=‘Exactly tied  -  split!’;
+}
+fcBet=0;fcSetButtons(‘idle’);fcUpdateStats();
 }
 
-</script>
-
-<script>
 /* ═══════════════════════════════════════════════════════════
-   ROULETTE
-   ═══════════════════════════════════════════════════════════ */
+ROULETTE
+═══════════════════════════════════════════════════════════ */
 const RL_NUMS=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 const RL_RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 const RL_COL1=[1,4,7,10,13,16,19,22,25,28,31,34];
@@ -2841,303 +2779,297 @@ let rlWins=0,rlLosses=0,rlProfit=0,rlStreak=0;
 let rlAngle=0,rlRAF=null,rlLastNums=[];
 
 function rlInit(){
-  const can=document.getElementById('rl-canvas');
-  if(!can)return;
-  const size=can.parentElement.offsetWidth||240;
-  can.width=size;can.height=size;
-  rlDrawWheel(rlAngle);
-  rlUpdateStats();
+const can=document.getElementById(‘rl-canvas’);
+if(!can)return;
+const size=can.parentElement.offsetWidth||240;
+can.width=size;can.height=size;
+rlDrawWheel(rlAngle);
+rlUpdateStats();
 }
 
 function rlDrawWheel(angle){
-  const can=document.getElementById('rl-canvas');
-  if(!can)return;
-  const ctx=can.getContext('2d'),W=can.width,cx=W/2,cy=W/2,r=cx-4,ir=cx*.28;
-  const n=RL_NUMS.length,arc=(Math.PI*2)/n;
-  ctx.clearRect(0,0,W,W);
-  // outer ring
-  ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);
-  ctx.fillStyle='#1a0008';ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);
-  ctx.strokeStyle='rgba(220,50,50,.5)';ctx.lineWidth=2;ctx.stroke();
-  // slices
-  RL_NUMS.forEach((num,i)=>{
-    const a=angle+i*arc-Math.PI/2;
-    const col=num===0?'#006622':RL_RED.has(num)?'#bb0000':'#111';
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+arc);ctx.closePath();
-    ctx.fillStyle=col;ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=.7;ctx.stroke();
-    // number text
-    ctx.save();ctx.translate(cx,cy);ctx.rotate(a+arc/2);
-    ctx.textAlign='center';ctx.fillStyle='#fff';
-    ctx.font=`bold ${W*.042}px Arial`;
-    ctx.fillText(num,r*.74,W*.018);ctx.restore();
-  });
-  // inner circle
-  const ig=ctx.createRadialGradient(cx,cy,0,cx,cy,ir);
-  ig.addColorStop(0,'#2a0010');ig.addColorStop(1,'#1a0008');
-  ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);ctx.fillStyle=ig;ctx.fill();
-  ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);
-  ctx.strokeStyle='rgba(200,0,50,.4)';ctx.lineWidth=2;ctx.stroke();
-  // center dot
-  ctx.beginPath();ctx.arc(cx,cy,ir*.18,0,Math.PI*2);
-  ctx.fillStyle='#cc0022';ctx.fill();
+const can=document.getElementById(‘rl-canvas’);
+if(!can)return;
+const ctx=can.getContext(‘2d’),W=can.width,cx=W/2,cy=W/2,r=cx-4,ir=cx*.28;
+const n=RL_NUMS.length,arc=(Math.PI*2)/n;
+ctx.clearRect(0,0,W,W);
+// outer ring
+ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);
+ctx.fillStyle=’#1a0008’;ctx.fill();
+ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);
+ctx.strokeStyle=‘rgba(220,50,50,.5)’;ctx.lineWidth=2;ctx.stroke();
+// slices
+RL_NUMS.forEach((num,i)=>{
+const a=angle+i*arc-Math.PI/2;
+const col=num===0?’#006622’:RL_RED.has(num)?’#bb0000’:’#111’;
+ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,a+arc);ctx.closePath();
+ctx.fillStyle=col;ctx.fill();
+ctx.strokeStyle=‘rgba(0,0,0,.5)’;ctx.lineWidth=.7;ctx.stroke();
+// number text
+ctx.save();ctx.translate(cx,cy);ctx.rotate(a+arc/2);
+ctx.textAlign=‘center’;ctx.fillStyle=’#fff’;
+ctx.font=`bold ${W*.042}px Arial`;
+ctx.fillText(num,r*.74,W*.018);ctx.restore();
+});
+// inner circle
+const ig=ctx.createRadialGradient(cx,cy,0,cx,cy,ir);
+ig.addColorStop(0,’#2a0010’);ig.addColorStop(1,’#1a0008’);
+ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);ctx.fillStyle=ig;ctx.fill();
+ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);
+ctx.strokeStyle=‘rgba(200,0,50,.4)’;ctx.lineWidth=2;ctx.stroke();
+// center dot
+ctx.beginPath();ctx.arc(cx,cy,ir*.18,0,Math.PI*2);
+ctx.fillStyle=’#cc0022’;ctx.fill();
 }
 
 function rlAddBet(n){
-  if(rlSpinning)return;
-  if(COINS<rlBet+n){hubToast('Not enough coins!');return;}
-  rlBet+=n;
-  document.getElementById('rl-bet-display').textContent=rlBet;
+if(rlSpinning)return;
+if(COINS<rlBet+n){hubToast(‘Not enough coins!’);return;}
+rlBet+=n;
+document.getElementById(‘rl-bet-display’).textContent=rlBet;
 }
 function rlResetBet(){
-  if(rlSpinning)return;
-  rlBet=0;document.getElementById('rl-bet-display').textContent=0;
+if(rlSpinning)return;
+rlBet=0;document.getElementById(‘rl-bet-display’).textContent=0;
 }
 function rlSelect(type){
-  if(rlSpinning)return;
-  rlSelection=type;
-  document.querySelectorAll('.rl-bet-btn').forEach(b=>b.classList.remove('selected'));
-  const el=document.getElementById('rl-b-'+type);
-  if(el)el.classList.add('selected');
+if(rlSpinning)return;
+rlSelection=type;
+document.querySelectorAll(’.rl-bet-btn’).forEach(b=>b.classList.remove(‘selected’));
+const el=document.getElementById(‘rl-b-’+type);
+if(el)el.classList.add(‘selected’);
 }
 function rlUpdateStats(){
-  const m={'rl-wins':rlWins,'rl-losses':rlLosses,'rl-profit':rlProfit,'rl-streak':rlStreak};
-  Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+const m={‘rl-wins’:rlWins,‘rl-losses’:rlLosses,‘rl-profit’:rlProfit,‘rl-streak’:rlStreak};
+Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
 }
 function rlCheckWin(num,sel){
-  const isRed=RL_RED.has(num),isBlack=num>0&&!isRed;
-  switch(sel){
-    case 'red':    return[isRed,2];
-    case 'black':  return[isBlack,2];
-    case 'green':  return[num===0,35];
-    case 'odd':    return[num>0&&num%2===1,2];
-    case 'even':   return[num>0&&num%2===0,2];
-    case 'low':    return[num>=1&&num<=18,2];
-    case 'high':   return[num>=19&&num<=36,2];
-    case 'dozen1': return[num>=1&&num<=12,3];
-    case 'dozen2': return[num>=13&&num<=24,3];
-    case 'dozen3': return[num>=25&&num<=36,3];
-    case 'col1':   return[RL_COL1.includes(num),3];
-    case 'col2':   return[RL_COL2.includes(num),3];
-    default:       return[false,0];
-  }
+const isRed=RL_RED.has(num),isBlack=num>0&&!isRed;
+switch(sel){
+case ‘red’:    return[isRed,2];
+case ‘black’:  return[isBlack,2];
+case ‘green’:  return[num===0,35];
+case ‘odd’:    return[num>0&&num%2===1,2];
+case ‘even’:   return[num>0&&num%2===0,2];
+case ‘low’:    return[num>=1&&num<=18,2];
+case ‘high’:   return[num>=19&&num<=36,2];
+case ‘dozen1’: return[num>=1&&num<=12,3];
+case ‘dozen2’: return[num>=13&&num<=24,3];
+case ‘dozen3’: return[num>=25&&num<=36,3];
+case ‘col1’:   return[RL_COL1.includes(num),3];
+case ‘col2’:   return[RL_COL2.includes(num),3];
+default:       return[false,0];
+}
 }
 function rlSpin(){
-  if(rlBet<=0){hubToast('Place a bet first!');return;}
-  if(!rlSelection){hubToast('Choose a bet type!');return;}
-  if(!spendCoins(rlBet))return;
-  rlSpinning=true;
-  document.getElementById('rl-spin-btn').disabled=true;
-  document.getElementById('rl-result').textContent='';
-  // Pick random landing number
-  const landIdx=Math.floor(Math.random()*RL_NUMS.length);
-  const landNum=RL_NUMS[landIdx];
-  // Animate: spin fast then slow to land
-  const totalRot=Math.PI*2*(5+Math.random()*3);
-  const targetAngle=rlAngle+totalRot-(landIdx*(Math.PI*2/RL_NUMS.length));
-  const start=performance.now(),dur=3800;
-  const startAngle=rlAngle;
-  function tick(now){
-    const t=Math.min((now-start)/dur,1);
-    const ease=t<1?1-Math.pow(1-t,3):1; // ease-out cubic
-    rlAngle=startAngle+totalRot*ease;
-    rlDrawWheel(rlAngle);
-    if(t<1){requestAnimationFrame(tick);return;}
-    // Done
-    rlSpinning=false;
-    document.getElementById('rl-spin-btn').disabled=false;
-    const[won,mult]=rlCheckWin(landNum,rlSelection);
-    const col=landNum===0?'🟢':RL_RED.has(landNum)?'🔴':'⚫';
-    document.getElementById('rl-last').textContent='Last: '+col+' '+landNum;
-    rlLastNums.unshift(landNum);if(rlLastNums.length>8)rlLastNums.pop();
-    const res=document.getElementById('rl-result');
-    if(won){
-      const prize=rlBet*mult;
-      earnCoins(prize,'Roulette');
-      rlWins++;rlStreak++;rlProfit+=prize-rlBet;
-      res.textContent=col+' '+landNum+'  -  WIN! +'+prize+'🪙';
-      res.className='rl-result win';confetti();
-      if(rlStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,'Roulette');}
-    } else {
-      rlLosses++;rlStreak=0;rlProfit-=rlBet;
-      res.textContent=col+' '+landNum+'  -  No win';
-      res.className='rl-result lose';
-    }
-    rlBet=0;document.getElementById('rl-bet-display').textContent=0;
-    rlUpdateStats();
-  }
-  requestAnimationFrame(tick);
+if(rlBet<=0){hubToast(‘Place a bet first!’);return;}
+if(!rlSelection){hubToast(‘Choose a bet type!’);return;}
+if(!spendCoins(rlBet))return;
+rlSpinning=true;
+document.getElementById(‘rl-spin-btn’).disabled=true;
+document.getElementById(‘rl-result’).textContent=’’;
+// Pick random landing number
+const landIdx=Math.floor(Math.random()*RL_NUMS.length);
+const landNum=RL_NUMS[landIdx];
+// Animate: spin fast then slow to land
+const totalRot=Math.PI*2*(5+Math.random()*3);
+const targetAngle=rlAngle+totalRot-(landIdx*(Math.PI*2/RL_NUMS.length));
+const start=performance.now(),dur=3800;
+const startAngle=rlAngle;
+function tick(now){
+const t=Math.min((now-start)/dur,1);
+const ease=t<1?1-Math.pow(1-t,3):1; // ease-out cubic
+rlAngle=startAngle+totalRot*ease;
+rlDrawWheel(rlAngle);
+if(t<1){requestAnimationFrame(tick);return;}
+// Done
+rlSpinning=false;
+document.getElementById(‘rl-spin-btn’).disabled=false;
+const[won,mult]=rlCheckWin(landNum,rlSelection);
+const col=landNum===0?‘🟢’:RL_RED.has(landNum)?‘🔴’:‘⚫’;
+document.getElementById(‘rl-last’).textContent=‘Last: ‘+col+’ ‘+landNum;
+rlLastNums.unshift(landNum);if(rlLastNums.length>8)rlLastNums.pop();
+const res=document.getElementById(‘rl-result’);
+if(won){
+const prize=rlBet*mult;
+earnCoins(prize,‘Roulette’);
+rlWins++;rlStreak++;rlProfit+=prize-rlBet;
+res.textContent=col+’ ‘+landNum+’  -  WIN! +’+prize+‘🪙’;
+res.className=‘rl-result win’;confetti();
+if(rlStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;earnSats(s);showSatDrop(s,‘Roulette’);}
+} else {
+rlLosses++;rlStreak=0;rlProfit-=rlBet;
+res.textContent=col+’ ‘+landNum+’  -  No win’;
+res.className=‘rl-result lose’;
+}
+rlBet=0;document.getElementById(‘rl-bet-display’).textContent=0;
+rlUpdateStats();
+}
+requestAnimationFrame(tick);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   VIDEO POKER  -  JACKS OR BETTER
-   ═══════════════════════════════════════════════════════════ */
+VIDEO POKER  -  JACKS OR BETTER
+═══════════════════════════════════════════════════════════ */
 const VP_PAY=[
-  {name:'Royal Flush',   rank:9,mult:800},
-  {name:'Straight Flush',rank:8,mult:50},
-  {name:'Four of a Kind',rank:7,mult:25},
-  {name:'Full House',    rank:6,mult:9},
-  {name:'Flush',         rank:5,mult:6},
-  {name:'Straight',      rank:4,mult:4},
-  {name:'Three of a Kind',rank:3,mult:3},
-  {name:'Two Pair',      rank:2,mult:2},
-  {name:'Jacks or Better',rank:-1,mult:1}, // special case
+{name:‘Royal Flush’,   rank:9,mult:800},
+{name:‘Straight Flush’,rank:8,mult:50},
+{name:‘Four of a Kind’,rank:7,mult:25},
+{name:‘Full House’,    rank:6,mult:9},
+{name:‘Flush’,         rank:5,mult:6},
+{name:‘Straight’,      rank:4,mult:4},
+{name:‘Three of a Kind’,rank:3,mult:3},
+{name:‘Two Pair’,      rank:2,mult:2},
+{name:‘Jacks or Better’,rank:-1,mult:1}, // special case
 ];
 
-let vpDeck=[],vpHand=[],vpHeld=[],vpBet=0,vpPhase='idle';
+let vpDeck=[],vpHand=[],vpHeld=[],vpBet=0,vpPhase=‘idle’;
 let vpWins=0,vpLosses=0,vpProfit=0,vpStreak=0;
 
 function vpInit(){
-  if(vpDeck.length<10)vpDeck=pkBuildDeck();
-  vpUpdateStats();
-  vpHighlightPay(-1);
+if(vpDeck.length<10)vpDeck=pkBuildDeck();
+vpUpdateStats();
+vpHighlightPay(-1);
 }
 function vpAddBet(n){
-  if(vpPhase!=='idle')return;
-  if(COINS<vpBet+n){hubToast('Not enough coins!');return;}
-  vpBet+=n;
-  document.getElementById('vp-bet-display').textContent=vpBet;
+if(vpPhase!==‘idle’)return;
+if(COINS<vpBet+n){hubToast(‘Not enough coins!’);return;}
+vpBet+=n;
+document.getElementById(‘vp-bet-display’).textContent=vpBet;
 }
 function vpUpdateStats(){
-  const m={'vp-wins':vpWins,'vp-losses':vpLosses,'vp-profit':vpProfit,'vp-streak':vpStreak,'vp-bet-display':vpBet};
-  Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
+const m={‘vp-wins’:vpWins,‘vp-losses’:vpLosses,‘vp-profit’:vpProfit,‘vp-streak’:vpStreak,‘vp-bet-display’:vpBet};
+Object.entries(m).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});
 }
 function vpHighlightPay(rank){
-  const rows=document.querySelectorAll('#vp-pay-table tr');
-  rows.forEach((r,i)=>{r.classList.toggle('active',VP_PAY[i]&&(VP_PAY[i].rank===rank||(rank===-1&&i===8)));});
+const rows=document.querySelectorAll(’#vp-pay-table tr’);
+rows.forEach((r,i)=>{r.classList.toggle(‘active’,VP_PAY[i]&&(VP_PAY[i].rank===rank||(rank===-1&&i===8)));});
 }
 function vpRenderHand(revealAll=true){
-  const el=document.getElementById('vp-hand');if(!el)return;
-  el.innerHTML='';
-  vpHand.forEach((card,i)=>{
-    const div=pkCardEl(card,!revealAll&&vpPhase==='dealt'?false:false,vpHeld.includes(i));
-    div.style.cursor='pointer';
-    div.onclick=()=>vpToggleHold(i);
-    // HOLD label
-    if(vpHeld.includes(i)){
-      const lbl=document.createElement('div');
-      lbl.style.cssText='text-align:center;font-family:Bebas Neue,sans-serif;font-size:.5rem;color:var(--gold);margin-top:2px;letter-spacing:1px;';
-      lbl.textContent='HOLD';
-      const wrap=document.createElement('div');
-      wrap.style.cssText='display:flex;flex-direction:column;align-items:center;';
-      wrap.appendChild(div);wrap.appendChild(lbl);
-      el.appendChild(wrap);
-    } else {
-      const wrap=document.createElement('div');
-      wrap.style.cssText='display:flex;flex-direction:column;align-items:center;';
-      const lbl=document.createElement('div');
-      lbl.style.cssText='text-align:center;font-size:.5rem;color:rgba(255,255,255,.2);margin-top:2px;';
-      lbl.textContent='tap';
-      wrap.appendChild(div);wrap.appendChild(lbl);
-      el.appendChild(wrap);
-    }
-  });
+const el=document.getElementById(‘vp-hand’);if(!el)return;
+el.innerHTML=’’;
+vpHand.forEach((card,i)=>{
+const div=pkCardEl(card,!revealAll&&vpPhase===‘dealt’?false:false,vpHeld.includes(i));
+div.style.cursor=‘pointer’;
+div.onclick=()=>vpToggleHold(i);
+// HOLD label
+if(vpHeld.includes(i)){
+const lbl=document.createElement(‘div’);
+lbl.style.cssText=‘text-align:center;font-family:Bebas Neue,sans-serif;font-size:.5rem;color:var(–gold);margin-top:2px;letter-spacing:1px;’;
+lbl.textContent=‘HOLD’;
+const wrap=document.createElement(‘div’);
+wrap.style.cssText=‘display:flex;flex-direction:column;align-items:center;’;
+wrap.appendChild(div);wrap.appendChild(lbl);
+el.appendChild(wrap);
+} else {
+const wrap=document.createElement(‘div’);
+wrap.style.cssText=‘display:flex;flex-direction:column;align-items:center;’;
+const lbl=document.createElement(‘div’);
+lbl.style.cssText=‘text-align:center;font-size:.5rem;color:rgba(255,255,255,.2);margin-top:2px;’;
+lbl.textContent=‘tap’;
+wrap.appendChild(div);wrap.appendChild(lbl);
+el.appendChild(wrap);
+}
+});
 }
 function vpToggleHold(i){
-  if(vpPhase!=='dealt')return;
-  if(vpHeld.includes(i))vpHeld=vpHeld.filter(x=>x!==i);
-  else vpHeld.push(i);
-  vpRenderHand();
-  // preview current held hand
-  const held=vpHand.filter((_,i2)=>vpHeld.includes(i2));
-  if(held.length>=3){const ev=pkEval(held);if(ev)vpHighlightPay(vpJoBRank(ev));}
-  else vpHighlightPay(-2);
+if(vpPhase!==‘dealt’)return;
+if(vpHeld.includes(i))vpHeld=vpHeld.filter(x=>x!==i);
+else vpHeld.push(i);
+vpRenderHand();
+// preview current held hand
+const held=vpHand.filter((_,i2)=>vpHeld.includes(i2));
+if(held.length>=3){const ev=pkEval(held);if(ev)vpHighlightPay(vpJoBRank(ev));}
+else vpHighlightPay(-2);
 }
 function vpJoBRank(ev){
-  if(!ev)return -2;
-  if(ev.rank>=3)return ev.rank; // trips or better uses standard rank
-  if(ev.rank===2)return 2; // two pair
-  if(ev.rank===1){
-    // pair: only pays if Jacks or better
-    const pairVal=ev.tiebreakers?ev.tiebreakers[0]:0;
-    if(pairVal>=11)return -1; // jacks or better → index 8 in pay table
-    return -2; // pair below jacks  -  no pay
-  }
-  return -2;
+if(!ev)return -2;
+if(ev.rank>=3)return ev.rank; // trips or better uses standard rank
+if(ev.rank===2)return 2; // two pair
+if(ev.rank===1){
+// pair: only pays if Jacks or better
+const pairVal=ev.tiebreakers?ev.tiebreakers[0]:0;
+if(pairVal>=11)return -1; // jacks or better → index 8 in pay table
+return -2; // pair below jacks  -  no pay
+}
+return -2;
 }
 function vpEvalPayout(hand){
-  const ev=pkEval(hand);if(!ev)return{mult:0,name:'No Win',rank:-2};
-  const rank=vpJoBRank(ev);
-  const entry=VP_PAY.find(p=>p.rank===rank);
-  return entry?{mult:entry.mult,name:entry.name,rank}:{mult:0,name:'No Win',rank:-2};
+const ev=pkEval(hand);if(!ev)return{mult:0,name:‘No Win’,rank:-2};
+const rank=vpJoBRank(ev);
+const entry=VP_PAY.find(p=>p.rank===rank);
+return entry?{mult:entry.mult,name:entry.name,rank}:{mult:0,name:‘No Win’,rank:-2};
 }
 function vpDeal(){
-  if(vpBet<=0){hubToast('Place a bet first!');return;}
-  if(!spendCoins(vpBet))return;
-  if(vpDeck.length<15)vpDeck=pkBuildDeck();
-  vpHand=[vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop()];
-  vpHeld=[];vpPhase='dealt';
-  vpRenderHand();
-  document.getElementById('vp-result').textContent='';
-  document.getElementById('vp-result').className='vp-result';
-  document.getElementById('vp-hint').textContent='Tap to HOLD · Press DRAW to replace others';
-  document.getElementById('vp-deal-btn').disabled=true;
-  document.getElementById('vp-draw-btn').disabled=false;
-  // Quick auto-hint for obvious holds
-  const ev=pkEval(vpHand);
-  if(ev&&ev.rank>=1)vpHighlightPay(vpJoBRank(ev));
-  else vpHighlightPay(-2);
+if(vpBet<=0){hubToast(‘Place a bet first!’);return;}
+if(!spendCoins(vpBet))return;
+if(vpDeck.length<15)vpDeck=pkBuildDeck();
+vpHand=[vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop(),vpDeck.pop()];
+vpHeld=[];vpPhase=‘dealt’;
+vpRenderHand();
+document.getElementById(‘vp-result’).textContent=’’;
+document.getElementById(‘vp-result’).className=‘vp-result’;
+document.getElementById(‘vp-hint’).textContent=‘Tap to HOLD · Press DRAW to replace others’;
+document.getElementById(‘vp-deal-btn’).disabled=true;
+document.getElementById(‘vp-draw-btn’).disabled=false;
+// Quick auto-hint for obvious holds
+const ev=pkEval(vpHand);
+if(ev&&ev.rank>=1)vpHighlightPay(vpJoBRank(ev));
+else vpHighlightPay(-2);
 }
 function vpDraw(){
-  if(vpPhase!=='dealt')return;
-  // Replace non-held cards
-  vpHand=vpHand.map((c,i)=>vpHeld.includes(i)?c:vpDeck.pop());
-  vpHeld=[];vpPhase='idle';
-  vpRenderHand();
-  const{mult,name,rank}=vpEvalPayout(vpHand);
-  const res=document.getElementById('vp-result');
-  const hint=document.getElementById('vp-hint');
-  vpHighlightPay(rank);
-  if(mult>0){
-    const prize=vpBet*mult;
-    earnCoins(prize,'Video Poker');
-    vpWins++;vpStreak++;vpProfit+=prize-vpBet;
-    res.textContent=name+'! +'+prize+'🪙';
-    res.className='vp-result win';
-    if(mult>=25)confetti();
-    hint.textContent=mult>=25?'💎 Big win! Deal again!':'Deal again!';
-    if(rank>=7&&Math.random()<.2){const s=~~(Math.random()*8)+1;earnSats(s);showSatDrop(s,'Video Poker');}
-    else if(vpStreak>=3&&Math.random()<.1){const s=~~(Math.random()*3)+1;earnSats(s);showSatDrop(s,'Video Poker');}
-  } else {
-    vpLosses++;vpStreak=0;vpProfit-=vpBet;
-    res.textContent='No Win  -  Deal Again';
-    res.className='vp-result lose';
-    hint.textContent='Better luck next hand!';
-  }
-  vpBet=0;
-  document.getElementById('vp-deal-btn').disabled=false;
-  document.getElementById('vp-draw-btn').disabled=true;
-  vpUpdateStats();
+if(vpPhase!==‘dealt’)return;
+// Replace non-held cards
+vpHand=vpHand.map((c,i)=>vpHeld.includes(i)?c:vpDeck.pop());
+vpHeld=[];vpPhase=‘idle’;
+vpRenderHand();
+const{mult,name,rank}=vpEvalPayout(vpHand);
+const res=document.getElementById(‘vp-result’);
+const hint=document.getElementById(‘vp-hint’);
+vpHighlightPay(rank);
+if(mult>0){
+const prize=vpBet*mult;
+earnCoins(prize,‘Video Poker’);
+vpWins++;vpStreak++;vpProfit+=prize-vpBet;
+res.textContent=name+’! +’+prize+‘🪙’;
+res.className=‘vp-result win’;
+if(mult>=25)confetti();
+hint.textContent=mult>=25?‘💎 Big win! Deal again!’:‘Deal again!’;
+if(rank>=7&&Math.random()<.2){const s=~(Math.random()*8)+1;earnSats(s);showSatDrop(s,‘Video Poker’);}
+else if(vpStreak>=3&&Math.random()<.1){const s=~(Math.random()*3)+1;earnSats(s);showSatDrop(s,‘Video Poker’);}
+} else {
+vpLosses++;vpStreak=0;vpProfit-=vpBet;
+res.textContent=‘No Win  -  Deal Again’;
+res.className=‘vp-result lose’;
+hint.textContent=‘Better luck next hand!’;
+}
+vpBet=0;
+document.getElementById(‘vp-deal-btn’).disabled=false;
+document.getElementById(‘vp-draw-btn’).disabled=true;
+vpUpdateStats();
 }
 
-</script>
-
-</body>
-</html>
-<!-- SCRATCH + BJ JS injected here -->
-<script>
 /* ═══════════════════════════════════════════════════════════
-   SCRATCH CARD  -  canvas-based real scratch reveal
-   ═══════════════════════════════════════════════════════════ */
+SCRATCH CARD  -  canvas-based real scratch reveal
+═══════════════════════════════════════════════════════════ */
 const SC_TYPES={
-  classic:{cost:10,grid:3,prizes:[
-    {ico:'💀',val:0,w:30},{ico:'🎟️',val:10,w:22},{ico:'💎',val:25,w:16},
-    {ico:'⚡',val:50,w:12},{ico:'🏆',val:100,w:8},{ico:'🎰',val:200,w:6},
-    {ico:'₿',val:500,w:4},{ico:'🌟',val:1000,w:2}
-  ]},
-  deluxe:{cost:25,grid:4,prizes:[
-    {ico:'💀',val:0,w:25},{ico:'🎟️',val:25,w:20},{ico:'💎',val:75,w:16},
-    {ico:'⚡',val:150,w:12},{ico:'🏆',val:300,w:9},{ico:'🎰',val:600,w:6},
-    {ico:'₿',val:1500,w:4},{ico:'🌟',val:3000,w:2}
-  ]},
-  mega:{cost:50,grid:3,prizes:[
-    {ico:'💀',val:0,w:20},{ico:'🎟️',val:75,w:18},{ico:'💎',val:200,w:15},
-    {ico:'⚡',val:400,w:13},{ico:'🏆',val:800,w:10},{ico:'🎰',val:1500,w:8},
-    {ico:'₿',val:5000,w:5},{ico:'🌟',val:10000,w:2}
-  ]}
+classic:{cost:10,grid:3,prizes:[
+{ico:‘💀’,val:0,w:30},{ico:‘🎟️’,val:10,w:22},{ico:‘💎’,val:25,w:16},
+{ico:‘⚡’,val:50,w:12},{ico:‘🏆’,val:100,w:8},{ico:‘🎰’,val:200,w:6},
+{ico:‘₿’,val:500,w:4},{ico:‘🌟’,val:1000,w:2}
+]},
+deluxe:{cost:25,grid:4,prizes:[
+{ico:‘💀’,val:0,w:25},{ico:‘🎟️’,val:25,w:20},{ico:‘💎’,val:75,w:16},
+{ico:‘⚡’,val:150,w:12},{ico:‘🏆’,val:300,w:9},{ico:‘🎰’,val:600,w:6},
+{ico:‘₿’,val:1500,w:4},{ico:‘🌟’,val:3000,w:2}
+]},
+mega:{cost:50,grid:3,prizes:[
+{ico:‘💀’,val:0,w:20},{ico:‘🎟️’,val:75,w:18},{ico:‘💎’,val:200,w:15},
+{ico:‘⚡’,val:400,w:13},{ico:‘🏆’,val:800,w:10},{ico:‘🎰’,val:1500,w:8},
+{ico:‘₿’,val:5000,w:5},{ico:‘🌟’,val:10000,w:2}
+]}
 };
-let scType='classic',scBoard=[],scScratched=[],scDone=false;
+let scType=‘classic’,scBoard=[],scScratched=[],scDone=false;
 let scTickets=0,scTotalWon=0,scBestWin=0,scHist=[];
 let scCanvases=[];   // canvas refs per cell
 const SC_BRUSH=28;   // scratch brush radius
@@ -3483,4 +3415,5 @@ if(win>0){earnCoins(win,‘Blackjack’);if(win>bjBet)confetti();}
 if(bjWinStreak>=3&&Math.random()<.15){const s=Math.floor(Math.random()*3)+1;earnSats(s);showSatDrop(s,‘Blackjack’);}
 bjBet=0;bjPlaying=false;bjSetButtons(false);bjUpdateStats();
 }
+
 </script>
