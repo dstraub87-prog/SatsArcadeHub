@@ -1605,7 +1605,7 @@ function buildFeed(){const all=[…extraFeed,…BASE_FEED];const d=[…all,…al
 function addFeedWin(g,n){extraFeed.unshift({u:‘You’,g,a:’+’+n});if(extraFeed.length>4)extraFeed.pop();buildFeed();}
 
 /* AGE GATE */
-function confirmAge(){document.getElementById(‘age-gate’).classList.add(‘hidden’);try{localStorage.setItem(‘sah_age’,‘ok’);}catch(e){}startSystems();}
+function confirmAge(){document.getElementById(‘age-gate’).classList.add(‘hidden’);try{localStorage.setItem(‘sah_age’,‘ok’);}catch(e){}}
 function declineAge(){document.body.innerHTML=’<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#4A4465;font-family:sans-serif;text-align:center;padding:20px;"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older to access this platform.</div></div>’;}
 /* age check moved to DOMContentLoaded */
 
@@ -1863,20 +1863,19 @@ setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT
 }
 // DOM init - deferred
 document.addEventListener(‘DOMContentLoaded’,function(){
-// Age gate check — safe here because DOM is ready
-try{
-if(localStorage.getItem(‘sah_age’)===‘ok’){
-const ag=document.getElementById(‘age-gate’);
-if(ag)ag.classList.add(‘hidden’);
+// Always start the game engine immediately — age gate is just a visual overlay
 startSystems();
-}
-}catch(e){
-// localStorage blocked (private browsing etc) — just show age gate
-}
 buildFeed();syncAll();renderStreakHub();renderRedeemHist();
 updateLevel(false);refreshAvatarUI();
 var ps=document.getElementById(‘profile-sheet’);
 if(ps)ps.addEventListener(‘click’,function(e){if(e.target===this)closeProfile();});
+// Hide age gate if already confirmed
+try{
+if(localStorage.getItem(‘sah_age’)===‘ok’){
+const ag=document.getElementById(‘age-gate’);
+if(ag)ag.classList.add(‘hidden’);
+}
+}catch(e){}
 });
 /* ═══ PLINKO ═══ */
 const P={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0};
