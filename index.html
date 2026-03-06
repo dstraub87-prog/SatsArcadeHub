@@ -711,6 +711,18 @@ window.confirmAge = function() {
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
 };
+// Global error catcher — shows real error on screen for debugging
+window.onerror = function(msg, src, line, col, err) {
+  var d = document.getElementById('_dbg');
+  if (!d) {
+    d = document.createElement('div');
+    d.id = '_dbg';
+    d.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#ff0040;color:#fff;font-family:monospace;font-size:11px;padding:8px;z-index:99999;max-height:200px;overflow:auto;';
+    document.body.appendChild(d);
+  }
+  d.innerHTML += '<div><b>' + msg + '</b> — ' + (src||'') + ':' + line + ':' + col + '</div>';
+  return false;
+};
 </script>
 
 <!-- AGE GATE -->
@@ -1496,25 +1508,17 @@ window.declineAge = function() {
   </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded',function(){
-  // Always start the game engine immediately — age gate is just a visual overlay
-  startSystems();
-  buildFeed();syncAll();renderStreakHub();renderRedeemHist();
-  updateLevel(false);refreshAvatarUI();
-  var ps=document.getElementById('profile-sheet');
-  if(ps)ps.addEventListener('click',function(e){if(e.target===this)closeProfile();});
-
 /* ═══════════════════════════════════════════════════════════
-STATE
-COINS = entertainment only (no real value, can buy/earn)
-SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
-═══════════════════════════════════════════════════════════ */
+   STATE
+   COINS = entertainment only (no real value, can buy/earn)
+   SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
+   ═══════════════════════════════════════════════════════════ */
 let COINS=1000, SATS=0, JACKPOT=1247;
-let STREAK=0, LAST_CLAIM=’’, CLAIMED_TODAY=false;
+let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
 let WEEKLY_CLAIMS={}, MONTHLY_CLAIMS={};
 let SESSION_START=Date.now(), SESSION_MINS=0;
 let TIME_CLAIMED={30:false,60:false,120:false,240:false};
-let AD_WATCH_NEXT=0, REDEEM_HIST=[], DAILY_REDEEMED=0, DAILY_REDEEM_DATE=””;
+let AD_WATCH_NEXT=0, REDEEM_HIST=[], DAILY_REDEEMED=0, DAILY_REDEEM_DATE="";
 const AD_INTERVALS=[3*60000,5*60000];
 let adIdx=0, adSkipTimer=null;
 
@@ -1636,7 +1640,6 @@ function addFeedWin(g,n){extraFeed.unshift({u:‘You’,g,a:’+’+n});if(extra
 /* AGE GATE */
 /* confirmAge defined in early script above */
 /* declineAge defined in early script above */
-/* age check moved to DOMContentLoaded */
 
 /* JACKPOT */
 function triggerJackpot(){const jp=JACKPOT;JACKPOT=Math.floor(500+Math.random()*300);earnCoins(jp,‘Jackpot’);document.getElementById(‘jp-amount’).textContent=’+’+jp+’ COINS’;document.getElementById(‘jp-overlay’).classList.add(‘show’);confetti();}
@@ -1890,15 +1893,7 @@ renderTimeTiers();
 },30000);
 setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT=500;document.getElementById(‘global-jackpot’).textContent=JACKPOT.toLocaleString();},4000);
 }
-// DOM init - deferred
-// Hide age gate if already confirmed
-try{
-if(localStorage.getItem(‘sah_age’)===‘ok’){
-const ag=document.getElementById(‘age-gate’);
-if(ag)ag.style.display=‘none’;
-}
-}catch(e){}
-});
+/* DOM ready handler is at the bottom of this script */
 /* ═══ PLINKO ═══ */
 const P={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0};
 let pCan,pCtx,pW,pH,pPegs=[],pActiveBalls=[],pParticles=[],pRAF=null,pInited=false;
@@ -2233,6 +2228,25 @@ closeBallsShop();
 pPToast(‘📺 Loading ad…’);
 setTimeout(()=>{P.balls+=3;pUpdateUI();pPToast(‘🎱 +3 free balls!’);},1800);
 }
+
+/* DOM READY - runs after all functions above are defined */
+document.addEventListener(‘DOMContentLoaded’,function(){
+try{startSystems();}catch(e){console.error(‘startSystems:’,e);}
+try{buildFeed();}catch(e){console.error(‘buildFeed:’,e);}
+try{syncAll();}catch(e){console.error(‘syncAll:’,e);}
+try{renderStreakHub();}catch(e){console.error(‘renderStreakHub:’,e);}
+try{renderRedeemHist();}catch(e){console.error(‘renderRedeemHist:’,e);}
+try{updateLevel(false);}catch(e){console.error(‘updateLevel:’,e);}
+try{refreshAvatarUI();}catch(e){console.error(‘refreshAvatarUI:’,e);}
+var ps=document.getElementById(‘profile-sheet’);
+if(ps)ps.addEventListener(‘click’,function(e){if(e.target===this)closeProfile();});
+try{
+if(localStorage.getItem(‘sah_age’)===‘ok’){
+var ag=document.getElementById(‘age-gate’);
+if(ag)ag.style.display=‘none’;
+}
+}catch(e){}
+});
 </script>
 
 <!-- PROFILE SHEET -->
