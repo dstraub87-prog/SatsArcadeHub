@@ -4865,12 +4865,16 @@ async function onAuthSuccess(user,displayName){
 async function syncToServer(){
   if(!_authUser)return;
   const sb=getSupabase();if(!sb)return;
-  await sb.from('profiles').update({
+  const payload={
+    id:_authUser.id,
     coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
     games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
     player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
     avatar:PLAYER_AVATAR,display_name:PLAYER_NAME
-  }).eq('id',_authUser.id);
+  };
+  const {error}=await sb.from('profiles').upsert(payload,{onConflict:'id'});
+  if(error)console.error('[Sats Arcade] Supabase sync error:',error.message,error.code);
+  else console.log('[Sats Arcade] Synced OK - coins:'+COINS+' sats:'+SATS);
 }
 function debouncedSyncToServer(){
   if(!_authUser)return;
