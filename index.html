@@ -898,8 +898,7 @@ window.onerror = function(msg, src, line, col, err) {
 </div>
 <!-- HEADER -->
 <header class="hdr">
-  <div class="hdr-account" id="hdr-account-btn" onclick="onAccountBtnClick()" title="Account">👤</div>
-  <div class="hdr-avatar" id="hdr-avatar" onclick="openProfile()">
+  <div class="hdr-avatar" id="hdr-avatar" onclick="onAccountBtnClick()">
     <span id="hdr-ava-inner">🎮</span>
     <div class="hdr-lvl-badge" id="hdr-lvl-badge">1</div>
   </div>
@@ -2094,7 +2093,13 @@ window.onerror = function(msg, src, line, col, err) {
         <div style="font-size:.45rem;color:var(--muted);letter-spacing:1px;">SATS ₿</div>
       </div>
     </div>
-    <button style="width:100%;padding:11px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;cursor:pointer;" onclick="closeProfile()">CLOSE</button>
+    <div id="ps-account-info" style="display:none;text-align:center;margin-bottom:8px">
+      <div style="font-size:.46rem;color:rgba(255,255,255,.3)" id="ps-account-email"></div>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button style="flex:1;padding:11px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;cursor:pointer;" onclick="closeProfile()">CLOSE</button>
+      <button id="ps-signout-btn" style="display:none;padding:11px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;cursor:pointer;" onclick="authSignOut();closeProfile()">SIGN OUT</button>
+    </div>
   </div>
 </div>
 
@@ -4783,9 +4788,16 @@ function authSetTab(t){
 function authMsg(id,msg,isErr){const el=document.getElementById(id);if(el){el.textContent=msg;el.className='auth-msg '+(isErr?'err':'ok');}}
 function onAccountBtnClick(){if(_authUser)openProfile();else openAuthModal();}
 function updateAccountBtn(signedIn){
-  const btn=document.getElementById('hdr-account-btn');if(!btn)return;
-  if(signedIn&&_authUser){btn.textContent=PLAYER_AVATAR||'&#x1F464;';btn.classList.add('signed-in');}
-  else{btn.textContent='&#x1F464;';btn.classList.remove('signed-in');}
+  // Update sign out button visibility in profile sheet
+  const soBtn=document.getElementById('ps-signout-btn');
+  const acInfo=document.getElementById('ps-account-info');
+  const acEmail=document.getElementById('ps-account-email');
+  if(soBtn)soBtn.style.display=signedIn?'':'none';
+  if(acInfo)acInfo.style.display=signedIn?'':'none';
+  if(acEmail&&_authUser)acEmail.textContent='Signed in as '+_authUser.email;
+  // Update hdr-avatar border to indicate signed-in state
+  const ava=document.getElementById('hdr-avatar');
+  if(ava)ava.style.borderColor=signedIn?'var(--gold)':'var(--btc)';
 }
 async function authSignIn(){
   const sb=getSupabase();if(!sb)return;
