@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>⚡ Sats Arcade Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
@@ -824,6 +825,36 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .lb-name{font-family:‘Bebas Neue’,sans-serif;font-size:.78rem;letter-spacing:1px;color:var(–text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lb-sub{font-size:.44rem;color:var(–muted);}
 .lb-val{font-family:‘Bebas Neue’,sans-serif;font-size:.85rem;color:var(–gold);flex-shrink:0;}
+
+/* ── Auth Modal ──────────────────────────────────────────── */
+#auth-modal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s;}
+#auth-modal.show{opacity:1;pointer-events:all;}
+.auth-card{background:linear-gradient(170deg,#0d0f1a,#080a12);border:1px solid rgba(247,147,26,.2);border-radius:18px;padding:24px 20px;width:100%;max-width:360px;animation:slideUp .24s cubic-bezier(.34,1.56,.64,1);}
+.auth-logo{font-family:‘Bebas Neue’,sans-serif;font-size:1.4rem;letter-spacing:4px;color:var(–btc);text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:.52rem;color:var(–muted);text-align:center;margin-bottom:20px;}
+.auth-tabs{display:flex;gap:4px;margin-bottom:16px;}
+.auth-tab{flex:1;background:rgba(0,0,0,.3);border:1px solid var(–border);border-radius:7px;padding:7px;color:var(–muted);font-family:‘Bebas Neue’,sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer;transition:all .15s;}
+.auth-tab.active{background:rgba(247,147,26,.12);border-color:rgba(247,147,26,.35);color:var(–gold);}
+.auth-input{width:100%;background:rgba(0,0,0,.4);border:1px solid var(–border);border-radius:9px;padding:10px 12px;color:var(–text);font-family:‘Rajdhani’,sans-serif;font-size:.88rem;outline:none;margin-bottom:8px;box-sizing:border-box;}
+.auth-input:focus{border-color:var(–btc);}
+.auth-btn{width:100%;padding:11px;background:linear-gradient(135deg,var(–btc),var(–gold));border:none;border-radius:9px;color:#000;font-family:‘Bebas Neue’,sans-serif;font-size:.88rem;letter-spacing:2px;cursor:pointer;margin-bottom:8px;transition:opacity .15s;}
+.auth-btn:hover{opacity:.9;}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+.auth-divider{display:flex;align-items:center;gap:8px;margin:4px 0 8px;}
+.auth-divider::before,.auth-divider::after{content:’’;flex:1;height:1px;background:rgba(255,255,255,.08);}
+.auth-divider span{font-size:.46rem;color:var(–muted);}
+.auth-oauth{display:flex;gap:6px;margin-bottom:10px;}
+.auth-oauth-btn{flex:1;padding:9px 6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;color:var(–text);font-family:‘Rajdhani’,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.auth-oauth-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);}
+.auth-msg{font-size:.52rem;text-align:center;min-height:16px;margin-bottom:4px;}
+.auth-msg.err{color:#f87171;}
+.auth-msg.ok{color:#4ade80;}
+.auth-close{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,.08);border-radius:9px;color:var(–muted);font-family:‘Bebas Neue’,sans-serif;font-size:.7rem;letter-spacing:1px;cursor:pointer;margin-top:2px;}
+.auth-guest-note{font-size:.46rem;color:rgba(255,255,255,.25);text-align:center;margin-top:8px;}
+/* Account indicator in header */
+.hdr-account{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.6rem;cursor:pointer;flex-shrink:0;transition:border-color .2s;}
+.hdr-account.signed-in{border-color:var(–btc);}
+.hdr-account:active{transform:scale(.9);}
 </style>
 
 </head>
@@ -867,6 +898,7 @@ window.onerror = function(msg, src, line, col, err) {
 </div>
 <!-- HEADER -->
 <header class="hdr">
+  <div class="hdr-account" id="hdr-account-btn" onclick="onAccountBtnClick()" title="Account">👤</div>
   <div class="hdr-avatar" id="hdr-avatar" onclick="openProfile()">
     <span id="hdr-ava-inner">🎮</span>
     <div class="hdr-lvl-badge" id="hdr-lvl-badge">1</div>
@@ -2122,6 +2154,7 @@ function loadState(){
   }catch(e){}
 }
 function saveState(){
+  debouncedSyncToServer();
   try{localStorage.setItem('sah_v5',JSON.stringify({
     c:COINS,s:SATS,j:JACKPOT,st:STREAK,lc:LAST_CLAIM,ct:CLAIMED_TODAY,
     wc:WEEKLY_CLAIMS,mc:MONTHLY_CLAIMS,tc:TIME_CLAIMED,awn:AD_WATCH_NEXT,rh:REDEEM_HIST,dr:DAILY_REDEEMED,drd:DAILY_REDEEM_DATE
@@ -3471,6 +3504,7 @@ function ballsBuyAd(){
 
 /* DOM READY - runs after all functions above are defined */
 document.addEventListener('DOMContentLoaded',function(){
+  authInit();
   try{startSystems();}catch(e){console.error('startSystems:',e);}
   try{buildFeed();}catch(e){console.error('buildFeed:',e);}
   try{syncAll();}catch(e){console.error('syncAll:',e);}
@@ -4683,4 +4717,165 @@ function lbBuild(){
   Object.entries(fields).forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.textContent=val;});
 }
 
+</script>
+
+<!-- AUTH MODAL -->
+
+<div id="auth-modal">
+  <div class="auth-card">
+    <div class="auth-logo">&#x26A1; SATS ARCADE</div>
+    <div class="auth-sub">Sign in to save progress &amp; enable withdrawals</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-tab-in" onclick="authSetTab('in')">SIGN IN</button>
+      <button class="auth-tab" id="auth-tab-up" onclick="authSetTab('up')">CREATE ACCOUNT</button>
+    </div>
+    <div id="auth-panel-in">
+      <input class="auth-input" id="auth-email-in" type="email" placeholder="Email address" autocomplete="email"/>
+      <input class="auth-input" id="auth-pass-in" type="password" placeholder="Password" autocomplete="current-password"/>
+      <div class="auth-msg" id="auth-msg-in"></div>
+      <button class="auth-btn" id="auth-signin-btn" onclick="authSignIn()">SIGN IN</button>
+      <div style="text-align:center;margin-bottom:6px"><span style="font-size:.5rem;color:var(--muted);cursor:pointer;text-decoration:underline" onclick="authForgot()">Forgot password?</span></div>
+    </div>
+    <div id="auth-panel-up" style="display:none">
+      <input class="auth-input" id="auth-email-up" type="email" placeholder="Email address" autocomplete="email"/>
+      <input class="auth-input" id="auth-pass-up" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password"/>
+      <input class="auth-input" id="auth-name-up" type="text" placeholder="Display name" maxlength="20"/>
+      <div class="auth-msg" id="auth-msg-up"></div>
+      <button class="auth-btn" id="auth-signup-btn" onclick="authSignUp()">CREATE ACCOUNT</button>
+    </div>
+    <div class="auth-divider"><span>OR CONTINUE WITH</span></div>
+    <div class="auth-oauth">
+      <button class="auth-oauth-btn" onclick="authOAuth('google')">
+        <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google
+      </button>
+      <button class="auth-oauth-btn" onclick="authOAuth('apple')" style="background:rgba(255,255,255,.08)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Apple
+      </button>
+    </div>
+    <div class="auth-msg" id="auth-msg-oauth"></div>
+    <button class="auth-close" onclick="closeAuthModal()">CONTINUE AS GUEST</button>
+    <div class="auth-guest-note">Guest progress saves locally on this device only</div>
+  </div>
+</div>
+
+<script>
+/* ═══ SUPABASE AUTH ══════════════════════════════════════════ */
+const SUPA_URL='https://udrymlujfjysiobfhhix.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0';
+let _supa=null,_authUser=null,_syncTimer=null;
+
+function getSupabase(){
+  if(!_supa&&typeof supabase!=='undefined')_supa=supabase.createClient(SUPA_URL,SUPA_KEY);
+  return _supa;
+}
+function openAuthModal(){document.getElementById('auth-modal').classList.add('show');}
+function closeAuthModal(){document.getElementById('auth-modal').classList.remove('show');}
+function authSetTab(t){
+  document.getElementById('auth-panel-in').style.display=t==='in'?'':'none';
+  document.getElementById('auth-panel-up').style.display=t==='up'?'':'none';
+  document.getElementById('auth-tab-in').classList.toggle('active',t==='in');
+  document.getElementById('auth-tab-up').classList.toggle('active',t==='up');
+  document.getElementById('auth-msg-in').textContent='';
+  document.getElementById('auth-msg-up').textContent='';
+}
+function authMsg(id,msg,isErr){const el=document.getElementById(id);if(el){el.textContent=msg;el.className='auth-msg '+(isErr?'err':'ok');}}
+function onAccountBtnClick(){if(_authUser)openProfile();else openAuthModal();}
+function updateAccountBtn(signedIn){
+  const btn=document.getElementById('hdr-account-btn');if(!btn)return;
+  if(signedIn&&_authUser){btn.textContent=PLAYER_AVATAR||'&#x1F464;';btn.classList.add('signed-in');}
+  else{btn.textContent='&#x1F464;';btn.classList.remove('signed-in');}
+}
+async function authSignIn(){
+  const sb=getSupabase();if(!sb)return;
+  const email=document.getElementById('auth-email-in').value.trim();
+  const pass=document.getElementById('auth-pass-in').value;
+  if(!email||!pass){authMsg('auth-msg-in','Please fill in all fields',true);return;}
+  const btn=document.getElementById('auth-signin-btn');btn.disabled=true;btn.textContent='SIGNING IN...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false;btn.textContent='SIGN IN';
+  if(error){authMsg('auth-msg-in',error.message,true);return;}
+  await onAuthSuccess(data.user);closeAuthModal();
+}
+async function authSignUp(){
+  const sb=getSupabase();if(!sb)return;
+  const email=document.getElementById('auth-email-up').value.trim();
+  const pass=document.getElementById('auth-pass-up').value;
+  const name=document.getElementById('auth-name-up').value.trim()||'Player';
+  if(!email||!pass){authMsg('auth-msg-up','Please fill in all fields',true);return;}
+  if(pass.length<6){authMsg('auth-msg-up','Password must be at least 6 characters',true);return;}
+  const btn=document.getElementById('auth-signup-btn');btn.disabled=true;btn.textContent='CREATING...';
+  const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:name}}});
+  btn.disabled=false;btn.textContent='CREATE ACCOUNT';
+  if(error){authMsg('auth-msg-up',error.message,true);return;}
+  if(data.user&&!data.session){authMsg('auth-msg-up','Check your email to confirm your account!',false);return;}
+  await onAuthSuccess(data.user,name);closeAuthModal();
+}
+async function authOAuth(provider){
+  const sb=getSupabase();if(!sb)return;
+  authMsg('auth-msg-oauth','Redirecting...',false);
+  const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin+window.location.pathname}});
+  if(error)authMsg('auth-msg-oauth',error.message,true);
+}
+async function authForgot(){
+  const sb=getSupabase();if(!sb)return;
+  const email=document.getElementById('auth-email-in').value.trim();
+  if(!email){authMsg('auth-msg-in','Enter your email first',true);return;}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+  if(error)authMsg('auth-msg-in',error.message,true);
+  else authMsg('auth-msg-in','Reset email sent!',false);
+}
+async function onAuthSuccess(user,displayName){
+  _authUser=user;
+  const sb=getSupabase();
+  const name=displayName||user.user_metadata?.display_name||user.email.split('@')[0];
+  const {data:existing}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  if(!existing){
+    await sb.from('profiles').insert({
+      id:user.id,display_name:name,avatar:PLAYER_AVATAR,
+      coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
+      games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
+      player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0
+    });
+    hubToast('Account created! Progress synced &#x2713;');
+  } else {
+    COINS=existing.coins??1000;SATS=existing.sats??0;
+    LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
+    GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
+    LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=existing.display_name??name;
+    PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
+    syncAll();saveState();
+    hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
+  }
+  updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
+}
+async function syncToServer(){
+  if(!_authUser)return;
+  const sb=getSupabase();if(!sb)return;
+  await sb.from('profiles').update({
+    coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
+    games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
+    player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
+    avatar:PLAYER_AVATAR,display_name:PLAYER_NAME
+  }).eq('id',_authUser.id);
+}
+function debouncedSyncToServer(){
+  if(!_authUser)return;
+  clearTimeout(_syncTimer);_syncTimer=setTimeout(syncToServer,3000);
+}
+async function authSignOut(){
+  const sb=getSupabase();if(!sb)return;
+  await syncToServer();await sb.auth.signOut();
+  _authUser=null;updateAccountBtn(false);hubToast('Signed out');
+}
+async function authInit(){
+  const sb=getSupabase();if(!sb)return;
+  const {data:{session}}=await sb.auth.getSession();
+  if(session?.user)await onAuthSuccess(session.user);
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session?.user&&!_authUser){await onAuthSuccess(session.user);closeAuthModal();}
+    if(event==='SIGNED_OUT'){_authUser=null;updateAccountBtn(false);}
+  });
+}
 </script>
