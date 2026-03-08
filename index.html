@@ -218,7 +218,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .machine-frame{background:linear-gradient(180deg,#6b3a14,#3b1e08);border:3px solid #3b1e08;border-radius:7px 7px 2px 2px;padding:3px;box-shadow:0 0 0 2px #d4af37,0 0 18px rgba(212,175,55,.22),0 8px 20px rgba(0,0,0,.7);flex-shrink:0;}
 .plinko-wrap.cm .machine-frame{box-shadow:0 0 0 2px #f7931a,0 0 22px rgba(247,147,26,.38),0 8px 20px rgba(0,0,0,.7)}
 #plinko-canvas{display:block;border-radius:2px;width:290px;height:420px;max-width:100%;}
-.bucket-row{display:flex;margin-top:1px;border-radius:0 0 2px 2px;overflow:hidden}
+.bucket-row{display:flex;margin-top:1px;border-radius:0 0 2px 2px;overflow:hidden;width:290px;max-width:100%;}
 .bucket-cell{flex:1;text-align:center;font-family:'Audiowide',monospace;font-size:.42rem;padding:2px 1px;color:#fff;}
 .bucket-cell.flash{animation:bFlash .28s ease}
 @keyframes bFlash{0%{transform:scale(1.18)}100%{transform:scale(1)}}
@@ -2703,23 +2703,31 @@ function _pLand(b){
   if(bucket.m>0){
     earnCoins(earned,'Plinko');
     PLINKO.score+=earned;
+    PLINKO.roundTotal=(PLINKO.roundTotal||0)+earned;
+    PLINKO.roundBest=Math.max(PLINKO.roundBest||0,bucket.m);
     PLINKO.history.unshift({l:bucket.l,n:earned});
     if(PLINKO.history.length>20)PLINKO.history.pop();
     _pUpdateHist();
-    if(PLINKO.activeDrops===0){
+  } else {
+    PLINKO.roundTotal=(PLINKO.roundTotal||0);
+  }
+  // Only show popup when ALL balls in this drop have landed
+  if(PLINKO.activeDrops===0){
+    if(PLINKO.roundTotal>0){
       const wp=document.getElementById('p-win-emoji');
       const wt=document.getElementById('p-win-title');
       const wpr=document.getElementById('p-win-prize');
       const wpop=document.getElementById('p-win-pop');
-      if(wp)wp.textContent=bucket.m>=50?'🎰':bucket.m>=10?'💎':'🎉';
-      if(wt)wt.textContent=bucket.l;
-      if(wpr)wpr.textContent='+'+earned+' coins';
+      const best=PLINKO.roundBest;
+      if(wp)wp.textContent=best>=50?'🎰':best>=10?'💎':'🎉';
+      if(wt)wt.textContent=PLINKO.multi>1?'TOTAL WIN':'WIN!';
+      if(wpr)wpr.textContent='+'+PLINKO.roundTotal+' coins';
       if(wpop)wpop.classList.add('show');
     } else {
-      pPToast('+'+earned+' coins');
+      pPToast('No win this time');
     }
-  } else if(PLINKO.activeDrops===0){
-    pPToast('No win this time');
+    PLINKO.roundTotal=0;
+    PLINKO.roundBest=0;
   }
   _pUpdateUI();
   _pUpdateBtn();
