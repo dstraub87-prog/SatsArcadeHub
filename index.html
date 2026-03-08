@@ -272,17 +272,17 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .s-cell.held .s-hold-badge{opacity:1;}
 .s-cell.winning{border-color:#FFD700!important;animation:s-wglow .38s ease-in-out infinite alternate;}
 @keyframes s-wglow{from{box-shadow:0 0 5px rgba(255,215,0,.22);}to{box-shadow:0 0 18px rgba(255,215,0,.75);}}
-.s-result{text-align:center;height:26px;display:flex;align-items:center;justify-content:center;font-family:‘Bungee’,cursive;font-size:.78rem;margin-bottom:5px;}
-.s-result.win{color:#FFD700;}.s-result.lose{color:rgba(255,255,255,.26);font-size:.65rem;font-family:‘Rajdhani’,sans-serif;}
+.s-result{text-align:center;height:26px;display:flex;align-items:center;justify-content:center;font-family:‘Bebas Neue’,sans-serif;font-size:.82rem;font-weight:700;letter-spacing:1px;cursive;font-size:.78rem;margin-bottom:5px;}
+.s-result.win{color:#FFD700;}.s-result.lose{color:rgba(255,255,255,.4);font-size:.72rem;font-family:‘Bebas Neue’,sans-serif;font-weight:700;}
 .s-bet-row{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:5px;}
 .s-bet-lbl{font-size:.52rem;color:rgba(255,255,255,.32);text-transform:uppercase;letter-spacing:2px;}
-.s-bet-amt{font-family:‘Bungee’,cursive;font-size:1.1rem;color:#FFD700;min-width:48px;text-align:center;}
+.s-bet-amt{font-family:‘Bebas Neue’,sans-serif;font-size:1.2rem;font-weight:700;color:#FFD700;min-width:48px;text-align:center;}
 .s-bet-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:5px;width:26px;height:26px;color:#fff;font-size:.9rem;cursor:pointer;}
 .s-presets{display:flex;gap:3px;justify-content:center;margin-bottom:7px;flex-wrap:wrap;}
 .s-preset{background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.16);border-radius:4px;padding:2px 7px;color:#FFD700;font-size:.58rem;font-weight:700;cursor:pointer;}
 .s-preset.active{background:rgba(255,215,0,.12);border-color:#FFD700;}
 .s-spin-row{display:flex;gap:5px;}
-.s-spin-btn{flex:1;padding:10px 7px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;font-family:‘Bungee’,cursive;font-size:.98rem;color:#000;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 12px rgba(255,140,0,.32);transition:all .18s;}
+.s-spin-btn{flex:1;padding:10px 7px;background:linear-gradient(135deg,#FFD700,#FF8C00);border:none;border-radius:10px;font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:.98rem;color:#000;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 12px rgba(255,140,0,.32);transition:all .18s;}
 .s-spin-btn:disabled{opacity:.5;cursor:not-allowed;}
 .s-spin-btn.spinning{background:linear-gradient(135deg,#444,#222);color:#fff;box-shadow:none;}
 .s-auto-btn{width:48px;padding:10px 4px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.1);border-radius:10px;font-size:.5rem;font-weight:700;color:rgba(255,255,255,.35);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
@@ -310,8 +310,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .s-win-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.87);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .s-win-modal.show{display:flex;}
 .s-modal{background:linear-gradient(135deg,#1e1e35,#141428);border:1px solid rgba(255,215,0,.22);border-radius:14px;padding:18px;max-width:260px;width:90%;text-align:center;animation:popIn .24s cubic-bezier(.175,.885,.32,1.275);}
-.s-modal h2{font-family:‘Bungee’,cursive;font-size:1rem;margin-bottom:3px;}.s-modal p{font-size:.68rem;color:rgba(255,255,255,.48);margin-bottom:11px;}
-.s-modal-btn{width:100%;padding:9px;border:none;border-radius:9px;font-family:‘Bungee’,cursive;font-size:.78rem;cursor:pointer;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#000;}
+.s-modal h2{font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:1.3rem;margin-bottom:3px;letter-spacing:1px;}.s-modal p{font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:11px;}
+.s-modal-btn{width:100%;padding:9px;border:none;border-radius:9px;font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:.9rem;letter-spacing:1px;cursor:pointer;background:linear-gradient(135deg,#FFD700,#FF8C00);color:#000;}
 /* ARCADE */
 .arcade-wrap{background:#0A0A0A;min-height:100%;}
 .arcade-nav{display:flex;gap:3px;padding:4px 6px;overflow-x:auto;border-bottom:1px solid rgba(247,147,26,.18);background:#111;scrollbar-width:none;height:42px;align-items:center;flex-shrink:0;}
@@ -1400,10 +1400,10 @@ window.onerror = function(msg, src, line, col, err) {
   </div>
   <div class="s-win-modal" id="s-win-modal">
     <div class="s-modal">
-      <div style="font-size:2rem;margin-bottom:3px" id="s-modal-icon">🎉</div>
-      <h2 id="s-modal-title" style="color:#FFD700">YOU WIN!</h2>
-      <p id="s-modal-desc">Congratulations!</p>
-      <button class="s-modal-btn" onclick="document.getElementById('s-win-modal').classList.remove('show')">🎰 SPIN AGAIN</button>
+      <div style="font-size:3rem;margin-bottom:6px;line-height:1" id="s-modal-icon">🎉</div>
+      <h2 id="s-modal-title" style="color:#FFD700;font-size:1.8rem;letter-spacing:2px">YOU WIN!</h2>
+      <div id="s-modal-desc" style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin:8px 0 14px;letter-spacing:1px;">Congratulations!</div>
+      <button class="s-modal-btn" onclick="sCloseWin()">🎰 SPIN AGAIN</button>
     </div>
   </div>
 </div>
@@ -1939,7 +1939,7 @@ window.onerror = function(msg, src, line, col, err) {
     <div class="gcontent"><div class="arcade-game-area" id="arcade-game-area">
       <div class="a-screen active" id="a-screen-wheel"><div class="a-title">Spin the Wheel</div><canvas id="a-wheel-canvas" width="270" height="270"></canvas><div id="a-wheel-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><span class="a-cost">🪙 8 coins per spin</span><button class="a-btn" id="a-wheel-btn" onclick="aSpinWheel()">SPIN — 8 COINS</button></div></div>
       <div class="a-screen" id="a-screen-coinflip"><div class="a-title">Coin Flip</div><div class="a-coin" id="a-coin">₿</div><div id="a-coin-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><span class="a-cost">🪙 5 coins · Win = 1.8×</span><div class="a-coin-btns"><button class="a-btn" onclick="aFlipCoin('heads')">₿ HEADS</button><button class="a-btn" onclick="aFlipCoin('tails')">TAILS ⚡</button></div></div></div>
-      <div class="a-screen" id="a-screen-dice"><div class="a-title">Dice Roll</div><div class="a-dice-row"><div class="a-die" id="a-die1">⚀</div><div class="a-die" id="a-die2">⚀</div></div><div id="a-dice-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><div class="a-hint">7 or 11 = 3× · Doubles = 2×</div><span class="a-cost">🪙 5 coins</span><button class="a-btn" id="a-dice-btn" onclick="aRollDice()">ROLL DICE</button></div></div>
+      <div class="a-screen" id="a-screen-dice"><div class="a-title">Dice Roll</div><div class="a-dice-row"><div class="a-die" id="a-die1"><canvas id="a-die1-cv" width="90" height="90"></canvas></div><div class="a-die" id="a-die2"><canvas id="a-die2-cv" width="90" height="90"></canvas></div></div><div id="a-dice-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><div class="a-hint">7 or 11 = 3× · Doubles = 2×</div><span class="a-cost">🪙 5 coins</span><button class="a-btn" id="a-dice-btn" onclick="aRollDice()">ROLL DICE</button></div></div>
       <div class="a-screen" id="a-screen-hilo"><div class="a-title">Hi-Lo</div><div class="a-card-display" id="a-hilo-card"><span id="a-hilo-val">?</span><span class="a-card-suit" id="a-hilo-suit"></span></div><div id="a-hilo-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><div class="a-hint">Higher or lower than current card?</div><span class="a-cost">🪙 6 coins · Win = 1.85×</span><div class="a-hilo-btns"><button class="a-btn" id="a-hilo-hi" onclick="aHiLo('hi')">▲ HIGHER</button><button class="a-btn" id="a-hilo-lo" onclick="aHiLo('lo')">▼ LOWER</button></div></div></div>
       <div class="a-screen" id="a-screen-keno"><div class="a-title">Keno</div><div class="a-hint">Pick up to 10 numbers, then draw</div><div class="a-keno-grid" id="a-keno-grid"></div><div id="a-keno-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><span class="a-cost">🪙 10 coins</span><div style="display:flex;gap:6px"><button class="a-btn" id="a-keno-btn" onclick="aDrawKeno()">DRAW — 10 COINS</button><button class="a-btn2" onclick="aResetKeno()">CLEAR</button></div></div></div>
       <div class="a-screen" id="a-screen-crash"><div class="a-title">Crash</div><div class="a-crash-mult" id="a-crash-mult">1.00×</div><canvas id="a-crash-canvas" width="480" height="160"></canvas><div id="a-crash-result" class="a-result"></div><div class="a-card" style="display:flex;flex-direction:column;gap:5px"><span class="a-cost">🪙 10 coins per round</span><div style="display:flex;gap:6px"><button class="a-btn" id="a-crash-bet" onclick="aCrashBet()">BET — 10 COINS</button><button class="a-btn2" id="a-crash-cash" onclick="aCrashCashout()" disabled>CASH OUT</button></div></div></div>
@@ -2808,7 +2808,17 @@ function sClearHolds(){SS.held.fill(false);for(let i=0;i<9;i++){const el=documen
 function sBuildPaytable(){const pg=document.getElementById('s-pay-grid');if(!pg)return;pg.innerHTML=SYMS.filter(s=>s.m>0).map(s=>`<div class="s-pay-row"><span class="s-pay-syms">${s.e}${s.e}${s.e}</span><span class="s-pay-rew">${s.m}× Bet</span></div>`).join('');}
 function sSpin(){if(SS.spinning)return;const isFree=SS.freeSpins>0;if(!isFree&&!spendCoins(SS.bet))return;if(isFree){SS.freeSpins--;sFreeUI();}SS.spinning=true;const btn=document.getElementById('s-spin-btn');btn.disabled=true;btn.classList.add('spinning');btn.textContent='⏳...';sSetResult('','');for(let i=0;i<9;i++){const el=document.getElementById('sc'+i);if(el)el.classList.remove('winning');}const ns=[...SS.symbols];for(let i=0;i<9;i++)if(!SS.held[i])ns[i]=sRand();const toSpin=[];for(let i=0;i<9;i++)if(!SS.held[i])toSpin.push(i);if(!toSpin.length){sFinalize(ns);return;}let done=0;toSpin.forEach(i=>{const cell=document.getElementById('sc'+i),em=document.getElementById('se'+i);if(!cell||!em)return;cell.classList.add('spinning');const dur=560+(i%3)*150+Math.random()*100,maxF=~~(dur/75);let f=0;const iv=setInterval(()=>{em.textContent=SYMS[sRand()].e;f++;if(f>=maxF){clearInterval(iv);cell.classList.remove('spinning');em.textContent=SYMS[ns[i]].e;done++;if(done===toSpin.length)sFinalize(ns);}},75);});}
 function sFinalize(ns){SS.symbols=ns;SS.spinning=false;const btn=document.getElementById('s-spin-btn');btn.disabled=false;btn.classList.remove('spinning');btn.textContent='🎰 SPIN';sClearHolds();syncAll();sEval();if(SS.autoActive&&SS.autoCount>0){SS.autoCount--;sAutoUI();if(SS.autoCount===0)sStopAuto();else SS.autoTimer=setTimeout(sSpin,750);}}
-function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById('sc'+i);if(el)el.classList.add('winning');});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,'SatSlots Jackpot');const jel=document.getElementById('s-jp-amt');if(jel)jel.textContent=SS.jackpot+' COINS';sSetResult('₿ JACKPOT! +'+jp+'!','win');sAddHist('JACKPOT!','win');triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,'SatSlots');parts.push('+'+coinWin+' COINS');}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push('+'+freeWin+' FREE');}const txt=parts.join(' · ');sSetResult(txt,'win');sAddHist(txt,'win');if(coinWin>=SS.bet*5){document.getElementById('s-modal-icon').textContent='🎉';document.getElementById('s-modal-title').textContent='Big Win!';document.getElementById('s-modal-title').style.color='#FFD700';document.getElementById('s-modal-desc').textContent=txt;document.getElementById('s-win-modal').classList.add('show');sStopAuto();}}else{sSetResult('No match - try again!','lose');sAddHist(' - ','lose');}}
+function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById('sc'+i);if(el)el.classList.add('winning');});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,'SatSlots Jackpot');const jel=document.getElementById('s-jp-amt');if(jel)jel.textContent=SS.jackpot+' COINS';sSetResult('₿ JACKPOT! +'+jp+'!','win');sAddHist('JACKPOT!','win');triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,'SatSlots');parts.push('+'+coinWin+' COINS');}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push('+'+freeWin+' FREE');}const txt=parts.join(' · ');sSetResult(txt,'win');sAddHist(txt,'win');
+  const isBig=coinWin>=SS.bet*5;
+  const icon=isBig?'💰':coinWin>0?'🎉':'🆓';
+  const title=isBig?'BIG WIN!':'YOU WIN!';
+  document.getElementById('s-modal-icon').textContent=icon;
+  document.getElementById('s-modal-title').textContent=title;
+  document.getElementById('s-modal-title').style.color=isBig?'#ff9900':'#FFD700';
+  document.getElementById('s-modal-desc').textContent=txt;
+  document.getElementById('s-win-modal').classList.add('show');
+  confetti();
+  if(SS.autoActive)sStopAuto();}else{sSetResult('No match - try again!','lose');sAddHist(' - ','lose');}}
 function sSetResult(t,c){const el=document.getElementById('s-result');if(el){el.textContent=t||'🎰 Good Luck!';el.className='s-result '+(c||'');}}
 function sChangeBet(d){SS.bet=Math.max(10,Math.min(250,SS.bet+d));document.getElementById('s-bet').textContent=SS.bet;}
 function sSetBet(v){SS.bet=v;const el=document.getElementById('s-bet');if(el)el.textContent=v;}
@@ -2838,8 +2848,46 @@ function aFlipCoin(guess){if(aFlipping)return;if(!spendCoins(5))return;aFlipping
 
 /* Dice */
 const AFACES=['⚀','⚁','⚂','⚃','⚄','⚅'];
+// Pip positions for each face [x,y] as fractions of die size
+const APIPS={
+  1:[[.5,.5]],
+  2:[[.25,.25],[.75,.75]],
+  3:[[.25,.25],[.5,.5],[.75,.75]],
+  4:[[.25,.25],[.75,.25],[.25,.75],[.75,.75]],
+  5:[[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]],
+  6:[[.25,.22],[.75,.22],[.25,.5],[.75,.5],[.25,.78],[.75,.78]]
+};
+function aDrawDie(canvasId,val,highlight){
+  const cv=document.getElementById(canvasId);if(!cv)return;
+  const ctx=cv.getContext('2d');const s=90;
+  ctx.clearRect(0,0,s,s);
+  // Die face gradient
+  const g=ctx.createLinearGradient(0,0,s,s);
+  g.addColorStop(0,highlight?'#fff8e8':'#f8f4e8');
+  g.addColorStop(1,highlight?'#ffe4a0':'#ddd5bb');
+  ctx.fillStyle=g;
+  ctx.roundRect(2,2,s-4,s-4,12);
+  ctx.fill();
+  // Inner shadow
+  ctx.strokeStyle='rgba(0,0,0,.12)';
+  ctx.lineWidth=1.5;
+  ctx.stroke();
+  // Pips
+  const pips=APIPS[val]||[];
+  pips.forEach(([fx,fy])=>{
+    const x=fx*s, y=fy*s, r=7;
+    const pg=ctx.createRadialGradient(x-2,y-2,1,x,y,r);
+    pg.addColorStop(0,'#555');
+    pg.addColorStop(1,'#1a1a1a');
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=pg;
+    ctx.fill();
+  });
+}
+function aInitDice(){aDrawDie('a-die1-cv',1,false);aDrawDie('a-die2-cv',1,false);}
 let aDiceRolling=false;
-function aRollDice(){if(aDiceRolling)return;if(!spendCoins(5))return;aDiceRolling=true;aResult('a-dice-result','','');document.getElementById('a-dice-btn').disabled=true;const d1=document.getElementById('a-die1'),d2=document.getElementById('a-die2');d1.classList.add('rolling');d2.classList.add('rolling');let cnt=0;const iv=setInterval(()=>{d1.textContent=AFACES[~~(Math.random()*6)];d2.textContent=AFACES[~~(Math.random()*6)];cnt++;if(cnt>=10){clearInterval(iv);d1.classList.remove('rolling');d2.classList.remove('rolling');aDiceRolling=false;document.getElementById('a-dice-btn').disabled=false;const r1=~~(Math.random()*6)+1,r2=~~(Math.random()*6)+1;d1.textContent=AFACES[r1-1];d2.textContent=AFACES[r2-1];const sum=r1+r2;if(sum===7||sum===11){earnCoins(15,'Dice');aResult('a-dice-result',`${sum}! +15 coins!`,'win');}else if(r1===r2){earnCoins(10,'Dice');aResult('a-dice-result',`Doubles! +10 coins!`,'win');}else aResult('a-dice-result',`${r1}+${r2}=${sum}. No win.`,'lose');}},80);}
+function aRollDice(){if(aDiceRolling)return;if(!spendCoins(5))return;aDiceRolling=true;aResult('a-dice-result','','');document.getElementById('a-dice-btn').disabled=true;document.getElementById('a-die1').classList.add('rolling');document.getElementById('a-die2').classList.add('rolling');let cnt=0;const iv=setInterval(()=>{aDrawDie('a-die1-cv',~~(Math.random()*6)+1,false);aDrawDie('a-die2-cv',~~(Math.random()*6)+1,false);cnt++;if(cnt>=12){clearInterval(iv);document.getElementById('a-die1').classList.remove('rolling');document.getElementById('a-die2').classList.remove('rolling');aDiceRolling=false;document.getElementById('a-dice-btn').disabled=false;const r1=~~(Math.random()*6)+1,r2=~~(Math.random()*6)+1;aDrawDie('a-die1-cv',r1,true);aDrawDie('a-die2-cv',r2,true);const sum=r1+r2;if(sum===7||sum===11){earnCoins(15,'Dice');aResult('a-dice-result',`${sum}! +15 coins!`,'win');confetti();}else if(r1===r2){earnCoins(10,'Dice');aResult('a-dice-result',`Doubles! +10 coins!`,'win');confetti();}else aResult('a-dice-result',`${r1}+${r2}=${sum}. No win.`,'lose');}},80);}
 
 /* HiLo */
 const AVALS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -5084,6 +5132,7 @@ async function syncToServer(){
   if(error)console.error('[Sats Arcade] Supabase sync error:',error.message,error.code);
   else console.log('[Sats Arcade] Synced OK - coins:'+COINS+' sats:'+SATS);
 }
+function sCloseWin(){document.getElementById('s-win-modal').classList.remove('show');}
 function debouncedSyncToServer(){
   if(!_authUser)return;
   clearTimeout(_syncTimer);_syncTimer=setTimeout(syncToServer,3000);
