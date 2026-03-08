@@ -659,13 +659,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .rl-result.win{color:var(–gold);text-shadow:0 0 16px rgba(255,215,0,.5);}
 .rl-result.lose{color:var(–pink);}
 .rl-bet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;max-width:420px;}
-.rl-bet-btn{padding:9px 2px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:var(–bg3);font-family:‘Bebas Neue’,sans-serif;font-size:.66rem;letter-spacing:.4px;color:rgba(255,255,255,.7);cursor:pointer;text-align:center;transition:all .13s;}
+.rl-bet-btn{padding:9px 2px;border:2px solid rgba(255,255,255,.25);border-radius:8px;background:rgba(30,20,50,.9);font-family:‘Bebas Neue’,sans-serif;font-size:.66rem;letter-spacing:.4px;color:#e0e0e0;cursor:pointer;text-align:center;transition:all .13s;}
 .rl-bet-btn:active{transform:scale(.94);}
-.rl-bet-btn.selected{border-color:var(–gold);color:var(–gold);background:rgba(255,215,0,.1);box-shadow:0 0 8px rgba(255,215,0,.2);}
-.rl-bet-btn.red{border-color:rgba(220,50,50,.4);color:#ff6b6b;}
-.rl-bet-btn.red.selected{border-color:#ff4444;background:rgba(220,50,50,.15);}
-.rl-bet-btn.blk{border-color:rgba(200,200,200,.2);}
-.rl-bet-btn.grn{border-color:rgba(0,200,80,.4);color:#4ade80;}
+.rl-bet-btn.selected{border-color:var(–gold);color:#fff;background:rgba(255,215,0,.2);box-shadow:0 0 10px rgba(255,215,0,.4);}
+.rl-bet-btn.red{border-color:#cc2222;background:rgba(180,30,30,.5);color:#ffaaaa;}
+.rl-bet-btn.red.selected{border-color:#ff4444;background:rgba(220,50,50,.55);color:#fff;box-shadow:0 0 10px rgba(255,50,50,.4);}
+.rl-bet-btn.blk{border-color:rgba(180,180,180,.5);background:rgba(20,20,20,.8);color:#cccccc;}
+.rl-bet-btn.grn{border-color:rgba(0,200,80,.6);background:rgba(0,120,40,.45);color:#4ade80;}
 .rl-spin-btn{width:42px;height:42px;flex-shrink:0;border:none;border-radius:9px;background:linear-gradient(135deg,#8b0000,#cc0000);color:#fff;font-family:‘Bebas Neue’,sans-serif;font-size:.6rem;letter-spacing:1px;cursor:pointer;box-shadow:0 2px 10px rgba(200,0,0,.4);transition:all .14s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;padding:0;}
 .rl-spin-btn:active{transform:scale(.97);}
 .rl-spin-btn:disabled{opacity:.3;cursor:not-allowed;transform:none;}
