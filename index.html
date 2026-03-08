@@ -2398,13 +2398,14 @@ function renderStreakRewards(){
   }).join('');
 }
 function claimStreak(){
-  if(CLAIMED_TODAY){hubToast('✅ Come back tomorrow!');return;}
+  const _today=new Date().toDateString();
+  if(LAST_CLAIM===_today){hubToast('✅ Come back tomorrow!');return;}
   const idx=Math.min(STREAK,6);
   const r=STREAK_DEFS[idx];
   earnCoins(r.coins,'Daily Streak');
   if(r.sats>0)earnSats(r.sats);
   const claimedDay=STREAK+1;
-  STREAK=Math.min(STREAK+1,7);CLAIMED_TODAY=true;LAST_CLAIM=new Date().toDateString();
+  STREAK=Math.min(STREAK+1,7);CLAIMED_TODAY=true;LAST_CLAIM=_today;
   saveState();renderStreakHub();renderStreakRewards();
   showRewardPopup('🔥','Day '+claimedDay+' Streak!',[{ico:'🪙',val:'+'+r.coins+' Coins'},{ico:'₿',val:r.sats>0?'₿'+r.sats:'Keep it up!'}],'var(--btc)');
   confetti();
@@ -5056,13 +5057,12 @@ async function onAuthSuccess(user,displayName){
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
     LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=existing.display_name??name;
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
-    // Recalculate CLAIMED_TODAY from loaded LAST_CLAIM
+    // Recalculate CLAIMED_TODAY and STREAK from LAST_CLAIM
     const _signInToday=new Date().toDateString();
     CLAIMED_TODAY=(LAST_CLAIM===_signInToday);
-    if(LAST_CLAIM){
+    if(LAST_CLAIM && !CLAIMED_TODAY){
       const _diff=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);
-      if(_diff>1){STREAK=0;CLAIMED_TODAY=false;}
-      else if(_diff===1)CLAIMED_TODAY=false;
+      if(_diff>1){STREAK=0;}
     }
     syncAll();saveState();
     hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
