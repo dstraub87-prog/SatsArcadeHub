@@ -204,7 +204,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .ld .contact-box{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:9px;margin-top:9px;font-size:.62rem;color:var(--muted);line-height:1.75;}
 /* PLINKO */
 
-/* ═══ SHARED WIN POPUP ═══ */
+/* === SHARED WIN POPUP === */
 #win-popup{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);}
 #win-popup.show{opacity:1;pointer-events:all;}
 .win-popup-card{background:linear-gradient(145deg,#1a1035,#0d0820);border:2px solid #FFD700;border-radius:20px;padding:28px 24px 22px;max-width:280px;width:90%;text-align:center;box-shadow:0 0 40px rgba(255,215,0,.3);animation:popIn .25s cubic-bezier(.175,.885,.32,1.275);}
@@ -525,7 +525,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .luo-rank{font-family:‘Bebas Neue’,sans-serif;font-size:1.4rem;letter-spacing:3px;color:var(–btc);margin-bottom:12px;}
 .luo-close{background:linear-gradient(135deg,var(–gold),var(–btc));border:none;border-radius:8px;padding:9px 26px;font-family:‘Bebas Neue’,sans-serif;font-size:.9rem;letter-spacing:2px;color:#000;cursor:pointer;}
 
-/* ═══ SCRATCH CARD ═══ */
+/* === SCRATCH CARD === */
 .sc-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(170deg,#0a0510,#110830);min-height:100%;padding:10px 12px 70px;}
 .sc-stats{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:10px;}
 .sc-stat-cell{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:5px 10px;flex:1;}
@@ -561,7 +561,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .sc-hist-win{color:var(–btc);font-family:‘Space Mono’,monospace;font-weight:700;}
 .sc-hist-lose{color:rgba(255,255,255,.2);font-family:‘Space Mono’,monospace;}
 
-/* ═══ BLACKJACK ═══ */
+/* === BLACKJACK === */
 .bj-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(170deg,#001a0a,#002a10);min-height:100%;padding:10px 12px 70px;position:relative;}
 .bj-wrap::before{content:’’;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,150,50,.08),transparent 65%);pointer-events:none;}
 .bj-felt{width:100%;max-width:420px;background:linear-gradient(145deg,#00420f,#003008);border:3px solid rgba(0,200,80,.2);border-radius:20px;padding:12px;box-shadow:0 0 40px rgba(0,150,50,.2),inset 0 1px 0 rgba(255,255,255,.04);}
@@ -612,7 +612,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .bj-sstat-val{font-family:‘Space Mono’,monospace;font-size:.76rem;font-weight:700;color:var(–green);}
 .bj-sstat-lbl{font-size:.42rem;color:var(–muted);letter-spacing:.5px;text-transform:uppercase;}
 
-/* ═══ SHARED POKER ═══ */
+/* === SHARED POKER === */
 .pk-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(170deg,#001508,#002210);min-height:100%;padding:5px 8px 60px;position:relative;}
 .pk-wrap::before{content:’’;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,rgba(0,130,40,.1),transparent 60%);pointer-events:none;}
 .pk-felt{width:100%;max-width:440px;background:linear-gradient(160deg,#005214,#003a0e);border:2px solid rgba(0,180,60,.18);border-radius:16px;padding:6px 8px 5px;box-shadow:0 0 50px rgba(0,130,40,.22),inset 0 1px 0 rgba(255,255,255,.04);}
@@ -674,7 +674,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 #balls-shop-overlay{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.88);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(5px);}
 #balls-shop-overlay.show{opacity:1;pointer-events:all;}
 
-/* ═══ ROULETTE ═══ */
+/* === ROULETTE === */
 .rl-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(170deg,#0a0005,#1a0010);min-height:100%;padding:4px 8px 60px;gap:3px;}
 .rl-wheel-wrap{position:relative;width:min(190px,52vw);height:min(190px,52vw);flex-shrink:0;}
 .rl-canvas{border-radius:50%;box-shadow:0 0 30px rgba(200,0,50,.3),0 0 60px rgba(200,0,50,.1);}
@@ -702,7 +702,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .feat-card.rl{background:linear-gradient(145deg,#1a0008,#0f0005);box-shadow:0 0 0 1px rgba(200,0,50,.2);}
 .feat-card.rl .fc-tag{background:rgba(200,0,50,.15);color:#ff6b6b;border:1px solid rgba(200,0,50,.25);}
 .feat-card.rl .fc-title{color:#ff8080;}
-/* ═══ VIDEO POKER ═══ */
+/* === VIDEO POKER === */
 .vp-wrap{display:flex;flex-direction:column;align-items:center;background:linear-gradient(170deg,#001020,#000818);min-height:100%;padding:6px 8px 60px;gap:6px;}
 .vp-felt{width:100%;max-width:420px;background:linear-gradient(160deg,#002040,#001530);border:2px solid rgba(0,120,255,.2);border-radius:14px;padding:10px 10px 8px;}
 .vp-pay-table{width:100%;border-collapse:collapse;margin-bottom:6px;}
@@ -2169,11 +2169,11 @@ window.onerror = function(msg, src, line, col, err) {
 
 <script>
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    STATE
    COINS = entertainment only (no real value, can buy/earn)
    SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 let COINS=1000, SATS=0, JACKPOT=1247;
 let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
 function _todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2417,7 +2417,7 @@ function watchAdForCoins(){
 }
 setInterval(updateAdWatchBtn,5000);
 
-/* ═══ DAILY STREAK (Sats earned here) ═══ */
+/* === DAILY STREAK (Sats earned here) === */
 const STREAK_DEFS=[
   {coins:50,sats:0},{coins:75,sats:0},{coins:100,sats:2},{coins:100,sats:2},
   {coins:150,sats:3},{coins:150,sats:3},{coins:250,sats:10}
@@ -2586,7 +2586,7 @@ function startSystems(){
   setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT=500;document.getElementById('global-jackpot').textContent=JACKPOT.toLocaleString();},4000);
 }
 /* DOM ready handler is at the bottom of this script */
-/* ═══ PLINKO ═══ */
+/* === PLINKO === */
 const PLINKO={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0,roundTotal:0,roundBest:0};
 const PN_B=[{l:'💀',m:0,c:'#1a0a0a'},{l:'2x',m:2,c:'#6b1a1a'},{l:'5x',m:5,c:'#6b3500'},{l:'10x',m:10,c:'#3a1a6b'},{l:'50x',m:50,c:'#8a6a00'},{l:'10x',m:10,c:'#3a1a6b'},{l:'5x',m:5,c:'#6b3500'},{l:'2x',m:2,c:'#6b1a1a'},{l:'💀',m:0,c:'#1a0a0a'}];
 let _pCan,_pCtx,_pPegs=[],_pBalls=[],_pParticles=[],_pRaf=null;
@@ -2845,7 +2845,7 @@ function pPToast(m){
 
 
 
-/* ═══ SATSLOTS ═══ */
+/* === SATSLOTS === */
 const SS={bet:50,freeSpins:0,jackpot:500,spinning:false,history:[],held:Array(9).fill(false),symbols:Array(9).fill(0),autoCount:0,autoActive:false,autoTimer:null};
 const SYMS=[{e:'🍒',n:'Cherry',w:30,m:2},{e:'🍋',n:'Lemon',w:25,m:1.5},{e:'🍇',n:'Grape',w:20,m:3},{e:'🔔',n:'Bell',w:15,m:5},{e:'⭐',n:'Star',w:12,m:7},{e:'🎫',n:'Ticket',w:8,m:0,fs:3},{e:'⚡',n:'Lightning',w:5,m:0,bonus:200},{e:'💎',n:'Diamond',w:3,m:0,bonus:400},{e:'₿',n:'Bitcoin',w:1,jackpot:true}];
 const POOL=[];SYMS.forEach((s,i)=>{for(let j=0;j<(s.w||1);j++)POOL.push(i);});
@@ -2869,7 +2869,7 @@ function sStartAuto(n){const picker=document.getElementById('s-auto-picker');if(
 function sStopAuto(){SS.autoActive=false;SS.autoCount=0;clearTimeout(SS.autoTimer);sAutoUI();const picker=document.getElementById('s-auto-picker');if(picker)picker.classList.remove('show');}
 function sAutoUI(){const btn=document.getElementById('s-auto-btn'),lbl=document.getElementById('s-auto-lbl'),cnt=document.getElementById('s-auto-cnt');if(!btn)return;if(SS.autoActive&&SS.autoCount>0){btn.classList.add('active');if(lbl)lbl.style.display='none';if(cnt){cnt.style.display='block';cnt.textContent=SS.autoCount;}}else{btn.classList.remove('active');if(lbl)lbl.style.display='block';if(cnt)cnt.style.display='none';}}
 function sTab(t){['pays','history'].forEach((x,i)=>{const tab=document.querySelectorAll('.s-tab')[i];const panel=document.getElementById('s-tab-'+x);if(tab)tab.classList.toggle('active',x===t);if(panel)panel.classList.toggle('active',x===t);});}
-/* ═══ ARCADE ═══ */
+/* === ARCADE === */
 let aCurrent='wheel';
 const ATABS=['wheel','coinflip','dice','hilo','keno','crash','mines','memory','reaction','snake','brick','flappy','whack','pong'];
 function aSwitch(g){aCurrent=g;document.querySelectorAll('.a-screen').forEach(s=>s.classList.remove('active'));const scr=document.getElementById('a-screen-'+g);if(scr)scr.classList.add('active');document.querySelectorAll('.a-tab').forEach((t,i)=>t.classList.toggle('active',ATABS[i]===g));if(g==='keno')aInitKeno();if(g==='mines')aInitMinesGrid();if(g==='memory')aStartMemory();if(g==='whack')aInitWhack();if(g==='hilo')aHiLoNewCard();if(g==='wheel')aDrawWheel();if(g==='flappy')setTimeout(aInitFlappy,60);if(g==='pong')setTimeout(aInitPong,60);}
@@ -3098,7 +3098,7 @@ aWhackIv=setInterval(()=>{aWhackTime--;document.getElementById('a-whack-time').t
 aWhackMoleIv=setInterval(()=>{document.querySelectorAll('.a-wh').forEach(h=>{h.textContent='';h.className='a-wh';});const i=~~(Math.random()*9);const h=document.getElementById('awh'+i);if(h){h.textContent='₿';h.className='a-wh active';}},850);}
 function aWhackHit(i){const h=document.getElementById('awh'+i);if(!h||!h.classList.contains('active'))return;aWhackScore++;document.getElementById('a-whack-score').textContent=aWhackScore;h.textContent='💥';h.className='a-wh';setTimeout(()=>{if(h.textContent==='💥'){h.textContent='';h.className='a-wh';}},180);}
 
-/* ═══ PONG ═══════════════════════════════════════════════════ */
+/* === PONG =================================================== */
 let pongAF=null,pongRunning=false,pongInited=false;
 const PW=310,PH=220,PPAD=8,PPADH=36,PBALL=6,PCPUSPD=2.4;
 let pongState={bx:PW/2,by:PH/2,vx:2.8,vy:2.2,py:PH/2-PPADH/2,cy:PH/2-PPADH/2,ps:0,cs:0,best:0};
@@ -3224,7 +3224,7 @@ function aInitPong(){
   }
 }
 
-/* ═══ SHARED HELPERS for new games ════════════════════════════ */
+/* === SHARED HELPERS for new games ============================ */
 function newDeck52(){
   const suits=['♠','♥','♦','♣'],ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
   const d=[];suits.forEach(s=>ranks.forEach(r=>d.push({rank:r,suit:s})));
@@ -3296,7 +3296,7 @@ function rank3(hand){
   return{rank:0,name:'High Card '+hand.map(c=>c.rank).join('-')};
 }
 
-/* ═══ BACCARAT ══════════════════════════════════════════════ */
+/* === BACCARAT ============================================== */
 let bacDeck=[],bacBet=0,bacWins=0,bacLosses=0,bacTies=0,bacStreak=0;
 function bacInit(){
   bacDeck=newDeck52();
@@ -3367,7 +3367,7 @@ function bacDeal(choice){
   bacBet=0;bacUpdateBet();
 }
 
-/* ═══ THREE CARD POKER ═══════════════════════════════════════ */
+/* === THREE CARD POKER ======================================= */
 let tcpDeck=[],tcpBet=0,tcpPlayerHand=[],tcpDealerHand=[],tcpWins=0,tcpLosses=0,tcpPushes=0,tcpStreak=0,tcpDealt=false;
 function tcpInit(){
   tcpDeck=newDeck52();tcpBet=0;tcpWins=0;tcpLosses=0;tcpPushes=0;tcpStreak=0;tcpDealt=false;
@@ -3450,7 +3450,7 @@ function tcpFinish(){
   ['tcp-play-btn','tcp-fold-btn'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=true;});
 }
 
-/* ═══ PAI GOW POKER ══════════════════════════════════════════ */
+/* === PAI GOW POKER ========================================== */
 let pgDeck=[],pgBet=0,pgPlayerCards=[],pgDealerCards=[],pgWins=0,pgLosses=0,pgPushes=0,pgStreak=0,pgDealt=false;
 let pgPlayerHigh=[],pgPlayerLow=[];
 function pgInit(){
@@ -3545,7 +3545,7 @@ function pgSet(){
   const set=document.getElementById('pg-set-btn');if(set)set.disabled=true;
 }
 
-/* ═══ BINGO ═══════════════════════════════════════════════════ */
+/* === BINGO =================================================== */
 let bngCard=[],bngCalled=[],bngBalls=0,bngAutoIv=null,bngActive=false;
 const BNG_RANGES=[[1,15],[16,30],[31,45],[46,60],[61,75]];
 function bngInit(){
@@ -3673,7 +3673,7 @@ function bngAuto(){
   bngAutoIv=setInterval(()=>{if(!bngActive){clearInterval(bngAutoIv);bngAutoIv=null;return;}bngDraw();},900);
 }
 
-/* ═══ PLAYER PROFILE & LEVELS ═══════════════════════════════ */
+/* === PLAYER PROFILE & LEVELS =============================== */
 const AVATARS=['🎮','🚀','🦊','🐉','🤖','👾','🦁','🐺','🦅','🧙','💀','🎯','⚡','🔥','💎','🏆','🎲','🃏','₿','🌟'];
 const RANKS=[
   {min:0,  max:4,  icon:'🌱', name:'Newcomer'},
@@ -3843,9 +3843,9 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    SHARED POKER ENGINE
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 const PK_SUITS=['\u2660','\u2665','\u2666','\u2663'];
 const PK_RED={'\u2665':true,'\u2666':true};
 const PK_RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
@@ -3975,9 +3975,9 @@ function pkCpuDecide(handRank,street,pot,toCall){
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    TEXAS HOLD'EM
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 let txDeck=[],txPlayer=[],txDealer=[],txCommunity=[];
 let txBet=0,txPot=0,txCpuBet=0,txStreet=0,txPlaying=false,txRaised=false;
 let txWins=0,txLosses=0,txPushes=0,txStreak=0;
@@ -4197,9 +4197,9 @@ function txShowdown(){
   }
   txBet=0;txSetButtons('idle');txUpdateStats();
 }
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    5-CARD DRAW
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 let fcDeck=[],fcPlayer=[],fcDealer=[],fcDiscards=[];
 let fcBet=0,fcPot=0,fcPhase='idle'; // idle, dealt, drawn
 let fcWins=0,fcLosses=0,fcPushes=0,fcStreak=0;
@@ -4362,9 +4362,9 @@ function fcShowdown(){
 
 
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    ROULETTE
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 const RL_NUMS=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 const RL_RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 const RL_COL1=[1,4,7,10,13,16,19,22,25,28,31,34];
@@ -4504,9 +4504,9 @@ function rlSpin(){trackGame();
   requestAnimationFrame(tick);
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    VIDEO POKER  -  JACKS OR BETTER
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 const VP_PAY=[
   {name:'Royal Flush',   rank:9,mult:800},
   {name:'Straight Flush',rank:8,mult:50},
@@ -4647,9 +4647,9 @@ function vpDraw(){
 
 
 
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    SCRATCH CARD  -  canvas-based real scratch reveal
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 const SC_TYPES={
   classic:{cost:10,grid:3,prizes:[
     {ico:'💀',val:0,w:30},{ico:'🎟️',val:10,w:22},{ico:'💎',val:25,w:16},
@@ -4888,9 +4888,9 @@ function scSetType(type){
   if(scBoard.length>0){scBoard=scGenBoard();scScratched=new Array(scBoard.length).fill(false);scDone=false;scRender();}
 }
 function scInit(){if(scBoard.length===0)scNewCard();}
-/* ═══════════════════════════════════════════════════════════
+/* ===========================================================
    BLACKJACK
-   ═══════════════════════════════════════════════════════════ */
+   =========================================================== */
 const BJ_SUITS=['\u2660','\u2665','\u2666','\u2663'];
 const BJ_RED={'\u2665':true,'\u2666':true};
 const BJ_RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -5014,7 +5014,7 @@ function bjResolve(){
   bjBet=0;bjPlaying=false;bjSetButtons(false);bjUpdateStats();
 }
 
-/* ═══ LEADERBOARD ════════════════════════════════════════════ */
+/* === LEADERBOARD ============================================ */
 function lbBuild(){
   const c=document.getElementById('lb-coins-bar');if(c)c.textContent=COINS;
   const xp=calcXP(GAMES_PLAYED,STREAK);
@@ -5091,7 +5091,7 @@ function lbBuild(){
   </div>
 </div>
 <script>
-/* ═══ SUPABASE AUTH ══════════════════════════════════════════ */
+/* === SUPABASE AUTH ========================================== */
 const SUPA_URL='https://udrymlujfjysiobfhhix.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0';
 let _supa=null,_authUser=null,_syncTimer=null;
@@ -5259,5 +5259,4 @@ if(event===‘SIGNED_IN’&&session?.user&&!_authUser){await onAuthSuccess(sessi
 if(event===‘SIGNED_OUT’){_authUser=null;updateAccountBtn(false);}
 });
 }
-//
 </script>
