@@ -254,7 +254,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .slots-wrap{background:#0a0a0f;min-height:100%;padding-bottom:8px;}
 .slots-main{max-width:420px;margin:0 auto;padding:7px 9px;}
 .slot-machine{background:linear-gradient(180deg,#1e1e35,#141428);border:2px solid rgba(255,215,0,.22);border-radius:14px;padding:9px 9px 11px;margin-bottom:7px;position:relative;}
-.slot-machine::before{content:‘⚡ SatSlots ⚡’;position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#FFD700,#FF6B00);color:#000;font-family:‘Bungee’,cursive;font-size:.52rem;padding:1px 10px;border-radius:999px;white-space:nowrap;letter-spacing:2px;}
+.slot-machine::before{content:‘⚡ SatSlots ⚡’;position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#FFD700,#FF6B00);color:#000;font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:.52rem;padding:1px 10px;border-radius:999px;white-space:nowrap;letter-spacing:2px;}
 .jp-pool{text-align:center;margin-bottom:7px;}
 .jp-pool-lbl{font-size:.48rem;text-transform:uppercase;letter-spacing:3px;color:rgba(255,215,0,.7);font-weight:700;font-family:‘Bebas Neue’,sans-serif;margin-bottom:1px;}
 .jp-pool-amt{font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:1.2rem;color:#FFD700;letter-spacing:1px;text-shadow:0 0 8px rgba(255,215,0,.5);}
@@ -272,7 +272,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .s-cell.held .s-hold-badge{opacity:1;}
 .s-cell.winning{border-color:#FFD700!important;animation:s-wglow .38s ease-in-out infinite alternate;}
 @keyframes s-wglow{from{box-shadow:0 0 5px rgba(255,215,0,.22);}to{box-shadow:0 0 18px rgba(255,215,0,.75);}}
-.s-result{text-align:center;height:26px;display:flex;align-items:center;justify-content:center;font-family:‘Bebas Neue’,sans-serif;font-size:.82rem;font-weight:700;letter-spacing:1px;cursive;font-size:.78rem;margin-bottom:5px;}
+.s-result{text-align:center;height:26px;display:flex;align-items:center;justify-content:center;font-family:‘Bebas Neue’,sans-serif;font-size:.82rem;font-weight:700;letter-spacing:1px;margin-bottom:5px;}
 .s-result.win{color:#FFD700;}.s-result.lose{color:rgba(255,255,255,.4);font-size:.72rem;font-family:‘Bebas Neue’,sans-serif;font-weight:700;}
 .s-bet-row{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:5px;}
 .s-bet-lbl{font-size:.52rem;color:rgba(255,255,255,.32);text-transform:uppercase;letter-spacing:2px;}
@@ -294,13 +294,13 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .s-free-bar-wrap{background:rgba(0,0,0,.18);border:1px solid rgba(0,229,255,.12);border-radius:7px;padding:5px 9px;margin-bottom:7px;display:flex;align-items:center;gap:6px;}
 .s-free-bar-bg{flex:2;background:rgba(0,0,0,.3);border-radius:999px;height:4px;overflow:hidden;}
 .s-free-bar{height:100%;background:linear-gradient(90deg,#00e5ff,#a855f7);border-radius:999px;transition:width .5s;}
-.s-free-count{font-family:‘Bungee’,cursive;font-size:.75rem;color:#00e5ff;min-width:14px;text-align:right;}
+.s-free-count{font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:.75rem;color:#00e5ff;min-width:14px;text-align:right;}
 .s-tabs{display:flex;gap:3px;margin-bottom:7px;}
 .s-tab{flex:1;padding:5px 3px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:7px;color:rgba(255,255,255,.32);font-size:.58rem;font-weight:700;cursor:pointer;font-family:‘Rajdhani’,sans-serif;}
 .s-tab.active{background:rgba(255,215,0,.07);border-color:rgba(255,215,0,.32);color:#FFD700;}
 .s-tab-panel{display:none;}.s-tab-panel.active{display:block;}
 .s-paytable{background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.04);border-radius:9px;padding:8px;margin-bottom:6px;}
-.s-paytable h3{font-family:‘Bungee’,cursive;font-size:.55rem;color:rgba(255,255,255,.35);letter-spacing:2px;text-align:center;margin-bottom:5px;text-transform:uppercase;}
+.s-paytable h3{font-family:‘Bebas Neue’,sans-serif;font-weight:700;font-size:.55rem;color:rgba(255,255,255,.35);letter-spacing:2px;text-align:center;margin-bottom:5px;text-transform:uppercase;}
 .s-pay-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;}
 .s-pay-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.02);border-radius:5px;padding:3px 6px;}
 .s-pay-syms{font-size:.75rem;letter-spacing:-2px;}.s-pay-rew{font-size:.55rem;font-weight:700;color:#FFD700;}
@@ -1366,7 +1366,7 @@ window.onerror = function(msg, src, line, col, err) {
           <button class="s-auto-btn" id="s-auto-btn" onclick="sToggleAuto()">
             <span style="font-size:.85rem">🔁</span>
             <span id="s-auto-lbl" style="font-size:.48rem">AUTO</span>
-            <span id="s-auto-cnt" style="font-family:'Bungee',cursive;font-size:.72rem;color:#00e5ff;display:none">0</span>
+            <span id="s-auto-cnt" style="font-family:'Bebas Neue',sans-serif;font-weight:700;font-size:.72rem;color:#00e5ff;display:none">0</span>
           </button>
         </div>
         <div class="s-auto-picker" id="s-auto-picker">
