@@ -2052,11 +2052,11 @@ window.onerror = function(msg, src, line, col, err) {
     <div class="shop-sub">Coins are for gameplay enjoyment only · No real-world value</div>
     <div class="shop-notice">₿ (real Bitcoin) is earned FREE through streaks & milestones — never purchased, completely separate from coins.</div>
     <div class="shop-pkgs">
-      <div class="shop-pkg" onclick="shopBuy('price_1T8lRkFMGqaFujiFyLzD2olL',100)"><div class="pkg-l"><span class="pkg-ico">🪙</span><div><div class="pkg-name">100 Coins</div><div class="pkg-sub">Starter · Entertainment only</div></div></div><div class="pkg-price">$0.99</div></div>
-      <div class="shop-pkg" onclick="shopBuy('price_1T8lUTFMGqaFujiF79xn3U0O',500)"><div class="pkg-l"><span class="pkg-ico">🪙</span><div><div class="pkg-name">500 Coins</div><div class="pkg-sub">Popular</div></div></div><div class="pkg-price">$3.99</div></div>
-      <div class="shop-pkg" onclick="shopBuy('price_1T8lY0FMGqaFujiFbLaGJUDi',5000)"><div class="pkg-l"><span class="pkg-ico">💎</span><div><div class="pkg-name">5,000 Coins</div><div class="pkg-sub">Best value</div></div></div><div class="pkg-price">$12.99</div></div>
+      <div class="shop-pkg" onclick="shopBuy('price_1T8qC4FYD7f6BsHmtUteQyf9',100)"><div class="pkg-l"><span class="pkg-ico">🪙</span><div><div class="pkg-name">100 Coins</div><div class="pkg-sub">Starter · Entertainment only</div></div></div><div class="pkg-price">$0.99</div></div>
+      <div class="shop-pkg" onclick="shopBuy('price_1T8qC4FYD7f6BsHmpjrwFP1Q',500)"><div class="pkg-l"><span class="pkg-ico">🪙</span><div><div class="pkg-name">500 Coins</div><div class="pkg-sub">Popular</div></div></div><div class="pkg-price">$3.99</div></div>
+      <div class="shop-pkg" onclick="shopBuy('price_1T8qC5FYD7f6BsHmTA5vLj0j',5000)"><div class="pkg-l"><span class="pkg-ico">💎</span><div><div class="pkg-name">5,000 Coins</div><div class="pkg-sub">Best value</div></div></div><div class="pkg-price">$12.99</div></div>
     </div>
-    <div class="shop-pkg" onclick="shopBuy('price_1T8lWCFMGqaFujiFZAhjMh5r',1000)"><div class="pkg-l"><span class="pkg-ico">💎</span><div><div class="pkg-name">1,000 Coins</div><div class="pkg-sub">Best value</div></div></div><div class="pkg-price">$5.99</div></div>
+    <div class="shop-pkg" onclick="shopBuy('price_1T8qC7FYD7f6BsHmwVrxStQe',1000)"><div class="pkg-l"><span class="pkg-ico">💎</span><div><div class="pkg-name">1,000 Coins</div><div class="pkg-sub">Best value</div></div></div><div class="pkg-price">$5.99</div></div>
     <div class="shop-ad" onclick="shopWatchAd()"><span class="shop-ad-ico">📺</span><div><h4>Watch Ad → Free Coins</h4><p>Short ad earns 50 free coins</p></div><div class="shop-ad-rew">+50 🪙</div></div>
     <button class="shop-close" onclick="closeShop()">CLOSE</button>
   </div>
@@ -2329,20 +2329,23 @@ async function shopBuy(priceId,coins){
   closeShop();
   try{
     const sb=getSupabase();
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session)throw new Error('Not signed in');
+    // Refresh session to ensure token is valid
+    const {data,error:sessionErr}=await sb.auth.getSession();
+    if(sessionErr||!data.session)throw new Error('Session expired - please sign in again');
+    const token=data.session.access_token;
+    console.log('token prefix:',token.substring(0,20));
     const res=await fetch('https://udrymlujfjysiobfhhix.supabase.co/functions/v1/create-checkout',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0'},
       body:JSON.stringify({priceId})
     });
     const text=await res.text();
     console.log('checkout status:',res.status,'body:',text);
     if(!res.ok)throw new Error('Server '+res.status+': '+text);
-    const data=JSON.parse(text);
-    if(data.error)throw new Error(data.error);
-    if(!data.url)throw new Error('No URL returned: '+text);
-    window.location.href=data.url;
+    const data2=JSON.parse(text);
+    if(data2.error)throw new Error(data2.error);
+    if(!data2.url)throw new Error('No URL returned: '+text);
+    window.location.href=data2.url;
   }catch(e){
     hubToast('Purchase failed: '+e.message);
     console.error('shopBuy error:',e);
