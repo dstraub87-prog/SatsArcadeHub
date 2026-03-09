@@ -5265,10 +5265,10 @@ async function authSignOut(){
   updateAccountBtn(false);hubToast('Signed out');
 }
 async function handlePurchaseReturn(){
-  const params=new URLSearchParams(window.location.search);
-  const status=params.get('purchase');
-  if(!status)return;
-  window.history.replaceState({},'',window.location.pathname);
+  const hash=window.location.hash;
+  if(!hash.includes('purchase='))return;
+  window.location.hash='';
+  const status=hash.includes('success')?'success':'cancelled';
   if(status==='success'){
     hubToast('Purchase successful! Updating balance...');
     setTimeout(async()=>{
