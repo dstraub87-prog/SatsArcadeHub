@@ -2366,14 +2366,14 @@ function showAdPopup(){
   const slot=document.getElementById('ad-banner-slot');
   if(slot){
     slot.innerHTML='';
-    const cfg=document.createElement('script');
-    cfg.text="atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};";
+    window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};
     const inv=document.createElement('script');
+    inv.async=true;
     inv.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';
-    slot.appendChild(cfg);slot.appendChild(inv);
+    slot.appendChild(inv);
   }
   popup.classList.add('show');
-  let cnt=5;
+  let cnt=15;
   const skipCnt=document.getElementById('ad-skip-cnt');if(skipCnt)skipCnt.textContent=cnt;
   const skipBtn=document.getElementById('ad-skip-btn');
   const closeBtn=document.getElementById('ad-close-btn');
@@ -2401,7 +2401,10 @@ function closeAdPopup(){
   const closeBtn=document.getElementById('ad-close-btn');
   if(skipBtn)skipBtn.onclick=null;
   if(closeBtn)closeBtn.disabled=true;
-  if(_adWatchType==='coins'){
+  if(_adWatchType==='balls'){
+    PLINKO.balls+=3;if(typeof _pUpdateUI==='function')_pUpdateUI();
+    hubToast('\u{1F3B1} +3 free balls!');
+  } else if(_adWatchType==='coins'){
     earnCoins(50,'Ad Watch');const sr=Math.floor(Math.random()*5)+1;earnSats(sr);
     AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
     hubToast('\u{1F4FA} +50 \u{1FA99} & \u20BF'+sr+' earned!');
@@ -3871,8 +3874,8 @@ function ballsBuy(count,cost){
 }
 function ballsBuyAd(){
   closeBallsShop();
-  pPToast('\u{1F4FA} Loading ad...');
-  setTimeout(()=>{PLINKO.balls+=3;_pUpdateUI();pPToast('\u{1F3B1} +3 free balls!');},1800);
+  _adWatchType='balls';
+  showAdPopup();
 }
 
 /* DOM READY - runs after all functions above are defined */
