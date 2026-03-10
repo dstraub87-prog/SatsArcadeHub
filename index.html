@@ -889,6 +889,18 @@ window.confirmAge = function() {
   var ag = document.getElementById('age-gate');
   if (ag) ag.style.display = 'none';
   try { localStorage.setItem('sah_age', 'ok'); } catch(e) {}
+  // Show demo disclaimer unless already seen
+  try {
+    if(!localStorage.getItem('sah_demo_ok')) {
+      var dd = document.getElementById('demo-disclaimer');
+      if(dd) dd.style.display = 'flex';
+    }
+  } catch(e) {}
+};
+window.closeDemoDisclaimer = function() {
+  var dd = document.getElementById('demo-disclaimer');
+  if(dd) dd.style.display = 'none';
+  try { localStorage.setItem('sah_demo_ok','ok'); } catch(e) {}
 };
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
@@ -918,6 +930,21 @@ window.onerror = function(msg, src, line, col, err) {
     <button class="ag-confirm" onclick="confirmAge()">I AM 18 OR OLDER — ENTER</button>
     <button class="ag-decline" onclick="declineAge()">I am under 18 — Exit</button>
     <div class="ag-legal">By entering you agree to Sweepstakes Rules & Privacy Policy. Sponsor: Sats Arcade Hub LLC, Arkansas, USA.</div>
+  </div>
+</div>
+
+<!-- DEMO DISCLAIMER POPUP -->
+
+<div id="demo-disclaimer" style="position:fixed;inset:0;z-index:895;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px);">
+  <div style="background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(255,193,7,.4);border-radius:16px;padding:28px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 0 40px rgba(255,193,7,.15);">
+    <div style="font-size:2.2rem;margin-bottom:10px;">⚠️</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#ffc107;margin-bottom:12px;">DEMO VERSION</div>
+    <div style="font-size:.82rem;color:#ccc;line-height:1.6;margin-bottom:18px;">
+      Sats Arcade Hub is currently in <strong style="color:#fff">demo mode</strong>. All gameplay, coins, and ₿ Satoshi earnings shown are for demonstration purposes only.<br><br>
+      <strong style="color:#ffc107">Real Bitcoin Satoshi rewards are not yet being awarded.</strong> A full prize pool and payout system is coming soon. Stay tuned!
+    </div>
+    <div style="font-size:.72rem;color:#888;margin-bottom:18px;">By continuing you acknowledge this is a demo and no real prizes are currently distributed.</div>
+    <button onclick="closeDemoDisclaimer()" style="width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#ffc107,#ff9800);color:#000;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;">I UNDERSTAND — PLAY DEMO</button>
   </div>
 </div>
 <!-- HEADER -->
@@ -3899,6 +3926,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(localStorage.getItem('sah_age')==='ok'){
       var ag=document.getElementById('age-gate');
       if(ag)ag.style.display='none';
+      if(!localStorage.getItem('sah_demo_ok')){var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';}
     }
   }catch(e){}
 });
