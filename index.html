@@ -5,6 +5,8 @@
 <meta charset="UTF-8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Adsterra Pop-under -->
+<script src="https://pl28884972.effectivegatecpm.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js"></script>
 <title>⚡ Sats Arcade Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -941,7 +943,7 @@ window.onerror = function(msg, src, line, col, err) {
       <div class="wb-lbl">🏆WINS</div>
       <div style="flex:1;overflow:hidden"><div class="wfeed" id="wfeed"></div></div>
     </div>
-    <button class="hub-shop-btn" onclick="openShop()">🛒 COIN SHOP &nbsp;·&nbsp; Buy Coins</button>
+    <!-- COIN SHOP BUTTON (disabled) -->
     <div class="streak-row" id="hub-streak-row"></div>
     <div class="feat-grid">
       <div class="feat-card pl" onclick="openGame('plinko')">
@@ -2030,11 +2032,9 @@ window.onerror = function(msg, src, line, col, err) {
 <div id="confetti-root"></div>
 <div id="ad-popup">
   <div class="ad-card">
-    <div class="ad-skip-btn" id="ad-skip-btn">Skip in <span id="ad-skip-cnt">5</span>s</div>
-    <div class="ad-banner">📢 ADVERTISEMENT</div>
-    <div class="ad-title">Supporting the ₿ Pool</div>
-    <div class="ad-desc">Ad revenue directly funds the real Bitcoin Sat prize pool. Thanks for watching!</div>
-    <div class="ad-pool-note">👁️ This ad → ₿ Pool</div>
+    <div class="ad-skip-btn" id="ad-skip-btn">Skip in <span id="ad-skip-cnt">15</span>s</div>
+    <div id="ad-banner-slot" style="display:flex;align-items:center;justify-content:center;min-height:250px;width:300px;margin:8px auto;background:rgba(0,0,0,.3);border-radius:8px;overflow:hidden;"></div>
+    <div class="ad-pool-note">👁️ Ad revenue funds the ₿ Sat prize pool</div>
     <button class="ad-close-btn" id="ad-close-btn" onclick="closeAdPopup()" disabled>CONTINUE PLAYING</button>
   </div>
 </div>
@@ -2046,6 +2046,7 @@ window.onerror = function(msg, src, line, col, err) {
     <button class="rp-close" id="rp-close" onclick="document.getElementById('reward-popup').classList.remove('show')">COLLECT!</button>
   </div>
 </div>
+<!-- COIN SHOP (temporarily disabled - re-enable when payment processor is ready)
 <div id="shop-overlay">
   <div class="shop-sheet">
     <div class="shop-title">🪙 Coin Shop</div>
@@ -2061,6 +2062,7 @@ window.onerror = function(msg, src, line, col, err) {
     <button class="shop-close" onclick="closeShop()">CLOSE</button>
   </div>
 </div>
+-->
 <div id="balls-shop-overlay">
   <div class="shop-sheet" style="border-color:rgba(255,45,120,.3);">
     <div class="shop-title" style="color:var(--pink)">🎱 Balls Shop</div>
@@ -2321,7 +2323,7 @@ let toastT;
 function hubToast(m){const t=document.getElementById('hub-toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
 
 /* SHOP */
-function openShop(){document.getElementById('shop-overlay').classList.add('show');}
+function openShop(){hubToast('🛒 Coin Shop coming soon!');}
 function closeShop(){document.getElementById('shop-overlay').classList.remove('show');}
 async function shopBuy(priceId,coins){
   if(!_authUser){hubToast('Sign in to purchase!');openAuthModal();return;}
@@ -2348,11 +2350,11 @@ async function shopBuy(priceId,coins){
     console.error('shopBuy error:',e);
   }
 }
-function shopWatchAd(){closeShop();hubToast('\u{1F4FA} Watching ad...');setTimeout(()=>{earnCoins(50,'Ad Watch');hubToast('\u{1F381} +50 coins!');},1800);}
+function shopWatchAd(){closeShop();_adWatchType='coins';showAdPopup();}
 
 /* POPUP ADS - rotate 3min/5min, fund sat pool conceptually */
 function scheduleNextAd(){setTimeout(showAdPopup,AD_INTERVALS[adIdx++%2]);}
-let adPopupOpen=false;
+let adPopupOpen=false,_adWatchType='timed',adSkipTimer=null;
 function showAdPopup(){
   if(adPopupOpen)return scheduleNextAd();
   const jp=document.getElementById('jp-overlay');
@@ -2360,6 +2362,16 @@ function showAdPopup(){
   if((jp&&jp.classList.contains('show'))||(rp&&rp.classList.contains('show')))return scheduleNextAd();
   adPopupOpen=true;
   const popup=document.getElementById('ad-popup');if(!popup)return scheduleNextAd();
+  // Inject Adsterra banner fresh each time
+  const slot=document.getElementById('ad-banner-slot');
+  if(slot){
+    slot.innerHTML='';
+    const cfg=document.createElement('script');
+    cfg.text="atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};";
+    const inv=document.createElement('script');
+    inv.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';
+    slot.appendChild(cfg);slot.appendChild(inv);
+  }
   popup.classList.add('show');
   let cnt=5;
   const skipCnt=document.getElementById('ad-skip-cnt');if(skipCnt)skipCnt.textContent=cnt;
@@ -2389,24 +2401,20 @@ function closeAdPopup(){
   const closeBtn=document.getElementById('ad-close-btn');
   if(skipBtn)skipBtn.onclick=null;
   if(closeBtn)closeBtn.disabled=true;
-  // Award 1-15 random sats for watching the ad
-  const satReward=Math.floor(Math.random()*15)+1;
-  earnSats(satReward);
-  // show a special cyan toast
-  const t=document.getElementById('hub-toast');
-  if(t){
-    t.textContent='\u{1F4FA} Ad reward: \u20BF'+satReward;
-    t.style.setProperty('border-color','var(--cyan)','');
-    t.style.setProperty('color','var(--cyan)','');
-    t.classList.add('show');
-    clearTimeout(window._adSatT);
-    window._adSatT=setTimeout(()=>{
-      t.classList.remove('show');
-      t.style.removeProperty('border-color');
-      t.style.removeProperty('color');
-    },3000);
+  if(_adWatchType==='coins'){
+    earnCoins(50,'Ad Watch');const sr=Math.floor(Math.random()*5)+1;earnSats(sr);
+    AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
+    hubToast('\u{1F4FA} +50 \u{1FA99} & \u20BF'+sr+' earned!');
+  } else if(_adWatchType==='bigcoins'){
+    earnCoins(250,'Ad Watch Big');
+    hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
+  } else {
+    const satReward=Math.floor(Math.random()*15)+1;
+    earnSats(satReward);
+    hubToast('\u{1F4FA} Ad reward: \u20BF'+satReward+' sats!');
+    scheduleNextAd();
   }
-  scheduleNextAd();
+  _adWatchType='timed';
 }
 
 /* WATCH AD FOR COINS */
@@ -2417,28 +2425,11 @@ function updateAdWatchBtn(){
   else{const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);btn.textContent=`${m}:${String(s).padStart(2,'0')}`;btn.className='awc-btn locked';}
 }
 function watchAdForBigCoins(){
-  hubToast('\u{1F3AC} Loading ad...');
-  setTimeout(()=>{
-    earnCoins(250,'Ad Watch Big');
-    const t=document.getElementById('hub-toast');
-    if(t){
-      t.textContent='\u{1F3AC} +250 Coins earned!';
-      t.style.setProperty('border-color','var(--gold)','');
-      t.style.setProperty('color','var(--gold)','');
-      t.classList.add('show');
-      clearTimeout(window._bigAdT);
-      window._bigAdT=setTimeout(()=>{
-        t.classList.remove('show');
-        t.style.removeProperty('border-color');
-        t.style.removeProperty('color');
-      },3000);
-    }
-  },2200);
+  _adWatchType='bigcoins';showAdPopup();
 }
 function watchAdForCoins(){
   if(Date.now()<AD_WATCH_NEXT){hubToast('Ad available soon!');return;}
-  hubToast('\u{1F4FA} Watching ad...');
-  setTimeout(()=>{earnCoins(50,'Ad Watch');const sr=Math.floor(Math.random()*5)+1;earnSats(sr);AD_WATCH_NEXT=Date.now()+1800000;saveState();const t=document.getElementById('hub-toast');if(t){t.textContent='\u{1F4FA} +50 \u{1FA99} & \u20BF'+sr;t.style.setProperty('border-color','var(--cyan)','');t.style.setProperty('color','var(--cyan)','');t.classList.add('show');clearTimeout(window._waSatT);window._waSatT=setTimeout(()=>{t.classList.remove('show');t.style.removeProperty('border-color');t.style.removeProperty('color');},3000);}},2000);
+  _adWatchType='coins';showAdPopup();
 }
 setInterval(updateAdWatchBtn,5000);
 
@@ -5337,12 +5328,12 @@ async function authInit(){
         Google
       </button>
 
-
+```
 </div>
 <div class="auth-msg" id="auth-msg-oauth"></div>
 <button class="auth-close" onclick="closeAuthModal()">CONTINUE AS GUEST</button>
 <div class="auth-guest-note">Guest progress saves locally on this device only</div>
-
+```
 
   </div>
 </div>
