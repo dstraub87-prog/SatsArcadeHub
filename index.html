@@ -5,8 +5,8 @@
 <meta charset="UTF-8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<!-- Adsterra Pop-under -->
-<script src="https://pl28884972.effectivegatecpm.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js"></script>
+<!-- Adsterra Anti-Popup-Blocker Pop-under -->
+<script src="https://environmenttalentrabble.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js"></script>
 <title>⚡ Sats Arcade Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -944,6 +944,11 @@ window.onerror = function(msg, src, line, col, err) {
       <div style="flex:1;overflow:hidden"><div class="wfeed" id="wfeed"></div></div>
     </div>
     <!-- COIN SHOP BUTTON (disabled) -->
+    <!-- Adsterra Banner -->
+    <div style="display:flex;justify-content:center;margin:4px 0;">
+      <script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};</script>
+      <script src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+    </div>
     <div class="streak-row" id="hub-streak-row"></div>
     <div class="feat-grid">
       <div class="feat-card pl" onclick="openGame('plinko')">
@@ -2374,11 +2379,11 @@ function showAdPopup(){
   }
   popup.classList.add('show');
   let cnt=15;
-  const skipCnt=document.getElementById('ad-skip-cnt');if(skipCnt)skipCnt.textContent=cnt;
   const skipBtn=document.getElementById('ad-skip-btn');
   const closeBtn=document.getElementById('ad-close-btn');
-  if(skipBtn){skipBtn.className='ad-skip-btn';skipBtn.onclick=null;}
+  if(skipBtn){skipBtn.innerHTML='Skip in <span id="ad-skip-cnt">15</span>s';skipBtn.className='ad-skip-btn';skipBtn.onclick=null;}
   if(closeBtn){closeBtn.disabled=true;closeBtn.classList.remove('ready');}
+  const skipCnt=document.getElementById('ad-skip-cnt');
   if(adSkipTimer)clearInterval(adSkipTimer);
   adSkipTimer=setInterval(()=>{
     cnt--;
