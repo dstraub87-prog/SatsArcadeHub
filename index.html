@@ -977,8 +977,9 @@ window.onerror = function(msg, src, line, col, err) {
       <script src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
     </div>
     <div style="display:flex;justify-content:center;margin:10px 0;">
-      <script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};</script>
-      <script src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+      <iframe style="width:300px;height:250px;border:none;overflow:hidden;" scrolling="no"
+        srcdoc="&lt;script&gt;window.atOptions={&#39;key&#39;:&#39;224430875b3c2f68327436355832e3f6&#39;,&#39;format&#39;:&#39;iframe&#39;,&#39;height&#39;:250,&#39;width&#39;:300,&#39;params&#39;:{}}&lt;/script&gt;&lt;script src=&#39;https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js&#39;&gt;&lt;/script&gt;">
+      </iframe>
     </div>
     <div class="streak-row" id="hub-streak-row"></div>
     <div class="feat-grid">
@@ -1033,8 +1034,9 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
     </div>
     <div style="display:flex;justify-content:center;margin:10px 0;">
-      <script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};</script>
-      <script src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+      <iframe style="width:300px;height:250px;border:none;overflow:hidden;" scrolling="no"
+        srcdoc="&lt;script&gt;window.atOptions={&#39;key&#39;:&#39;224430875b3c2f68327436355832e3f6&#39;,&#39;format&#39;:&#39;iframe&#39;,&#39;height&#39;:250,&#39;width&#39;:300,&#39;params&#39;:{}}&lt;/script&gt;&lt;script src=&#39;https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js&#39;&gt;&lt;/script&gt;">
+      </iframe>
     </div>
     <div class="hub-section-divider"><span>&#x1F579; ARCADE GAMES</span></div>
     <div class="feat-grid">
@@ -1097,8 +1099,9 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
     </div>
     <div style="display:flex;justify-content:center;margin:10px 0;">
-      <script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};</script>
-      <script src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+      <iframe style="width:300px;height:250px;border:none;overflow:hidden;" scrolling="no"
+        srcdoc="&lt;script&gt;window.atOptions={&#39;key&#39;:&#39;224430875b3c2f68327436355832e3f6&#39;,&#39;format&#39;:&#39;iframe&#39;,&#39;height&#39;:250,&#39;width&#39;:300,&#39;params&#39;:{}}&lt;/script&gt;&lt;script src=&#39;https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js&#39;&gt;&lt;/script&gt;">
+      </iframe>
     </div>
         <div class="hub-footer">
       <span class="hf-link" onclick="legOpen('terms')">Sweepstakes Rules</span>
@@ -2406,15 +2409,15 @@ function showAdPopup(){
   if((jp&&jp.classList.contains('show'))||(rp&&rp.classList.contains('show')))return scheduleNextAd();
   adPopupOpen=true;
   const popup=document.getElementById('ad-popup');if(!popup)return scheduleNextAd();
-  // Inject Adsterra banner fresh each time
+  // Inject Adsterra banner fresh each time via isolated iframe
   const slot=document.getElementById('ad-banner-slot');
   if(slot){
     slot.innerHTML='';
-    window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};
-    const inv=document.createElement('script');
-    inv.async=true;
-    inv.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';
-    slot.appendChild(inv);
+    const fr=document.createElement('iframe');
+    fr.style.cssText='width:300px;height:250px;border:none;overflow:hidden;';
+    fr.scrolling='no';
+    fr.srcdoc="<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
+    slot.appendChild(fr);
   }
   popup.classList.add('show');
   let cnt=15;
