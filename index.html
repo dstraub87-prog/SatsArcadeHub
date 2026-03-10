@@ -5202,6 +5202,8 @@ async function onAuthSuccess(user,displayName){
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
     LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=existing.display_name??name;
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
+    try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
+    try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
     // Recalculate CLAIMED_TODAY and STREAK from LAST_CLAIM
     const _signInToday=_todayISO();
     CLAIMED_TODAY=(LAST_CLAIM===_signInToday);
@@ -5222,7 +5224,9 @@ async function syncToServer(){
     coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
     games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
     player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
-    avatar:PLAYER_AVATAR,display_name:PLAYER_NAME
+    avatar:PLAYER_AVATAR,display_name:PLAYER_NAME,
+    weekly_claims:JSON.stringify(WEEKLY_CLAIMS),
+    monthly_claims:JSON.stringify(MONTHLY_CLAIMS)
   };
   const {error}=await sb.from('profiles').upsert(payload,{onConflict:'id'});
   if(error)console.error('[Sats Arcade] Supabase sync error:',error.message,error.code);
