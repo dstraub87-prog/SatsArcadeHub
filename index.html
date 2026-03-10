@@ -455,8 +455,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 /* AGE GATE */
 #age-gate{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.98);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(10px);}
 #age-gate.hidden{display:none;}
-.ag-card{background:linear-gradient(160deg,#0d0a1a,#0a0810);border:1px solid rgba(247,147,26,.22);border-radius:16px;padding:22px 18px;max-width:300px;width:100%;text-align:center;}
-.ag-logo{font-family:‘Bebas Neue’,sans-serif;font-size:1.65rem;letter-spacing:4px;color:var(–btc);margin-bottom:3px;}
+.ag-card{background:linear-gradient(160deg,#0d0a1a,#0a0810);border:1px solid rgba(247,147,26,.22);border-radius:16px;padding:22px 18px;max-width:300px;width:100%;text-align:center;overflow:hidden;}
+.ag-logo{font-family:‘Bebas Neue’,sans-serif;font-size:1.15rem;letter-spacing:3px;color:var(–btc);margin-bottom:3px;white-space:nowrap;}
 .ag-logo span{color:var(–text);}
 .ag-icon{font-size:2rem;margin-bottom:7px;}
 .ag-title{font-family:‘Bebas Neue’,sans-serif;font-size:1.15rem;letter-spacing:2px;color:var(–text);margin-bottom:5px;}
@@ -851,7 +851,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 /* ── Auth Modal ──────────────────────────────────────────── */
 #auth-modal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .22s;}
 #auth-modal.show{opacity:1;pointer-events:all;}
-.auth-card{background:linear-gradient(170deg,#0d0f1a,#080a12);border:1px solid rgba(247,147,26,.2);border-radius:18px;padding:24px 20px;width:100%;max-width:360px;animation:slideUp .24s cubic-bezier(.34,1.56,.64,1);}
+.auth-card{background:linear-gradient(170deg,#0d0f1a,#080a12);border:1px solid rgba(247,147,26,.2);border-radius:18px;padding:24px 20px;width:100%;max-width:360px;animation:slideUp .24s cubic-bezier(.34,1.56,.64,1);overflow:hidden;}
 .auth-logo{font-family:‘Bebas Neue’,sans-serif;font-size:1.4rem;letter-spacing:4px;color:var(–btc);text-align:center;margin-bottom:4px;}
 .auth-sub{font-size:.52rem;color:var(–muted);text-align:center;margin-bottom:20px;}
 .auth-tabs{display:flex;gap:4px;margin-bottom:16px;}
@@ -909,7 +909,7 @@ window.onerror = function(msg, src, line, col, err) {
 
 <div id="age-gate">
   <div class="ag-card">
-    <div class="ag-logo">⚡<span>SATS</span>HUB</div>
+    <div class="ag-logo">&#x26A1; <span>SATS ARCADE HUB</span> &#x26A1;</div>
     <div class="ag-icon">🔞</div>
     <div class="ag-title">Age Verification Required</div>
     <div class="ag-desc">Sats Arcade Hub is a free-to-play sweepstakes platform. You must be 18+ to participate. No purchase necessary. Void where prohibited.</div>
@@ -5310,7 +5310,7 @@ async function authInit(){
 
 <div id="auth-modal">
   <div class="auth-card">
-    <div class="auth-logo">&#x26A1; SATS ARCADE</div>
+    <div class="auth-logo">&#x26A1; SATS ARCADE &#x26A1;</div>
     <div class="auth-sub">Sign in to save progress &amp; enable withdrawals</div>
     <div class="auth-tabs">
       <button class="auth-tab active" id="auth-tab-in" onclick="authSetTab('in')">SIGN IN</button>
