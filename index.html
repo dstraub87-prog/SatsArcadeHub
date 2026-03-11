@@ -2263,16 +2263,16 @@ loadState();
 function spendCoins(n){if(COINS<n){hubToast('Need more coins! \u{1F6D2}');openShop();return false;}COINS-=n;syncAll();saveState();return true;}
 function trackGame(){GAMES_PLAYED++;saveProfileState();updateLevel(true);}
 function earnCoins(n,label){
-  COINS+=n;syncAll();saveState();if(label)addFeedWin(label,n);if(Math.random()<.012)setTimeout(triggerJackpot,800);
-  LIFETIME_COINS+=n;
-  // Sat drop chance on wins (no GAMES_PLAYED here - tracked per game action)
+  COINS+=n;LIFETIME_COINS+=n;
+  syncAll();saveState();saveProfileState();debouncedSyncToServer();
+  if(label)addFeedWin(label,n);if(Math.random()<.012)setTimeout(triggerJackpot,800);
   if(label&&n>0){
     var _roll=Math.random(),_thr=n>=100?0.18:n>=50?0.10:n>=20?0.06:0.04;
     if(_roll<_thr){var _sa=n>=200?3:n>=100?2:1;setTimeout(function(){earnSats(_sa);showSatDrop(_sa,label);},600);}
   }
 }
 /* SATS ONLY operations - earned free via loyalty */
-function earnSats(n){SATS+=n;syncAll();saveState();showRewardsDot();LIFETIME_SATS+=n;try{saveProfileState();}catch(e){}}
+function earnSats(n){SATS+=n;LIFETIME_SATS+=n;syncAll();saveState();saveProfileState();debouncedSyncToServer();showRewardsDot();}
 function showRewardsDot(){document.getElementById('bn-rewards-dot').classList.add('show');setTimeout(()=>document.getElementById('bn-rewards-dot').classList.remove('show'),6000);}
 
 /* SYNC ALL UI */
@@ -2355,7 +2355,7 @@ function confetti(){const r=document.getElementById('confetti-root'),cols=['#FFD
 
 /* TOAST */
 let toastT;
-function hubToast(m){const t=document.getElementById('hub-toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
+function hubToast(m){const t=document.getElementById('hub-toast');t.style.borderColor='';t.style.color='';t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>{t.classList.remove('show');},2600);}
 
 /* SHOP */
 function openShop(){hubToast('🛒 Coin Shop coming soon!');}
@@ -2442,14 +2442,14 @@ function closeAdPopup(){
   } else if(_adWatchType==='coins'){
     earnCoins(50,'Ad Watch');const sr=Math.floor(Math.random()*5)+1;earnSats(sr);
     AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
-    hubToast('\u{1F4FA} +50 \u{1FA99} & \u20BF'+sr+' earned!');
+    hubToast('\u{1F4FA} +50 coins!');setTimeout(()=>showSatToast(sr,'Ad Watch'),800);
   } else if(_adWatchType==='bigcoins'){
     earnCoins(250,'Ad Watch Big');
     hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
   } else {
-    const satReward=Math.floor(Math.random()*15)+1;
+    const satReward=Math.floor(Math.random()*5)+1;
     earnSats(satReward);
-    hubToast('\u{1F4FA} Ad reward: \u20BF'+satReward+' sats!');
+    showSatToast(satReward,'Ad');
     scheduleNextAd();
   }
   _adWatchType='timed';
@@ -3879,11 +3879,10 @@ function saveName(){
 }
 /* earnCoins/earnSats tracking merged into declarations above */
 
-function showSatDrop(n,game){
-  // reuse hub toast with special styling
+function showSatToast(n,source){
   const t=document.getElementById('hub-toast');
   if(!t)return;
-  t.textContent='\u20BF'+n+' from '+game+'!';
+  t.innerHTML='<span style="color:var(--cyan)">&#x20BF;+'+n+' sat'+(n!==1?'s':'')+'</span>'+(source?' <span style="opacity:.6;font-size:.6em">'+source+'</span>':'');
   t.style.borderColor='var(--cyan)';
   t.style.color='var(--cyan)';
   t.classList.add('show');
@@ -3892,8 +3891,10 @@ function showSatDrop(n,game){
     t.classList.remove('show');
     t.style.borderColor='';
     t.style.color='';
-  },3000);
+    t.innerHTML='';
+  },3200);
 }
+function showSatDrop(n,game){showSatToast(n,game);}
 
 function openBallsShop(){
   const el=document.getElementById('balls-shop-coins');
