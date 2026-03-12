@@ -5396,7 +5396,17 @@ async function authInit(){
     const sb=getSupabase();
     if(sb){
       const tgId='tg_'+tgu.id;
-      const {data:existing}=await sb.from('profiles').select('*').eq('display_name',tgId).single();
+      // Look up by tg_id first, fallback to old display_name style
+      let {data:existing}=await sb.from('profiles').select('*').eq('tg_id',tgId).single();
+      if(!existing){
+        // fallback: old profile stored tgId in display_name
+        const {data:old}=await sb.from('profiles').select('*').eq('display_name',tgId).single();
+        if(old){
+          // migrate: set tg_id and fix display_name
+          await sb.from('profiles').update({tg_id:tgId,display_name:PLAYER_NAME}).eq('id',old.id);
+          existing=old;
+        }
+      }
       if(existing){
         COINS=existing.coins??1000;SATS=existing.sats??0;
         LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
@@ -5410,12 +5420,14 @@ async function authInit(){
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
         syncAll();saveState();hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
       } else {
+        // New TG user - upsert on tg_id to prevent duplicates
         const newId=crypto.randomUUID();
-        await sb.from('profiles').insert({
-          id:newId,display_name:tgId,avatar:'⚡',
+        const {error:ie}=await sb.from('profiles').upsert({
+          id:newId,tg_id:tgId,display_name:PLAYER_NAME,avatar:'⚡',
           coins:1000,sats:0,lifetime_coins:0,lifetime_sats:0,
           games_played:0,streak:0,player_level:1,player_xp:0
-        });
+        },{onConflict:'tg_id',ignoreDuplicates:false});
+        if(ie)console.error('[TG] upsert error:',ie.message);
         _authUser={id:newId,email:tgId};_tgId=tgId;
         if(!localStorage.getItem('sah_v5'))COINS=1000;
         syncAll();saveState();
