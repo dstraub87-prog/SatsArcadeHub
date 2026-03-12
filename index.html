@@ -902,7 +902,7 @@ window.confirmAge = function() {
   try { localStorage.setItem('sah_age', 'ok'); } catch(e) {}
   // Show demo disclaimer unless already seen
   try {
-    if(!localStorage.getItem('sah_demo_ok') && !window.isTelegram()) {
+    if(!localStorage.getItem('sah_demo_ok')) {
       var dd = document.getElementById('demo-disclaimer');
       if(dd) dd.style.display = 'flex';
     }
@@ -3942,8 +3942,8 @@ document.addEventListener('DOMContentLoaded',function(){
   try{
     if(window.isTelegram()){
       var ag=document.getElementById('age-gate');if(ag)ag.style.display='none';
-      var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='none';
-      try{localStorage.setItem('sah_age','ok');localStorage.setItem('sah_demo_ok','ok');}catch(e){}
+      try{localStorage.setItem('sah_age','ok');}catch(e){}
+      if(!localStorage.getItem('sah_demo_ok')){var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';}
     } else if(localStorage.getItem('sah_age')==='ok'){
       var ag=document.getElementById('age-gate');
       if(ag)ag.style.display='none';
@@ -5185,7 +5185,7 @@ async function lbFetchTop(){
         <div style="font-size:1.1rem;flex-shrink:0;width:24px;text-align:center">${medal}</div>
         <div style="font-size:1.4rem;flex-shrink:0">${p.avatar||'🎮'}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1px;color:${isMe?'var(--gold)':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${/^tg_\d+$/.test(p.display_name||'')?'\u26A1 TG Player':(p.display_name||'Anon')}${isMe?' (You)':''}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1px;color:${isMe?'var(--gold)':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.display_name||'Anon'}${isMe?' (You)':''}</div>
           <div style="font-size:.44rem;color:var(--muted)">${rank.icon} LV${lvl} · 🎮${(p.games_played||0).toLocaleString()} · 🔥${p.streak||0}</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
@@ -5314,7 +5314,8 @@ async function syncToServer(){
     coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
     games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
     player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
-    avatar:PLAYER_AVATAR,display_name:_tgId||PLAYER_NAME,
+    avatar:PLAYER_AVATAR,display_name:PLAYER_NAME,
+    ...(_tgId?{tg_id:_tgId}:{}),
     weekly_claims:JSON.stringify(WEEKLY_CLAIMS),
     monthly_claims:JSON.stringify(MONTHLY_CLAIMS)
   };
