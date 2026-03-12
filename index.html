@@ -5398,7 +5398,8 @@ async function handlePurchaseReturn(){
 async function authInit(){
   if(window.isTelegram()){
     const tgu=window.TG_USER;
-    PLAYER_NAME=tgu.username||tgu.first_name+(tgu.last_name?' '+tgu.last_name:'');
+    const _tgDefaultName=tgu.username||tgu.first_name+(tgu.last_name?' '+tgu.last_name:'');
+    PLAYER_NAME=_tgDefaultName;
     const sb=getSupabase();
     if(sb){
       const tgId='tg_'+tgu.id;
@@ -5423,13 +5424,15 @@ async function authInit(){
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
         const _t=_todayISO();CLAIMED_TODAY=(LAST_CLAIM===_t);
         if(LAST_CLAIM&&!CLAIMED_TODAY){const _d=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);if(_d>1)STREAK=0;}
+        // Use saved display_name from Supabase; fallback to Telegram name
+        if(existing.display_name&&!existing.display_name.startsWith('tg_'))PLAYER_NAME=existing.display_name;
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
         syncAll();saveState();hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
       } else {
         // New TG user - upsert on tg_id to prevent duplicates
         const newId=crypto.randomUUID();
         const {error:ie}=await sb.from('profiles').upsert({
-          id:newId,tg_id:tgId,display_name:PLAYER_NAME,avatar:'⚡',
+          id:newId,tg_id:tgId,display_name:_tgDefaultName,avatar:'⚡',
           coins:1000,sats:0,lifetime_coins:0,lifetime_sats:0,
           games_played:0,streak:0,player_level:1,player_xp:0
         },{onConflict:'tg_id',ignoreDuplicates:false});
