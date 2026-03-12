@@ -5314,7 +5314,7 @@ async function syncToServer(){
     coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
     games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
     player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
-    avatar:PLAYER_AVATAR,display_name:PLAYER_NAME,
+    avatar:PLAYER_AVATAR,display_name:_tgId||PLAYER_NAME,
     weekly_claims:JSON.stringify(WEEKLY_CLAIMS),
     monthly_claims:JSON.stringify(MONTHLY_CLAIMS)
   };
