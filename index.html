@@ -3887,7 +3887,13 @@ function toggleNameEdit(){
 }
 function saveName(){
   const v=document.getElementById('ps-name-input').value.trim();
-  if(v){PLAYER_NAME=v;saveProfileState();document.getElementById('ps-name-display').textContent=v;}
+  if(v){
+    PLAYER_NAME=v;
+    saveProfileState();
+    document.getElementById('ps-name-display').textContent=v;
+    // Sync new name to Supabase immediately
+    debouncedSyncToServer();
+  }
   document.getElementById('ps-name-input-wrap').classList.remove('show');
 }
 /* earnCoins/earnSats tracking merged into declarations above */
