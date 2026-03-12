@@ -5403,7 +5403,7 @@ async function authInit(){
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
         const _t=_todayISO();CLAIMED_TODAY=(LAST_CLAIM===_t);
         if(LAST_CLAIM&&!CLAIMED_TODAY){const _d=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);if(_d>1)STREAK=0;}
-        _authUser={id:existing.id,email:tgId};
+        _authUser={id:existing.id,email:tgId};_tgId=tgId;
         syncAll();saveState();hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
       } else {
         const newId=crypto.randomUUID();
@@ -5412,8 +5412,9 @@ async function authInit(){
           coins:1000,sats:0,lifetime_coins:0,lifetime_sats:0,
           games_played:0,streak:0,player_level:1,player_xp:0
         });
-        _authUser={id:newId,email:tgId};
-        COINS=1000;syncAll();saveState();
+        _authUser={id:newId,email:tgId};_tgId=tgId;
+        if(!localStorage.getItem('sah_v5'))COINS=1000;
+        syncAll();saveState();
         hubToast('Welcome to Sats Arcade! ⚡');
       }
       updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
