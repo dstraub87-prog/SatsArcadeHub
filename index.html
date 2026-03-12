@@ -7,6 +7,7 @@
 <!-- Adsterra Anti-Popup-Blocker Pop-under -->
 <script src="https://environmenttalentrabble.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js"></script>
 <title>⚡ Sats Arcade Hub</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--btc:#F7931A;--btcg:rgba(247,147,26,.3);--gold:#FFD700;--cyan:#00E5FF;--pink:#FF2D78;--purple:#A855F7;--green:#39FF14;--bg:#07080F;--bg2:#0D0E1A;--bg3:#131525;--card:#10111E;--border:rgba(247,147,26,.16);--text:#F0E8D8;--muted:#4A4465;}
@@ -883,13 +884,25 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 <body>
 <script>
 // Age gate  -  standalone, no dependencies, runs immediately
+// === TELEGRAM MINI APP INIT ===
+window.TG = window.Telegram?.WebApp || null;
+window.TG_USER = null;
+if(window.TG && window.TG.initDataUnsafe?.user){
+  window.TG_USER = window.TG.initDataUnsafe.user;
+  window.TG.ready();
+  window.TG.expand();
+  window.TG.setHeaderColor('#0d0d1a');
+  window.TG.setBackgroundColor('#0d0d1a');
+}
+window.isTelegram = function(){ return !!window.TG_USER; };
+
 window.confirmAge = function() {
   var ag = document.getElementById('age-gate');
   if (ag) ag.style.display = 'none';
   try { localStorage.setItem('sah_age', 'ok'); } catch(e) {}
   // Show demo disclaimer unless already seen
   try {
-    if(!localStorage.getItem('sah_demo_ok')) {
+    if(!localStorage.getItem('sah_demo_ok') && !window.isTelegram()) {
       var dd = document.getElementById('demo-disclaimer');
       if(dd) dd.style.display = 'flex';
     }
@@ -3927,7 +3940,11 @@ document.addEventListener('DOMContentLoaded',function(){
   var ps=document.getElementById('profile-sheet');
   if(ps)ps.addEventListener('click',function(e){if(e.target===this)closeProfile();});
   try{
-    if(localStorage.getItem('sah_age')==='ok'){
+    if(window.isTelegram()){
+      var ag=document.getElementById('age-gate');if(ag)ag.style.display='none';
+      var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='none';
+      try{localStorage.setItem('sah_age','ok');localStorage.setItem('sah_demo_ok','ok');}catch(e){}
+    } else if(localStorage.getItem('sah_age')==='ok'){
       var ag=document.getElementById('age-gate');
       if(ag)ag.style.display='none';
       if(!localStorage.getItem('sah_demo_ok')){var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';}
@@ -5369,6 +5386,47 @@ async function handlePurchaseReturn(){
   }
 }
 async function authInit(){
+  if(window.isTelegram()){
+    const tgu=window.TG_USER;
+    PLAYER_NAME=tgu.username||tgu.first_name+(tgu.last_name?' '+tgu.last_name:'');
+    const sb=getSupabase();
+    if(sb){
+      const tgId='tg_'+tgu.id;
+      const {data:existing}=await sb.from('profiles').select('*').eq('display_name',tgId).single();
+      if(existing){
+        COINS=existing.coins??1000;SATS=existing.sats??0;
+        LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
+        GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
+        LAST_CLAIM=existing.last_claim??'';PLAYER_AVATAR=existing.avatar??'⚡';
+        PLAYER_LEVEL=existing.player_level??1;
+        try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
+        try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
+        const _t=_todayISO();CLAIMED_TODAY=(LAST_CLAIM===_t);
+        if(LAST_CLAIM&&!CLAIMED_TODAY){const _d=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);if(_d>1)STREAK=0;}
+        _authUser={id:existing.id,email:tgId};
+        syncAll();saveState();hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
+      } else {
+        const newId=crypto.randomUUID();
+        await sb.from('profiles').insert({
+          id:newId,display_name:tgId,avatar:'⚡',
+          coins:1000,sats:0,lifetime_coins:0,lifetime_sats:0,
+          games_played:0,streak:0,player_level:1,player_xp:0
+        });
+        _authUser={id:newId,email:tgId};
+        COINS=1000;syncAll();saveState();
+        hubToast('Welcome to Sats Arcade! ⚡');
+      }
+      updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
+      if(window.TG.MainButton){
+        window.TG.MainButton.setText('Share with Friends ⚡');
+        window.TG.MainButton.show();
+        window.TG.MainButton.onClick(()=>{
+          window.TG.switchInlineQuery('Play Sats Arcade & earn free Bitcoin! ⚡',['users','groups','channels']);
+        });
+      }
+    }
+    return;
+  }
   const sb=getSupabase();if(!sb)return;
   const {data:{session}}=await sb.auth.getSession();
   if(session?.user)await onAuthSuccess(session.user);
