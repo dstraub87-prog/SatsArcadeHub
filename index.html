@@ -5,7 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <!-- Adsterra Anti-Popup-Blocker Pop-under -->
-<script src="https://environmenttalentrabble.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js"></script>
+<script>if(window.self===window.top){var s=document.createElement("script");s.src="https://environmenttalentrabble.com/e1/74/3a/e1743a52ff78f4c3e2ee530ead8c1425.js";document.head.appendChild(s);}</script>
 <title>⚡ Sats Arcade Hub</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://html5.api.gamedistribution.com/main.min.js"></script>
@@ -884,6 +884,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 </style>
 </head>
 <body>
+<script>if(window.self!==window.top){var st=document.createElement('style');st.textContent='.ad-banner{display:none!important}script[src*="highperformanceformat"]{display:none}';document.head.appendChild(st);}</script>
 <script>
 // Age gate  -  standalone, no dependencies, runs immediately
 // === TELEGRAM MINI APP INIT ===
@@ -902,6 +903,7 @@ window.isTelegram = function(){ return !!window.TG_USER; };
 // GD_OPTIONS MUST be defined before the SDK script loads
 window.GD_READY = false;
 window.GD_PAUSED = false;
+window._gdRewardType = 'timed'; // tracks what reward to give after GD ad
 window["GD_OPTIONS"] = {
   "gameId": "1cec31a16cf34305acec31364182b7fb",
   "advertisementSettings": {"autoplay": false},
@@ -909,10 +911,32 @@ window["GD_OPTIONS"] = {
     switch(event.name){
       case "SDK_READY":
         window.GD_READY = true;
+        // Reinstall error suppressor after GD SDK sets its own handlers
+        window.addEventListener('error', _suppressCrossOriginErrors, true);
+        window.onerror=function(msg,src,line){if(msg==='Script error.'||!src||line===0)return true;return false;};
         if(typeof gdsdk !== 'undefined') gdsdk.showAd();
         break;
       case "SDK_GAME_START":
         window.GD_PAUSED = false;
+        // Grant reward after GD rewarded ad completes
+        (function(){
+          var rt=window._gdRewardType||'timed';
+          window._gdRewardType='timed';
+          if(rt==='balls'){
+            PLINKO.balls+=3;if(typeof _pUpdateUI==='function')_pUpdateUI();
+            hubToast('\u{1F3B1} +3 free balls!');
+          } else if(rt==='coins'){
+            earnCoins(50,'Ad Watch');
+            awardSats(Math.floor(Math.random()*5)+1,'ad').then(function(got){if(got>0)showSatToast(got,'Ad Watch');});
+            AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
+            hubToast('\u{1F4FA} +50 coins!');
+          } else if(rt==='bigcoins'){
+            earnCoins(250,'Ad Watch Big');
+            hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
+          } else {
+            awardSats(Math.floor(Math.random()*5)+1,'ad').then(function(got){if(got>0)showSatToast(got,'Ad');});
+          }
+        })();
         break;
       case "SDK_GAME_PAUSE":
         window.GD_PAUSED = true;
@@ -930,6 +954,22 @@ window["GD_OPTIONS"] = {
   s.async=true;
   document.head.appendChild(s);
 })();
+
+// Suppress cross-origin script errors from third-party ads
+// Uses capture-phase listener which fires before ANY SDK can intercept
+function _suppressCrossOriginErrors(e){
+  if(e.message==='Script error.'||(!e.filename||e.filename==='')||e.lineno===0){
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    return false;
+  }
+}
+window.addEventListener('error', _suppressCrossOriginErrors, true);
+// Also set onerror as fallback
+window.onerror=function(msg,src,line){
+  if(msg==='Script error.'||!src||line===0)return true;
+  return false;
+};
 
 // Call this between games to show a GD ad
 function showGDAd(){
@@ -963,18 +1003,7 @@ window.closeDemoDisclaimer = function() {
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
 };
-// Global error catcher  -  shows real error on screen for debugging
-window.onerror = function(msg, src, line, col, err) {
-  var d = document.getElementById('_dbg');
-  if (!d) {
-    d = document.createElement('div');
-    d.id = '_dbg';
-    d.style.cssText = 'position:fixed;bottom:60px;left:0;right:0;background:#ff0040;color:#fff;font-family:monospace;font-size:11px;padding:8px;z-index:99999;max-height:200px;overflow:auto;';
-    document.body.appendChild(d);
-  }
-  d.innerHTML += '<div><b>' + msg + '</b>  -  ' + (src||'') + ':' + line + ':' + col + '</div>';
-  return false;
-};
+// Error display removed for production
 </script>
 
 <!-- AGE GATE -->
@@ -1081,8 +1110,7 @@ window.onerror = function(msg, src, line, col, err) {
     </div>
 
     <div style="display:flex;justify-content:center;margin:10px 0;">
-      <script type="text/javascript">atOptions = {'key' : '224430875b3c2f68327436355832e3f6','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};</script>
-      <script type="text/javascript" src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+      <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
     </div>
     <div class="hub-section-divider"><span>&#x1F579; ARCADE GAMES</span></div>
     <div class="feat-grid">
@@ -1208,8 +1236,7 @@ window.onerror = function(msg, src, line, col, err) {
         <div class="time-tiers" id="time-tiers"></div>
       </div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script type="text/javascript">atOptions = {'key' : '224430875b3c2f68327436355832e3f6','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};</script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
       </div>
     </div></div>
   </div>
@@ -1248,8 +1275,7 @@ window.onerror = function(msg, src, line, col, err) {
       </div>
       <div class="rdm-legal">₿ earned through gameplay. Redeem any amount, up to ₿300/day. No purchase necessary. 18+ only. Void where prohibited. Sponsor: Sats Arcade Hub LLC, Arkansas.</div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script type="text/javascript">atOptions = {'key' : '224430875b3c2f68327436355832e3f6','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};</script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
       </div>
     </div></div>
   </div>
@@ -1326,8 +1352,7 @@ window.onerror = function(msg, src, line, col, err) {
           </div>
         </div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script type="text/javascript">atOptions = {'key' : '224430875b3c2f68327436355832e3f6','format' : 'iframe','height' : 250,'width' : 300,'params' : {}};</script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js"></script>
+        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
       </div>
       </div>
     </div>
@@ -2325,6 +2350,10 @@ function checkSignupRateLimit(){
   }catch(e){return true;}
 }
 
+// Detect if running inside an iframe (GD or other embed)
+// IN_IFRAME = true only for GD/embed context, NOT Telegram
+const IN_IFRAME = (window.self !== window.top) && !window.TG_USER;
+
 let COINS=1000, SATS=0, JACKPOT=1247;
 let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
 function _todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2559,9 +2588,20 @@ async function shopBuy(priceId,coins){
 function shopWatchAd(){closeShop();_adWatchType='coins';showAdPopup();}
 
 /* POPUP ADS - rotate 3min/5min, fund sat pool conceptually */
-function scheduleNextAd(){setTimeout(showAdPopup,AD_INTERVALS[adIdx++%2]);}
+function scheduleNextAd(){if(IN_IFRAME)return;setTimeout(showAdPopup,AD_INTERVALS[adIdx++%2]);}
 let adPopupOpen=false,_adWatchType='timed';
 function showAdPopup(){
+  // In iframe (GD context) use GD rewarded ad instead of Adsterra
+  if(IN_IFRAME){
+    if(_adWatchType==='timed')return; // timed ads disabled in iframe
+    // For rewarded buttons wire to GD ad
+    _gdRewardType=_adWatchType;
+    if(window.GD_READY&&typeof gdsdk!=='undefined'){
+      _lastAnyAdTime=Date.now();
+      gdsdk.showAd();
+    }
+    return;
+  }
   // Don't show Adsterra popup if any ad showed recently
   if(Date.now()-_lastAnyAdTime<_MIN_AD_GAP&&_adWatchType==='timed'){return scheduleNextAd();}
   _adPopupOpenTime=Date.now();
@@ -2579,7 +2619,7 @@ function showAdPopup(){
     const fr=document.createElement('iframe');
     fr.style.cssText='width:300px;height:250px;border:none;overflow:hidden;';
     fr.scrolling='no';
-    fr.srcdoc="<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
+    if(!IN_IFRAME)fr.srcdoc="<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
     slot.appendChild(fr);
   }
   popup.classList.add('show');
@@ -4134,7 +4174,7 @@ function ballsBuyAd(){
 document.addEventListener('DOMContentLoaded',async function(){
   // Handle age gate / TG bypass FIRST before anything renders
   try{
-    var _inIframe=window.self!==window.top;
+    var _inIframe=IN_IFRAME; // uses same logic - excludes Telegram
     if(window.isTelegram()||_inIframe){
       var ag=document.getElementById('age-gate');if(ag)ag.style.display='none';
       try{
