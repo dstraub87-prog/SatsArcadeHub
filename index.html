@@ -2245,6 +2245,15 @@ window.onerror = function(msg, src, line, col, err) {
 let COINS=1000, SATS=0, JACKPOT=1247;
 let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
 function _todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _applyStreakState(lastClaim,streak){
+  // Returns {streak, claimedToday} based on lastClaim date vs today
+  const today=_todayISO();
+  if(!lastClaim) return {streak:0,claimedToday:false};
+  const diff=Math.floor((new Date(today)-new Date(lastClaim))/86400000);
+  if(diff===0) return {streak:streak,claimedToday:true};   // claimed today
+  if(diff===1) return {streak:streak,claimedToday:false};  // claimed yesterday, can claim today
+  return {streak:0,claimedToday:false};                    // missed a day, streak broken
+}
 let WEEKLY_CLAIMS={}, MONTHLY_CLAIMS={};
 let SESSION_START=Date.now(), SESSION_MINS=0;
 let TIME_CLAIMED={30:false,60:false,120:false,240:false};
@@ -2278,11 +2287,9 @@ function loadState(){
     if(DAILY_REDEEM_DATE!==_today){DAILY_REDEEMED=0;DAILY_REDEEM_DATE=_today;}
     const today=_todayISO();
     if(LAST_CLAIM){
-      const diff=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);
-      if(diff>1){STREAK=0;CLAIMED_TODAY=false;}
-      else if(diff===1)CLAIMED_TODAY=false;
+      const _sc=_applyStreakState(LAST_CLAIM,STREAK);
+      STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;
     }
-    if(LAST_CLAIM===today)CLAIMED_TODAY=true;
   }catch(e){}
 }
 function saveState(){
@@ -5373,12 +5380,8 @@ async function onAuthSuccess(user,displayName){
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
     try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
     // Recalculate CLAIMED_TODAY and STREAK from LAST_CLAIM
-    const _signInToday=_todayISO();
-    CLAIMED_TODAY=(LAST_CLAIM===_signInToday);
-    if(LAST_CLAIM && !CLAIMED_TODAY){
-      const _diff=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);
-      if(_diff>1){STREAK=0;}
-    }
+    if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
+    else{CLAIMED_TODAY=false;}
     syncAll();saveState();
     hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
   }
@@ -5491,8 +5494,8 @@ async function authInit(){
         PLAYER_LEVEL=existing.player_level??1;
         try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
-        const _t=_todayISO();CLAIMED_TODAY=(LAST_CLAIM===_t);
-        if(LAST_CLAIM&&!CLAIMED_TODAY){const _d=Math.floor((new Date()-new Date(LAST_CLAIM))/86400000);if(_d>1)STREAK=0;}
+        if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
+        else{CLAIMED_TODAY=false;}
         // Use saved display_name from Supabase; fallback to Telegram name
         if(existing.display_name&&!existing.display_name.startsWith('tg_'))PLAYER_NAME=existing.display_name;
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
