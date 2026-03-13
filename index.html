@@ -2201,6 +2201,16 @@ window.onerror = function(msg, src, line, col, err) {
     <div id="ps-account-info" style="display:none;text-align:center;margin-bottom:8px">
       <div style="font-size:.46rem;color:rgba(255,255,255,.3)" id="ps-account-email"></div>
     </div>
+    <div style="background:linear-gradient(135deg,rgba(247,147,26,.12),rgba(247,147,26,.04));border:1px solid rgba(247,147,26,.3);border-radius:12px;padding:12px;margin-bottom:10px;text-align:center;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:var(--btc);letter-spacing:2px;margin-bottom:4px;">⚡ REFER &amp; EARN</div>
+      <div style="font-size:.5rem;color:rgba(255,255,255,.5);margin-bottom:8px;">Share your link — earn 10,000 coins per referral!</div>
+      <div id="ps-ref-link" style="font-size:.42rem;color:rgba(255,255,255,.3);word-break:break-all;margin-bottom:8px;min-height:12px;"></div>
+      <div style="display:flex;gap:6px;">
+        <button onclick="copyReferralLink()" style="flex:1;padding:8px;background:rgba(247,147,26,.15);border:1px solid rgba(247,147,26,.3);border-radius:8px;color:var(--btc);font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:1px;cursor:pointer;">📋 COPY LINK</button>
+        <button onclick="shareReferralLink()" style="flex:1;padding:8px;background:rgba(247,147,26,.15);border:1px solid rgba(247,147,26,.3);border-radius:8px;color:var(--btc);font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:1px;cursor:pointer;">🔗 SHARE</button>
+      </div>
+      <div id="ps-ref-count" style="font-size:.45rem;color:rgba(255,255,255,.3);margin-top:6px;"></div>
+    </div>
     <div style="display:flex;gap:6px">
       <button style="flex:1;padding:11px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;cursor:pointer;" onclick="closeProfile()">CLOSE</button>
       <button id="ps-signout-btn" style="display:none;padding:11px 14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:10px;color:#f87171;font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:2px;cursor:pointer;" onclick="authSignOut();closeProfile()">SIGN OUT</button>
@@ -2225,6 +2235,13 @@ window.onerror = function(msg, src, line, col, err) {
    COINS = entertainment only (no real value, can buy/earn)
    SATS  = real Bitcoin rewards, earned FREE via loyalty ONLY
    =========================================================== */
+// Capture referral param from URL
+(function(){
+  try{
+    const _rp=new URLSearchParams(window.location.search).get('ref');
+    if(_rp)sessionStorage.setItem('sah_ref',_rp);
+  }catch(e){}
+})();
 let COINS=1000, SATS=0, JACKPOT=1247;
 let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
 function _todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2235,6 +2252,11 @@ let AD_WATCH_NEXT=0, REDEEM_HIST=[], DAILY_REDEEMED=0, DAILY_REDEEM_DATE="";
 const AD_INTERVALS=[3*60000,5*60000];
 let adIdx=0, adSkipTimer=null;
 
+function getOrCreateAnonId(){
+  let id=localStorage.getItem('sah_anon_id');
+  if(!id){id=crypto.randomUUID();try{localStorage.setItem('sah_anon_id',id);}catch(e){}}
+  return id;
+}
 function loadState(){
   try{
     const s=JSON.parse(localStorage.getItem('sah_v5')||'{}');
@@ -3865,7 +3887,42 @@ function updateLevel(animate){
     confetti();
   }
 }
-function openProfile(){buildEmojiGrid();updateLevel(false);refreshAvatarUI();document.getElementById('profile-sheet').classList.add('show');}
+function getReferralLink(){
+  const base='https://satsarcadehub.com';
+  const id=_authUser?.id||localStorage.getItem('sah_anon_id');
+  return id?base+'?ref='+id.slice(0,8):base;
+}
+function copyReferralLink(){
+  const link=getReferralLink();
+  navigator.clipboard?.writeText(link).then(()=>hubToast('Referral link copied! ⚡')).catch(()=>{
+    const el=document.createElement('textarea');el.value=link;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);hubToast('Referral link copied! ⚡');
+  });
+}
+function shareReferralLink(){
+  const link=getReferralLink();
+  const text='Play free arcade games & earn Bitcoin sats! ⚡ '+link;
+  if(window.TG&&window.TG.switchInlineQuery){
+    window.TG.switchInlineQuery('Play free arcade games & earn Bitcoin sats! ⚡ No deposit needed.',['users','groups','channels']);
+  } else if(navigator.share){
+    navigator.share({title:'Sats Arcade Hub',text:'Play free arcade games & earn Bitcoin sats! ⚡',url:link});
+  } else {
+    copyReferralLink();
+  }
+}
+async function updateReferralCount(){
+  const sb=getSupabase();if(!sb||!_authUser)return;
+  const {count}=await sb.from('profiles').select('*',{count:'exact',head:true}).eq('referred_by',_authUser.id);
+  const el=document.getElementById('ps-ref-count');
+  if(el&&count!=null)el.textContent=count+' referral'+(count===1?'':'s')+' — '+(count*10000).toLocaleString()+' coins earned';
+}
+function openProfile(){
+  buildEmojiGrid();updateLevel(false);refreshAvatarUI();
+  // Show referral link
+  const rl=document.getElementById('ps-ref-link');
+  if(rl)rl.textContent=getReferralLink();
+  updateReferralCount();
+  document.getElementById('profile-sheet').classList.add('show');
+}
 function closeProfile(){document.getElementById('profile-sheet').classList.remove('show');}
 function buildEmojiGrid(){
   const g=document.getElementById('ps-emoji-grid');if(!g)return;
@@ -5294,6 +5351,19 @@ async function onAuthSuccess(user,displayName){
       games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
       player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0
     });
+    // Award referrer 10,000 coins for this new signup
+    try{
+      const _ref=sessionStorage.getItem('sah_ref');
+      if(_ref){
+        const {data:referrer}=await sb.from('profiles').select('id,coins').filter('id','like',_ref+'%').single();
+        if(referrer&&referrer.id!==user.id){
+          await sb.from('profiles').update({coins:referrer.coins+10000}).eq('id',referrer.id);
+          await sb.from('profiles').update({referred_by:referrer.id}).eq('id',user.id);
+          sessionStorage.removeItem('sah_ref');
+          console.log('[Ref] Awarded 10,000 coins to referrer');
+        }
+      }
+    }catch(e){console.error('[Ref] award error:',e);}
     hubToast('Account created! Progress synced &#x2713;');
   } else {
     COINS=existing.coins??1000;SATS=existing.sats??0;
@@ -5440,6 +5510,18 @@ async function authInit(){
         _authUser={id:newId,email:tgId};_tgId=tgId;
         if(!localStorage.getItem('sah_v5'))COINS=1000;
         syncAll();saveState();
+        // Award referrer for TG new user
+        try{
+          const _ref=sessionStorage.getItem('sah_ref');
+          if(_ref){
+            const {data:referrer}=await sb.from('profiles').select('id,coins').filter('id','like',_ref+'%').single();
+            if(referrer&&referrer.id!==newId){
+              await sb.from('profiles').update({coins:referrer.coins+10000}).eq('id',referrer.id);
+              await sb.from('profiles').update({referred_by:referrer.id}).eq('id',newId);
+              sessionStorage.removeItem('sah_ref');
+            }
+          }
+        }catch(e){console.error('[Ref TG] award error:',e);}
         hubToast('Welcome to Sats Arcade! ⚡');
       }
       updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
