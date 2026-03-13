@@ -899,33 +899,36 @@ if(window.TG && window.TG.initDataUnsafe?.user){
 window.isTelegram = function(){ return !!window.TG_USER; };
 
 // === GAMEDISTRIBUTION SDK INIT ===
+// GD_OPTIONS MUST be defined before the SDK script loads
 window.GD_READY = false;
 window.GD_PAUSED = false;
-(function(){
-  if(typeof gdsdk === 'undefined') return;
-  window.gdsdk = gdsdk;
-  gdsdk.init({
-    gameId: '1cec31a1-6cf3-4305-acec-31364182b7fb',
-    advertisementSettings: { autoplay: false },
-    onEvent: function(event){
-      switch(event.name){
-        case 'SDK_READY':
-          window.GD_READY = true;
-          break;
-        case 'SDK_GAME_START':
-          // Ad finished - resume game
-          window.GD_PAUSED = false;
-          break;
-        case 'SDK_GAME_PAUSE':
-          // Ad starting - pause game
-          window.GD_PAUSED = true;
-          break;
-        case 'SDK_ERROR':
-          window.GD_READY = false;
-          break;
-      }
+window["GD_OPTIONS"] = {
+  "gameId": "1cec31a16cf34305acec31364182b7fb",
+  "advertisementSettings": {"autoplay": false},
+  "onEvent": function(event){
+    switch(event.name){
+      case "SDK_READY":
+        window.GD_READY = true;
+        if(typeof gdsdk !== 'undefined') gdsdk.showAd();
+        break;
+      case "SDK_GAME_START":
+        window.GD_PAUSED = false;
+        break;
+      case "SDK_GAME_PAUSE":
+        window.GD_PAUSED = true;
+        break;
+      case "SDK_ERROR":
+        window.GD_READY = false;
+        break;
     }
-  });
+  }
+};
+// Load SDK after GD_OPTIONS is set
+(function(){
+  var s=document.createElement('script');
+  s.src='https://html5.api.gamedistribution.com/main.min.js';
+  s.async=true;
+  document.head.appendChild(s);
 })();
 
 // Call this between games to show a GD ad
