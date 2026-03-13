@@ -414,9 +414,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .conf{position:absolute;animation:confFall linear forwards;}
 @keyframes confFall{from{transform:translateY(-8px) rotate(0);opacity:1}to{transform:translateY(105vh) rotate(720deg);opacity:0}}
 /* POPUP AD */
-#ad-popup{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;padding:18px;backdrop-filter:blur(5px);}
+#ad-popup{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.9);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .28s;padding:12px;backdrop-filter:blur(5px);overflow-y:auto;}
 #ad-popup.show{opacity:1;pointer-events:all;}
-.ad-card{background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;max-width:300px;width:100%;text-align:center;position:relative;animation:popIn .32s cubic-bezier(.34,1.56,.64,1);}
+.ad-card{background:var(--bg2);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px 14px 16px;max-width:340px;width:calc(100% - 24px);text-align:center;position:relative;animation:popIn .32s cubic-bezier(.34,1.56,.64,1);}
 .ad-skip-btn{position:absolute;top:9px;right:11px;font-size:.54rem;color:var(--muted);cursor:default;font-family:'Space Mono',monospace;}
 .ad-skip-btn.ready{color:var(--btc);cursor:pointer;}
 .ad-banner{background:linear-gradient(135deg,rgba(247,147,26,.08),rgba(255,215,0,.04));border:1px dashed rgba(247,147,26,.25);border-radius:9px;height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:.65rem;color:var(--muted);letter-spacing:2px;font-family:'Audiowide',monospace;}
@@ -2156,7 +2156,7 @@ window.declineAge = function() {
 <div id="ad-popup">
   <div class="ad-card">
     <div class="ad-skip-btn" id="ad-skip-btn">Skip in <span id="ad-skip-cnt">15</span>s</div>
-    <div id="ad-banner-slot" style="display:flex;align-items:center;justify-content:center;min-height:250px;width:300px;margin:8px auto;background:rgba(0,0,0,.3);border-radius:8px;overflow:hidden;"></div>
+    <div id="ad-banner-slot" style="display:flex;align-items:center;justify-content:center;min-height:260px;width:100%;max-width:300px;margin:8px auto;background:rgba(0,0,0,.3);border-radius:8px;overflow:hidden;"></div>
     <div class="ad-pool-note">👁️ Ad revenue funds the ₿ Sat prize pool</div>
     <button class="ad-close-btn" id="ad-close-btn" onclick="closeAdPopup()" disabled>CONTINUE PLAYING</button>
   </div>
@@ -2429,6 +2429,7 @@ function trackGame(){
 // Session security counters - reset each page load
 let _sessionSatsEarned=0, _sessionCoinsEarned=0;
 const _MAX_SATS_SESSION=500, _MAX_COINS_SESSION=500000, _MAX_SINGLE_SAT=200, _MAX_SINGLE_COIN=10000;
+let _sessionSatsEarned=0;
 let _adPopupOpenTime=0; // track when ad popup was actually opened
 
 function earnCoins(n,label){
@@ -2738,6 +2739,8 @@ function claimStreak(){
   const cycleDay=idx+1;
   STREAK=STREAK+1;CLAIMED_TODAY=true;LAST_CLAIM=_todayISO();
   saveState();renderStreakHub();renderStreakRewards();
+  // Sync immediately - streak is critical, don't wait for debounce
+  syncToServer();
   const isWeek7=cycleDay===7;
   showRewardPopup('\u{1F525}',isWeek7?'Week Complete! \u{1F525}':'Day '+cycleDay+' Streak!',[{ico:'\u{1FA99}',val:'+'+r.coins+' Coins'},{ico:'\u20BF',val:'\u20BF'+r.sats}],'var(--btc)');
   confetti();
@@ -2861,6 +2864,10 @@ function startSystems(){
     renderTimeTiers();
   },30000);
   setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT=500;document.getElementById('global-jackpot').textContent=JACKPOT.toLocaleString();},4000);
+  // Sync to server every 60 seconds regardless of activity
+  setInterval(()=>{ if(_authUser) syncToServer(); },60000);
+  // Final sync before tab closes
+  window.addEventListener('beforeunload',()=>{ if(_authUser) syncToServer(); });
 }
 /* DOM ready handler is at the bottom of this script */
 /* === PLINKO === */
@@ -5608,10 +5615,30 @@ async function syncToServer(){
     p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims,
     p_plinko_balls:payload.plinko_balls||5
   });
-  if(error){console.error('[Sync] error:',error.message);}
-  else if(syncResult?.coins!=null&&syncResult.coins!==COINS){
-    // Server corrected our values - accept server truth
-    COINS=syncResult.coins;SATS=syncResult.sats;syncAll();
+  if(error){
+    console.error('[Sync] RPC error:',error.message);
+    // Fallback: direct upsert if RPC fails (e.g. signature mismatch)
+    try{
+      await sb.from('profiles').upsert({
+        id:payload.id, coins:payload.coins, sats:payload.sats,
+        lifetime_coins:payload.lifetime_coins, lifetime_sats:payload.lifetime_sats,
+        games_played:payload.games_played, streak:payload.streak,
+        last_claim:payload.last_claim, player_level:payload.player_level,
+        player_xp:payload.player_xp, avatar:payload.avatar,
+        display_name:payload.display_name, plinko_balls:payload.plinko_balls||5,
+        weekly_claims:payload.weekly_claims, monthly_claims:payload.monthly_claims,
+        ...(_tgId?{tg_id:_tgId}:{})
+      },{onConflict:'id'});
+      console.log('[Sync] fallback upsert succeeded');
+    }catch(fe){console.error('[Sync] fallback also failed:',fe);}
+  }
+  else if(syncResult!=null){
+    // Always accept server truth for all values
+    if(syncResult.coins!=null) COINS=syncResult.coins;
+    if(syncResult.sats!=null){ SATS=syncResult.sats; }
+    if(syncResult.lifetime_sats!=null) LIFETIME_SATS=syncResult.lifetime_sats;
+    if(syncResult.plinko_balls!=null) PLINKO.balls=syncResult.plinko_balls;
+    syncAll();
   }
 }
 
