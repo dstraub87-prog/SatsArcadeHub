@@ -3900,8 +3900,7 @@ function copyReferralLink(){
 }
 function shareReferralLink(){
   const link=getReferralLink();
-  const text='Play free arcade games & earn Bitcoin sats! ⚡ '+link;
-  if(window.TG&&window.TG.switchInlineQuery){
+  if(window.isTelegram()&&window.TG.switchInlineQuery){
     window.TG.switchInlineQuery('Play free arcade games & earn Bitcoin sats! ⚡ No deposit needed.',['users','groups','channels']);
   } else if(navigator.share){
     navigator.share({title:'Sats Arcade Hub',text:'Play free arcade games & earn Bitcoin sats! ⚡',url:link});
