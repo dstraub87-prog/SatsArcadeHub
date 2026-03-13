@@ -2397,6 +2397,7 @@ function loadState(){
     if(s.rh)REDEEM_HIST=s.rh;
     if(s.dr!=null)DAILY_REDEEMED=s.dr;
     if(s.drd)DAILY_REDEEM_DATE=s.drd;
+    if(s.pb!=null)PLINKO.balls=Math.min(Math.max(0,parseInt(s.pb)||0),200); // cap 200
     // Reset daily counter if new day
     const _today=_todayISO();
     if(DAILY_REDEEM_DATE!==_today){DAILY_REDEEMED=0;DAILY_REDEEM_DATE=_today;}
@@ -2411,7 +2412,8 @@ function saveState(){
   try{if(typeof debouncedSyncToServer==='function')debouncedSyncToServer();}catch(e){}
   try{localStorage.setItem('sah_v5',JSON.stringify({
     c:COINS,s:SATS,j:JACKPOT,st:STREAK,lc:LAST_CLAIM,ct:CLAIMED_TODAY,
-    wc:WEEKLY_CLAIMS,mc:MONTHLY_CLAIMS,tc:TIME_CLAIMED,awn:AD_WATCH_NEXT,rh:REDEEM_HIST,dr:DAILY_REDEEMED,drd:DAILY_REDEEM_DATE
+    wc:WEEKLY_CLAIMS,mc:MONTHLY_CLAIMS,tc:TIME_CLAIMED,awn:AD_WATCH_NEXT,rh:REDEEM_HIST,dr:DAILY_REDEEMED,drd:DAILY_REDEEM_DATE,
+    pb:PLINKO.balls
   }));}catch(e){}
 }
 loadState();
@@ -3073,7 +3075,7 @@ function pDrop(){
     else pPToast('Need '+PLINKO.multi+' balls for \u00D7'+PLINKO.multi);
     return;
   }
-  PLINKO.balls-=PLINKO.multi;
+  PLINKO.balls-=PLINKO.multi;saveState();
   PLINKO.activeDrops=PLINKO.multi;
   PLINKO.roundTotal=0;PLINKO.roundBest=0;
   trackGame();
@@ -3109,7 +3111,7 @@ function pCycleMulti(){
   btn.textContent='\u{1F3B1} \u00D7'+PLINKO.multi;
   _pUpdateBtn();
 }
-function pBuyBalls(){if(spendCoins(200)){PLINKO.balls+=1;_pUpdateUI();pPToast('\u{1F3B1} +1 ball!');}}
+function pBuyBalls(){if(spendCoins(200)){PLINKO.balls+=1;_pUpdateUI();saveState();pPToast('\u{1F3B1} +1 ball!');}}
 function openBallsShop(){openShop();}
 const BVALS=[1,1,2,2,3,3,5,5,10,'bomb','bomb','bomb'];
 function pOpenBonus(){
@@ -4164,6 +4166,7 @@ function closeBallsShop(){document.getElementById('balls-shop-overlay').classLis
 function ballsBuy(count,cost){
   if(!spendCoins(cost))return;
   PLINKO.balls+=count;_pUpdateUI();
+  saveState(); // persist ball purchase immediately
   closeBallsShop();
   pPToast('\u{1F3B1} +'+count+' ball'+(count>1?'s':'')+'!');
 }
@@ -5568,6 +5571,7 @@ async function onAuthSuccess(user,displayName){
     COINS=existing.coins??1000;SATS=existing.sats??0;
     LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
+    PLINKO.balls=Math.min(Math.max(0,existing.plinko_balls??5),200);
     LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=sanitizeName(existing.display_name??name);
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
@@ -5587,6 +5591,7 @@ async function syncToServer(){
     id:_authUser.id,
     coins:COINS,sats:SATS,lifetime_coins:LIFETIME_COINS,lifetime_sats:LIFETIME_SATS,
     games_played:GAMES_PLAYED,streak:STREAK,last_claim:LAST_CLAIM||null,
+    plinko_balls:Math.min(PLINKO.balls,200),
     player_level:PLAYER_LEVEL||1,player_xp:PLAYER_XP||0,
     avatar:PLAYER_AVATAR,display_name:PLAYER_NAME,
     ...(_tgId?{tg_id:_tgId}:{}),
@@ -5600,7 +5605,8 @@ async function syncToServer(){
     p_last_claim:payload.last_claim, p_player_level:payload.player_level,
     p_player_xp:payload.player_xp, p_avatar:payload.avatar,
     p_display_name:payload.display_name, p_tg_id:payload.tg_id||null,
-    p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims
+    p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims,
+    p_plinko_balls:payload.plinko_balls||5
   });
   if(error){console.error('[Sync] error:',error.message);}
   else if(syncResult?.coins!=null&&syncResult.coins!==COINS){
