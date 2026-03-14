@@ -2387,6 +2387,9 @@ function getOrCreateAnonId(){
   if(!id){id=crypto.randomUUID();try{localStorage.setItem('sah_anon_id',id);}catch(e){}}
   return id;
 }
+// PLINKO must be declared before loadState() runs
+const PLINKO={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0,roundTotal:0,roundBest:0};
+
 function loadState(){
   try{
     const s=JSON.parse(localStorage.getItem('sah_v5')||'{}');
@@ -2877,7 +2880,6 @@ function startSystems(){
 }
 /* DOM ready handler is at the bottom of this script */
 /* === PLINKO === */
-const PLINKO={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0,roundTotal:0,roundBest:0};
 const PN_B=[{l:'9x',m:9,c:'#3a1a6b'},{l:'3x',m:3,c:'#6b3500'},{l:'1.5x',m:1.5,c:'#6b1a1a'},{l:'\u{1F480}',m:0,c:'#1a0a0a'},{l:'25x',m:25,c:'#8a6a00'},{l:'\u{1F480}',m:0,c:'#1a0a0a'},{l:'1.5x',m:1.5,c:'#6b1a1a'},{l:'3x',m:3,c:'#6b3500'},{l:'9x',m:9,c:'#3a1a6b'}];
 let _pCan,_pCtx,_pPegs=[],_pBalls=[],_pParticles=[],_pRaf=null;
 const _pW=260,_pH=380,_pBH=44;
