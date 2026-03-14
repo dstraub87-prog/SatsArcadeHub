@@ -2403,6 +2403,7 @@ let _sfxVol = 0.7;
 let _musicVol = 0.25;
 let _musicNodes = [];
 let _musicInterval = null;
+let _musicGain = null;
 
 function _getCtx(){
   if(!_audioCtx){
@@ -2642,14 +2643,31 @@ let _musicStreamIdx = 0;
 
 function startMusic(){
   stopMusic();
+  const ctx=_getCtx();
   _musicAudio = new Audio();
   _musicAudio.crossOrigin = 'anonymous';
-  _musicAudio.volume = _musicVol;
   _musicAudio.preload = 'none';
-  // Try next stream on error
+  // Route through Web Audio GainNode for reliable volume control
+  if(ctx){
+    try{
+      const src=ctx.createMediaElementSource(_musicAudio);
+      _musicGain=ctx.createGain();
+      _musicGain.gain.setValueAtTime(_musicVol,ctx.currentTime);
+      src.connect(_musicGain);
+      _musicGain.connect(ctx.destination);
+      _musicNodes.push(_musicGain);
+    }catch(e){
+      // Fallback: direct volume if Web Audio fails
+      _musicAudio.volume=_musicVol;
+      _musicGain=null;
+    }
+  } else {
+    _musicAudio.volume=_musicVol;
+    _musicGain=null;
+  }
   _musicAudio.onerror = ()=>{
     _musicStreamIdx = (_musicStreamIdx+1) % JAZZ_STREAMS.length;
-    if(_musicStreamIdx > 0 && _musicOn){
+    if(_musicOn && _musicStreamIdx < JAZZ_STREAMS.length){
       _musicAudio.src = JAZZ_STREAMS[_musicStreamIdx];
       _musicAudio.play().catch(()=>{});
     }
@@ -2688,7 +2706,12 @@ function toggleSfx(){
 
 function setMusicVol(v){
   _musicVol=v/100;
-  if(_musicAudio) _musicAudio.volume=_musicVol;
+  if(_musicGain){
+    const ctx=_getCtx();
+    if(ctx) _musicGain.gain.setValueAtTime(_musicVol,ctx.currentTime);
+  } else if(_musicAudio){
+    _musicAudio.volume=_musicVol;
+  }
   saveSoundPrefs();
 }
 function setSfxVol(v){ _sfxVol=v/100; saveSoundPrefs(); }
