@@ -5592,6 +5592,13 @@ async function onAuthSuccess(user,displayName){
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
     PLINKO.balls=Math.min(Math.max(0,existing.plinko_balls??5),200);
     if(typeof _pUpdateUI==='function')_pUpdateUI();
+    // Restore ad watch cooldown from server - prevents logout exploit
+    if(existing.last_ad_sat){
+      const _lastAd=new Date(existing.last_ad_sat).getTime();
+      const _nextAd=_lastAd+1800000; // 30 min cooldown
+      if(_nextAd>Date.now()) AD_WATCH_NEXT=_nextAd;
+      else AD_WATCH_NEXT=0;
+    }
     LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=sanitizeName(existing.display_name??name);
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
@@ -5616,7 +5623,8 @@ async function syncToServer(){
     avatar:PLAYER_AVATAR,display_name:PLAYER_NAME,
     tg_id:_tgId||null,
     weekly_claims:JSON.stringify(WEEKLY_CLAIMS),
-    monthly_claims:JSON.stringify(MONTHLY_CLAIMS)
+    monthly_claims:JSON.stringify(MONTHLY_CLAIMS),
+    last_ad_sat:AD_WATCH_NEXT>0?new Date(AD_WATCH_NEXT-1800000).toISOString():null
   };
   const {data:syncResult,error}=await sb.rpc('secure_profile_update',{
     p_id:payload.id, p_coins:payload.coins, p_sats:payload.sats,
@@ -5626,7 +5634,8 @@ async function syncToServer(){
     p_player_xp:payload.player_xp, p_avatar:payload.avatar,
     p_display_name:payload.display_name, p_tg_id:payload.tg_id||null,
     p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims,
-    p_plinko_balls:payload.plinko_balls||5
+    p_plinko_balls:payload.plinko_balls||5,
+    p_last_ad_sat:payload.last_ad_sat||null
   });
   if(error){console.error('[Sync] RPC error:',error.message,'code:',error.code,'streak:',payload.streak,'balls:',payload.plinko_balls);}
   else if(syncResult!=null){
@@ -5732,6 +5741,12 @@ async function authInit(){
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
         if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
         else{CLAIMED_TODAY=false;}
+        // Restore ad watch cooldown from server
+        if(existing.last_ad_sat){
+          const _lastAd=new Date(existing.last_ad_sat).getTime();
+          const _nextAd=_lastAd+1800000;
+          AD_WATCH_NEXT=_nextAd>Date.now()?_nextAd:0;
+        }
         // Use saved display_name from Supabase; fallback to Telegram name
         if(existing.display_name&&!existing.display_name.startsWith('tg_'))PLAYER_NAME=sanitizeName(existing.display_name);
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
