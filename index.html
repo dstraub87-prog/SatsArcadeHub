@@ -2388,7 +2388,7 @@ function getOrCreateAnonId(){
   return id;
 }
 // PLINKO must be declared before loadState() runs
-const PLINKO={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0,roundTotal:0,roundBest:0};
+const PLINKO={balls:0,score:0,multi:1,activeDrops:0,history:[],bonusActive:false,bonusTotal:0,bonusPicks:0,roundTotal:0,roundBest:0};
 
 function loadState(){
   try{
@@ -5590,7 +5590,7 @@ async function onAuthSuccess(user,displayName){
     COINS=existing.coins??1000;SATS=existing.sats??0;
     LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
-    PLINKO.balls=Math.min(Math.max(0,existing.plinko_balls??5),200);
+    PLINKO.balls=Math.min(Math.max(0,existing.plinko_balls??0),200);
     if(typeof _pUpdateUI==='function')_pUpdateUI();
     // Restore ad watch cooldown from server - prevents logout exploit
     if(existing.last_ad_sat){
@@ -5634,7 +5634,7 @@ async function syncToServer(){
     p_player_xp:payload.player_xp, p_avatar:payload.avatar,
     p_display_name:payload.display_name, p_tg_id:payload.tg_id||null,
     p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims,
-    p_plinko_balls:payload.plinko_balls||5,
+    p_plinko_balls:payload.plinko_balls??0,
     p_last_ad_sat:payload.last_ad_sat||null
   });
   if(error){console.error('[Sync] RPC error:',error.message,'code:',error.code,'streak:',payload.streak,'balls:',payload.plinko_balls);}
