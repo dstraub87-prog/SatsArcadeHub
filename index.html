@@ -2482,19 +2482,17 @@ const SFX = {
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);
     o.type='sawtooth';
-    o.frequency.setValueAtTime(40,ctx.currentTime);
-    o.frequency.linearRampToValueAtTime(120,ctx.currentTime+0.4);
-    o.frequency.linearRampToValueAtTime(60,ctx.currentTime+1.2);
-    o.frequency.linearRampToValueAtTime(30,ctx.currentTime+2.5);
-    g.gain.setValueAtTime(0.2*_sfxVol,ctx.currentTime);
-    g.gain.setValueAtTime(0.2*_sfxVol,ctx.currentTime+1.5);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+2.6);
-    o.start(); o.stop(ctx.currentTime+2.7);
-    // Add ticking as it slows
-    for(let i=0;i<8;i++){
-      const delay=1.4+i*(0.08+i*0.02);
-      _noise(0.03,0.4,800,1600,delay);
-    }
+    o.frequency.setValueAtTime(30,ctx.currentTime);
+    o.frequency.linearRampToValueAtTime(160,ctx.currentTime+0.6);
+    o.frequency.linearRampToValueAtTime(100,ctx.currentTime+1.5);
+    o.frequency.linearRampToValueAtTime(40,ctx.currentTime+2.4);
+    o.frequency.linearRampToValueAtTime(20,ctx.currentTime+3.0);
+    g.gain.setValueAtTime(0.25*_sfxVol,ctx.currentTime);
+    g.gain.setValueAtTime(0.25*_sfxVol,ctx.currentTime+2.0);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+3.1);
+    o.start(); o.stop(ctx.currentTime+3.2);
+    const tickTimes=[1.8,2.1,2.35,2.55,2.72,2.86,2.96,3.04];
+    tickTimes.forEach(t=>_noise(0.025,0.5,900,2000,t));
   },
   // Roulette spin
   rouletteSpin: ()=>{
@@ -2604,54 +2602,58 @@ const SFX = {
   scratch:()=>{ if(!_sfxOn)return; _noise(0.08,0.3,2000,6000,0); },
   cardFlip:()=>{ if(!_sfxOn)return; _noise(0.07,0.3,500,1500,0); _tone(500,'sine',0.05,0.1,0.05); },
   beep:()=>{ if(!_sfxOn)return; _tone(880,'sine',0.08,0.4); },
+  crashTick:(mult)=>{
+    if(!_sfxOn)return;
+    const freq=Math.min(200+mult*80,1400);
+    _tone(freq,'sine',0.035,0.12);
+  },
+  crashBoom:()=>{
+    if(!_sfxOn)return;
+    _noise(0.5,0.9,30,500,0);
+    _tone(80,'sawtooth',0.4,0.6,0.02);
+    _noise(0.3,0.6,500,2000,0.06);
+  },
 };
 
-// ---- AMBIENT BACKGROUND PAD ----
-// Deep casino atmosphere: filtered noise + slow chord drones
-// No melody = relaxing presence, not annoying
+// ---- STREAMING JAZZ MUSIC ----
+// Uses live jazz radio streams (royalty-free, HTTPS)
+// Falls back through multiple streams if one is unavailable
+const JAZZ_STREAMS = [
+  'https://ice4.somafm.com/groovesalad-128-mp3',   // SomaFM Groove Salad (ambient/jazz)
+  'https://ice2.somafm.com/groovesalad-128-mp3',   // SomaFM mirror 2
+  'https://ice1.somafm.com/groovesalad-128-mp3',   // SomaFM mirror 1
+];
+let _musicAudio = null;
+let _musicStreamIdx = 0;
+
 function startMusic(){
-  const ctx=_getCtx();if(!ctx)return;
   stopMusic();
-  const master=ctx.createGain();
-  master.gain.setValueAtTime(_musicVol*0.5,ctx.currentTime);
-  master.connect(ctx.destination);
-  _musicNodes.push(master);
-  // Deep sub hum 55Hz
-  const sub=ctx.createOscillator();
-  const subG=ctx.createGain();
-  sub.type='sine';sub.frequency.value=55;
-  subG.gain.value=0.5;
-  sub.connect(subG);subG.connect(master);
-  sub.start();_musicNodes.push(sub,subG);
-  // Filtered brown noise
-  const bufLen=ctx.sampleRate*4;
-  const buf=ctx.createBuffer(1,bufLen,ctx.sampleRate);
-  const d=buf.getChannelData(0);
-  let lo=0;
-  for(let i=0;i<bufLen;i++){d[i]=(lo=(lo+0.02*(Math.random()*2-1))/1.02)*3.5;}
-  const nSrc=ctx.createBufferSource();nSrc.buffer=buf;nSrc.loop=true;
-  const nFilt=ctx.createBiquadFilter();nFilt.type='lowpass';nFilt.frequency.value=160;
-  const nGain=ctx.createGain();nGain.gain.value=0.18;
-  nSrc.connect(nFilt);nFilt.connect(nGain);nGain.connect(master);
-  nSrc.start();_musicNodes.push(nSrc,nFilt,nGain);
-  // Slow pad chords with tremolo
-  [[110,0.12],[138.6,0.07],[165,0.06]].forEach(([freq,vol])=>{
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    const lfo=ctx.createOscillator(),lg=ctx.createGain();
-    lfo.frequency.value=0.12+Math.random()*0.08;lfo.type='sine';
-    lg.gain.value=vol*0.25;
-    lfo.connect(lg);lg.connect(g.gain);
-    o.type='sine';o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,ctx.currentTime);
-    o.connect(g);g.connect(master);
-    o.start();lfo.start();
-    _musicNodes.push(o,g,lfo,lg);
+  _musicAudio = new Audio();
+  _musicAudio.crossOrigin = 'anonymous';
+  _musicAudio.volume = _musicVol;
+  _musicAudio.preload = 'none';
+  // Try next stream on error
+  _musicAudio.onerror = ()=>{
+    _musicStreamIdx = (_musicStreamIdx+1) % JAZZ_STREAMS.length;
+    if(_musicStreamIdx > 0 && _musicOn){
+      _musicAudio.src = JAZZ_STREAMS[_musicStreamIdx];
+      _musicAudio.play().catch(()=>{});
+    }
+  };
+  _musicAudio.src = JAZZ_STREAMS[_musicStreamIdx % JAZZ_STREAMS.length];
+  _musicAudio.play().catch(e=>{
+    console.log('[Music] Autoplay blocked, will play on next interaction');
   });
 }
 function stopMusic(){
   if(_musicInterval){clearInterval(_musicInterval);_musicInterval=null;}
   _musicNodes.forEach(n=>{try{if(n.stop)n.stop();n.disconnect();}catch(e){}});
   _musicNodes=[];
+  if(_musicAudio){
+    _musicAudio.pause();
+    _musicAudio.src='';
+    _musicAudio=null;
+  }
 }
 
 function toggleMusic(){
@@ -2672,6 +2674,7 @@ function toggleSfx(){
 
 function setMusicVol(v){
   _musicVol=v/100;
+  if(_musicAudio) _musicAudio.volume=_musicVol;
   saveSoundPrefs();
 }
 function setSfxVol(v){ _sfxVol=v/100; saveSoundPrefs(); }
@@ -3372,7 +3375,7 @@ function _pTickBall(b){
       b.vx=Math.cos(a)*sp*0.76+(Math.random()-0.5)*1.2;
       b.vy=Math.abs(Math.sin(a)*sp*0.76);
       p.hit=8;
-      if(!b._lastBounce||Date.now()-b._lastBounce>80){SFX.bounce();b._lastBounce=Date.now();}
+      if(!b._bounceCount||b._bounceCount<20){SFX.bounce();b._bounceCount=(b._bounceCount||0)+1;}
     }
   }
   b.trail.push({x:b.x,y:b.y});
@@ -3549,7 +3552,7 @@ function aResult(id,m,c){const el=document.getElementById(id);if(!el)return;el.t
 const AW_SLICES=[{l:'0\u00D7',m:0,c:'#1a1a1a'},{l:'0\u00D7',m:0,c:'#1a1a1a'},{l:'1.5\u00D7',m:1.5,c:'#2a1800'},{l:'0\u00D7',m:0,c:'#1a1a1a'},{l:'2\u00D7',m:2,c:'#3a2000'},{l:'0\u00D7',m:0,c:'#1a1a1a'},{l:'0\u00D7',m:0,c:'#1a1a1a'},{l:'3.5\u00D7',m:3.5,c:'#a86000'}];
 let awAngle=0,awSpinning=false;
 function aDrawWheel(angle=0){const c=document.getElementById('a-wheel-canvas');if(!c)return;const ctx=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2,r=cx-10,n=AW_SLICES.length,arc=Math.PI*2/n;ctx.clearRect(0,0,W,H);for(let i=0;i<n;i++){const s=angle+i*arc;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,s+arc);ctx.fillStyle=AW_SLICES[i].c;ctx.fill();ctx.strokeStyle='#F7931A33';ctx.lineWidth=1.5;ctx.stroke();ctx.save();ctx.translate(cx,cy);ctx.rotate(s+arc/2);ctx.textAlign='right';ctx.fillStyle='#F0E6D3';ctx.font='bold 14px Bebas Neue,sans-serif';ctx.fillText(AW_SLICES[i].l,r-10,5);ctx.restore();}ctx.beginPath();ctx.arc(cx,cy,16,0,Math.PI*2);ctx.fillStyle='#F7931A';ctx.fill();ctx.beginPath();ctx.moveTo(cx+r+8,cy);ctx.lineTo(cx+r-8,cy-8);ctx.lineTo(cx+r-8,cy+8);ctx.fillStyle='#F7931A';ctx.fill();}
-function aSpinWheel(){SFX.wheelSpin();if(awSpinning)return;if(!spendCoins(aWheelBet))return;trackGame();aResult('a-wheel-result','','');awSpinning=true;document.getElementById('a-wheel-btn').disabled=true;const total=5*Math.PI*2+Math.random()*Math.PI*2,dur=3000,start=performance.now(),sa=awAngle;function tick(now){const t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,4);awAngle=sa+total*ease;aDrawWheel(awAngle);if(t<1){requestAnimationFrame(tick);return;}awSpinning=false;document.getElementById('a-wheel-btn').disabled=false;const n=AW_SLICES.length,arc=Math.PI*2/n,norm=(((-awAngle)%(Math.PI*2))+Math.PI*2)%(Math.PI*2),idx=~~(norm/arc)%n,sl=AW_SLICES[idx];if(sl.m>0){const w=~~(aWheelBet*sl.m);earnCoins(w,'Wheel Spin');showWinPopup(w,'Wheel Spin','\u{1F3A1}');aResult('a-wheel-result',`\u{1F3A1} ${sl.l}  -  +${w} coins!`,'win');}else SFX.lose();aResult('a-wheel-result','No luck this spin!','lose');}requestAnimationFrame(tick);}
+function aSpinWheel(){if(awSpinning)return;if(!spendCoins(aWheelBet))return;SFX.wheelSpin();trackGame();aResult('a-wheel-result','','');awSpinning=true;document.getElementById('a-wheel-btn').disabled=true;const total=5*Math.PI*2+Math.random()*Math.PI*2,dur=3000,start=performance.now(),sa=awAngle;function tick(now){const t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,4);awAngle=sa+total*ease;aDrawWheel(awAngle);if(t<1){requestAnimationFrame(tick);return;}awSpinning=false;document.getElementById('a-wheel-btn').disabled=false;const n=AW_SLICES.length,arc=Math.PI*2/n,norm=(((-awAngle)%(Math.PI*2))+Math.PI*2)%(Math.PI*2),idx=~~(norm/arc)%n,sl=AW_SLICES[idx];if(sl.m>0){const w=~~(aWheelBet*sl.m);earnCoins(w,'Wheel Spin');showWinPopup(w,'Wheel Spin','\u{1F3A1}');aResult('a-wheel-result',`\u{1F3A1} ${sl.l}  -  +${w} coins!`,'win');}else SFX.lose();aResult('a-wheel-result','No luck this spin!','lose');}requestAnimationFrame(tick);}
 
 /* Coin Flip */
 let aFlipping=false;
@@ -3640,7 +3643,8 @@ function aDrawKeno(){if(aKenoSel.size===0){aToast('Pick numbers first!');return;
 
 /* Crash */
 let aCrashRunning=false,aCrashMult=1,aCrashTarget=2,aCrashCashed=false,aCrashWager=10,aCrashAF=null;
-function aCrashBet(){if(aCrashRunning)return;if(!spendCoins(aCrashBetAmt))return;aCrashWager=aCrashBetAmt;aCrashMult=1;aCrashCashed=false;aCrashTarget=Math.random()<.3?1+Math.random()*.4:1+Math.random()*9;aCrashRunning=true;document.getElementById('a-crash-bet').disabled=true;document.getElementById('a-crash-cash').disabled=false;document.getElementById('a-crash-mult').className='a-crash-mult';aResult('a-crash-result','','');const can=document.getElementById('a-crash-canvas'),ctx=can.getContext('2d'),W=can.width,H=can.height,pts=[],t0=performance.now();function tick(now){const el=(now-t0)/1000;aCrashMult=Math.pow(Math.E,.15*el);document.getElementById('a-crash-mult').textContent=aCrashMult.toFixed(2)+'\u00D7';ctx.clearRect(0,0,W,H);ctx.fillStyle='#161616';ctx.fillRect(0,0,W,H);pts.push({x:Math.min(el/20*W,W),y:H-Math.min((aCrashMult-1)/9*H,H)});ctx.beginPath();ctx.strokeStyle='#F7931A';ctx.lineWidth=2;pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();if(pts.length){const l=pts[pts.length-1];ctx.beginPath();ctx.arc(l.x,l.y,5,0,Math.PI*2);ctx.fillStyle='#F7931A';ctx.fill();}if(aCrashMult>=aCrashTarget){aCrashRunning=false;document.getElementById('a-crash-cash').disabled=true;document.getElementById('a-crash-bet').disabled=false;document.getElementById('a-crash-mult').className='a-crash-mult crashed';document.getElementById('a-crash-mult').textContent='CRASHED @ '+aCrashTarget.toFixed(2)+'\u00D7';if(!aCrashCashed)aResult('a-crash-result',`Crashed! Lost ${aCrashBetAmt} coins.`,'lose');return;}aCrashAF=requestAnimationFrame(tick);}requestAnimationFrame(tick);}
+function aCrashBet(){if(aCrashRunning)return;if(!spendCoins(aCrashBetAmt))return;aCrashWager=aCrashBetAmt;aCrashMult=1;aCrashCashed=false;aCrashTarget=Math.random()<.3?1+Math.random()*.4:1+Math.random()*9;aCrashRunning=true;document.getElementById('a-crash-bet').disabled=true;document.getElementById('a-crash-cash').disabled=false;document.getElementById('a-crash-mult').className='a-crash-mult';aResult('a-crash-result','','');const can=document.getElementById('a-crash-canvas'),ctx=can.getContext('2d'),W=can.width,H=can.height,pts=[],t0=performance.now();function tick(now){const el=(now-t0)/1000;aCrashMult=Math.pow(Math.E,.15*el);document.getElementById('a-crash-mult').textContent=aCrashMult.toFixed(2)+'\u00D7';
+    const _prev=aCrashMult-0.004;if(Math.floor(aCrashMult*4)>Math.floor(_prev*4))SFX.crashTick(aCrashMult);ctx.clearRect(0,0,W,H);ctx.fillStyle='#161616';ctx.fillRect(0,0,W,H);pts.push({x:Math.min(el/20*W,W),y:H-Math.min((aCrashMult-1)/9*H,H)});ctx.beginPath();ctx.strokeStyle='#F7931A';ctx.lineWidth=2;pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();if(pts.length){const l=pts[pts.length-1];ctx.beginPath();ctx.arc(l.x,l.y,5,0,Math.PI*2);ctx.fillStyle='#F7931A';ctx.fill();}if(aCrashMult>=aCrashTarget){aCrashRunning=false;document.getElementById('a-crash-cash').disabled=true;document.getElementById('a-crash-bet').disabled=false;SFX.crashBoom();document.getElementById('a-crash-mult').className='a-crash-mult crashed';document.getElementById('a-crash-mult').textContent='CRASHED @ '+aCrashTarget.toFixed(2)+'\u00D7';if(!aCrashCashed)aResult('a-crash-result',`Crashed! Lost ${aCrashBetAmt} coins.`,'lose');return;}aCrashAF=requestAnimationFrame(tick);}requestAnimationFrame(tick);}
 function aCrashCashout(){if(!aCrashRunning||aCrashCashed)return;aCrashCashed=true;const w=~~(aCrashWager*aCrashMult);earnCoins(w,'Crash');showWinPopup(w,'Crash','\u{1F4A5}');aResult('a-crash-result',`Cashed out @ ${aCrashMult.toFixed(2)}\u00D7  -  +${w} coins!`,'win');}
 
 /* Mines */
@@ -3825,7 +3829,7 @@ function pLoop(){
   if(s.by-PBALL<0){s.by=PBALL;SFX.pongWall();s.vy=Math.abs(s.vy);}
   if(s.by+PBALL>PH){s.by=PH-PBALL;s.vy=-Math.abs(s.vy);}
   // player paddle (right)
-  if(s.vx>0&&s.bx+PBALL>=PW-PPAD-8&&s.bx+PBALL<=PW-PPAD&&s.by>=s.py&&s.by<=s.py+PPADH){
+  if(s.vx>0&&s.bx+PBALL>=PW-PPAD-8&&s.bx+PBALL<=PW-PPAD&&s.by>=s.py&&s.by<=s.py+PPADH){SFX.pongHit();
     s.vx=-Math.abs(s.vx)*1.05;
     const rel=(s.by-(s.py+PPADH/2))/(PPADH/2);
     s.vy=rel*4.5;
@@ -5571,6 +5575,7 @@ function scCompleteCell(i){
 
 function scScratchAll(){
   if(scDone)return;
+  SFX.scratch();SFX.scratch();
   scBoard.forEach((_,i)=>{
     if(scScratched[i])return;
     const can=scCanvases[i];if(!can)return;
