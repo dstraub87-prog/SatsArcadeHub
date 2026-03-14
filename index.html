@@ -975,8 +975,9 @@ window.onerror=function(msg,src,line){
 // Call this between games to show a GD ad
 function showGDAd(){
   try{
-    // Don't show GD ad if another ad showed recently
-    if(Date.now()-_lastAnyAdTime<_MIN_AD_GAP) return;
+    var _gap=typeof _MIN_AD_GAP!=='undefined'?_MIN_AD_GAP:120000;
+    var _last=typeof _lastAnyAdTime!=='undefined'?_lastAnyAdTime:0;
+    if(Date.now()-_last<_gap) return;
     if(window.GD_READY && typeof gdsdk !== 'undefined'){
       _lastAnyAdTime=Date.now();
       gdsdk.showAd();
@@ -1116,7 +1117,7 @@ window.declineAge = function() {
     </div>
 
     <div style="display:flex;justify-content:center;margin:10px 0;">
-      <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
+      <script>if(window.self===window.top){window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.head.appendChild(_bs);}</script>
     </div>
     <div class="hub-section-divider"><span>&#x1F579; ARCADE GAMES</span></div>
     <div class="feat-grid">
@@ -1242,7 +1243,7 @@ window.declineAge = function() {
         <div class="time-tiers" id="time-tiers"></div>
       </div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
+        <script>if(window.self===window.top){window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.head.appendChild(_bs);}</script>
       </div>
     </div></div>
   </div>
@@ -1281,7 +1282,7 @@ window.declineAge = function() {
       </div>
       <div class="rdm-legal">₿ earned through gameplay. Redeem any amount, up to ₿300/day. No purchase necessary. 18+ only. Void where prohibited. Sponsor: Sats Arcade Hub LLC, Arkansas.</div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
+        <script>if(window.self===window.top){window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.head.appendChild(_bs);}</script>
       </div>
     </div></div>
   </div>
@@ -1358,7 +1359,7 @@ window.declineAge = function() {
           </div>
         </div>
       <div style="display:flex;justify-content:center;margin:8px 0;">
-        <script>if(window.self===window.top){atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.currentScript.parentNode.appendChild(_bs);}</script>
+        <script>if(window.self===window.top){window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}};var _bs=document.createElement('script');_bs.src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js';document.head.appendChild(_bs);}</script>
       </div>
       </div>
     </div>
@@ -2434,7 +2435,6 @@ function trackGame(){
 // Session security counters - reset each page load
 let _sessionSatsEarned=0, _sessionCoinsEarned=0;
 const _MAX_SATS_SESSION=500, _MAX_COINS_SESSION=500000, _MAX_SINGLE_SAT=200, _MAX_SINGLE_COIN=10000;
-let _sessionSatsEarned=0;
 let _adPopupOpenTime=0; // track when ad popup was actually opened
 
 function earnCoins(n,label){
@@ -2871,7 +2871,7 @@ function startSystems(){
   },30000);
   setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT=500;document.getElementById('global-jackpot').textContent=JACKPOT.toLocaleString();},4000);
   // Sync to server every 60 seconds regardless of activity
-  setInterval(()=>{ if(_authUser) syncToServer(); },60000);
+  setInterval(()=>{ if(_authUser){console.log('[Sync] periodic');syncToServer();} },60000);
   // Final sync before tab closes
   window.addEventListener('beforeunload',()=>{ if(_authUser) syncToServer(); });
 }
@@ -3125,7 +3125,6 @@ function pCycleMulti(){
   _pUpdateBtn();
 }
 function pBuyBalls(){if(spendCoins(200)){PLINKO.balls+=1;_pUpdateUI();saveState();pPToast('\u{1F3B1} +1 ball!');}}
-function openBallsShop(){openShop();}
 const BVALS=[1,1,2,2,3,3,5,5,10,'bomb','bomb','bomb'];
 function pOpenBonus(){
   if(PLINKO.bonusActive)return;
@@ -5590,6 +5589,7 @@ async function onAuthSuccess(user,displayName){
     LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
     PLINKO.balls=Math.min(Math.max(0,existing.plinko_balls??5),200);
+    if(typeof _pUpdateUI==='function')_pUpdateUI();
     LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=sanitizeName(existing.display_name??name);
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
@@ -5626,7 +5626,7 @@ async function syncToServer(){
     p_weekly_claims:payload.weekly_claims, p_monthly_claims:payload.monthly_claims,
     p_plinko_balls:payload.plinko_balls||5
   });
-  if(error){console.error('[Sync] RPC error:',error.message);}
+  if(error){console.error('[Sync] RPC error:',error.message,'code:',error.code,'streak:',payload.streak,'balls:',payload.plinko_balls);}
   else if(syncResult!=null){
     // Accept server corrections for sats (security critical) and balls
     // Do NOT correct coins mid-game - causes UI freezes if server clamp < bet
@@ -5660,11 +5660,12 @@ function debouncedSyncToServer(){
   clearTimeout(_syncTimer);_syncTimer=setTimeout(syncToServer,3000);
 }
 async function authSignOut(){
-  const sb=getSupabase();if(!sb)return;
-  // Cancel any pending debounced sync so it can't fire after state is reset
+  const sb=_supa||getSupabase();
   clearTimeout(_syncTimer);_syncTimer=null;
-  await syncToServer();
-  await sb.auth.signOut();
+  if(sb&&_authUser){
+    try{await syncToServer();}catch(e){console.error('[SignOut] sync:',e);}
+    try{await sb.auth.signOut();}catch(e){console.error('[SignOut] sb:',e);}
+  }
   _authUser=null;
   // Reset all game state to defaults so next account loads clean
   COINS=1000;SATS=0;JACKPOT=1247;
@@ -5677,7 +5678,7 @@ async function authSignOut(){
   // Clear localStorage so guest state doesn't bleed in
   try{localStorage.removeItem('sah_v5');localStorage.removeItem('sah_profile');}catch(e){}
   syncAll();refreshAvatarUI();updateLevel(false);
-  updateAccountBtn(false);hubToast('Signed out');
+  updateAccountBtn(false);renderStreakHub();hubToast('Signed out ✔');
 }
 async function handlePurchaseReturn(){
   const hash=window.location.hash;
