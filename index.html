@@ -2393,7 +2393,7 @@ const PLINKO={balls:5,score:0,multi:1,activeDrops:0,history:[],bonusActive:false
 function loadState(){
   try{
     const s=JSON.parse(localStorage.getItem('sah_v5')||'{}');
-    console.log('[LOAD] localStorage:', {streak:s.st, last_claim:s.lc, balls:s.pb});
+    console.log('[LOAD] localStorage: streak='+s.st+' last_claim='+s.lc+' balls='+s.pb);
     if(s.c!=null)COINS=s.c;
     if(s.s!=null)SATS=s.s;
     if(s.j)JACKPOT=s.j;
@@ -5482,7 +5482,7 @@ async function lbFetchTop(){
 /* === SUPABASE AUTH ========================================== */
 const SUPA_URL='https://udrymlujfjysiobfhhix.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0';
-let _supa=null,_authUser=null,_syncTimer=null;
+let _supa=null,_authUser=null,_syncTimer=null,_tgId=null;
 
 function getSupabase(){
   if(!_supa&&typeof supabase!=='undefined')_supa=supabase.createClient(SUPA_URL,SUPA_KEY);
@@ -5589,12 +5589,7 @@ async function onAuthSuccess(user,displayName){
     }catch(e){console.error('[Ref] award error:',e);}
     hubToast('Account created! Progress synced &#x2713;');
   } else {
-    console.log('[AUTH] Loading profile from Supabase:', {
-      streak: existing.streak,
-      last_claim: existing.last_claim,
-      plinko_balls: existing.plinko_balls,
-      coins: existing.coins
-    });
+    console.log('[AUTH] Supabase: streak='+existing.streak+' last_claim='+existing.last_claim+' balls='+existing.plinko_balls+' coins='+existing.coins);
     COINS=existing.coins??1000;SATS=existing.sats??0;
     LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
     GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
@@ -5626,7 +5621,7 @@ async function syncToServer(){
     weekly_claims:JSON.stringify(WEEKLY_CLAIMS),
     monthly_claims:JSON.stringify(MONTHLY_CLAIMS)
   };
-  console.log('[SYNC] Sending:', {streak:payload.streak, last_claim:payload.last_claim, plinko_balls:payload.plinko_balls});
+  console.log('[SYNC] Sending: streak='+payload.streak+' last_claim='+payload.last_claim+' balls='+payload.plinko_balls+' tgId='+payload.tg_id);
   const {data:syncResult,error}=await sb.rpc('secure_profile_update',{
     p_id:payload.id, p_coins:payload.coins, p_sats:payload.sats,
     p_lifetime_coins:payload.lifetime_coins, p_lifetime_sats:payload.lifetime_sats,
