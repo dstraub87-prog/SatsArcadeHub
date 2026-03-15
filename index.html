@@ -1030,7 +1030,7 @@ window.confirmAge = function() {
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
   // Show tutorial if demo disclaimer isn't showing
-  if(localStorage.getItem('sah_demo_ok')) setTimeout(tutStart, 400);
+  if(localStorage.getItem('sah_demo_ok')) _tutWhenReady();
 };
 window.closeDemoDisclaimer = function() {
   var dd = document.getElementById('demo-disclaimer');
@@ -1038,8 +1038,8 @@ window.closeDemoDisclaimer = function() {
   try { localStorage.setItem('sah_demo_ok','ok'); } catch(e) {}
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
-  // Start tutorial after demo disclaimer is dismissed
-  setTimeout(tutStart, 400);
+  // Start tutorial only after auth has resolved
+  _tutWhenReady();
 };
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
@@ -2495,6 +2495,19 @@ const TUT_STEPS = [
 
 let _tutStep = 0;
 let _tutActive = false;
+
+function _tutWhenReady(){
+  // Wait up to 4 seconds for auth to resolve, then decide
+  let waited = 0;
+  const check = setInterval(()=>{
+    waited += 200;
+    const authDone = !!_authUser || window._authInitDone;
+    if(authDone || waited >= 4000){
+      clearInterval(check);
+      tutStart();
+    }
+  }, 200);
+}
 
 function tutStart(){
   if(IN_IFRAME) return; // skip tutorial in GD embed
@@ -6423,6 +6436,7 @@ async function authInit(){
         }catch(e){console.error('[Ref TG] award error:',e);}
         hubToast('Welcome to Sats Arcade! ⚡');
       }
+      window._authInitDone = true;
       updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
       if(window.TG.MainButton){
         window.TG.MainButton.setText('Share with Friends ⚡');
@@ -6434,9 +6448,10 @@ async function authInit(){
     }
     return;
   }
-  const sb=getSupabase();if(!sb)return;
+  const sb=getSupabase();if(!sb){window._authInitDone=true;return;}
   const {data:{session}}=await sb.auth.getSession();
   if(session?.user)await onAuthSuccess(session.user);
+  window._authInitDone = true;
   sb.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session?.user&&!_authUser){await onAuthSuccess(session.user);closeAuthModal();}
     if(event==='SIGNED_OUT'){_authUser=null;updateAccountBtn(false);}
