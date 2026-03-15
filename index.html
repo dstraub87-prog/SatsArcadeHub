@@ -2498,6 +2498,7 @@ let _tutActive = false;
 
 function tutStart(){
   if(IN_IFRAME) return; // skip tutorial in GD embed
+  if(window._tutSuppressed) return; // returning user loaded from server
   try{ if(localStorage.getItem('sah_tutorial_done')) return; }catch(e){}
   _tutActive = true;
   _tutStep = 0;
@@ -2590,6 +2591,7 @@ function tutDone(){
   ['tut-backdrop','tut-spotlight','tut-card'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='none';
   });
+  window._tutSuppressed = true;
   try{ localStorage.setItem('sah_tutorial_done','1'); }catch(e){}
 }
 
@@ -6249,6 +6251,7 @@ async function onAuthSuccess(user,displayName){
     if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
     else{CLAIMED_TODAY=false;}
     syncAll();saveState();
+    window._tutSuppressed = true; // returning user - skip tutorial
     hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
   }
   updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
@@ -6393,7 +6396,7 @@ async function authInit(){
         // Use saved display_name from Supabase; fallback to Telegram name
         if(existing.display_name&&!existing.display_name.startsWith('tg_'))PLAYER_NAME=sanitizeName(existing.display_name);
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
-        syncAll();saveState();hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
+        syncAll();saveState();window._tutSuppressed=true;hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
       } else {
         // New TG user - upsert on tg_id to prevent duplicates
         const newId=crypto.randomUUID();
