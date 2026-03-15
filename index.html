@@ -11,7 +11,13 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--btc:#F7931A;--btcg:rgba(247,147,26,.3);--gold:#FFD700;--cyan:#00E5FF;--pink:#FF2D78;--purple:#A855F7;--green:#39FF14;--bg:#07080F;--bg2:#0D0E1A;--bg3:#131525;--card:#10111E;--border:rgba(247,147,26,.16);--text:#F0E8D8;--muted:#4A4465;}
+:root{--btc:#F7931A;--btcg:rgba(247,147,26,.3);--gold:#FFD700;--cyan:#00E5FF;--pink:#FF2D78;--purple:#A855F7;--green:#39FF14;--bg:#07080F;--bg2:#0D0E1A;--bg3:#131525;--card:#10111E;--border:rgba(247,147,26,.16);--text:#F0E8D8;--muted:#6B6485;}
+/* Force dark mode regardless of OS setting */
+:root{color-scheme:dark;}
+@media(prefers-color-scheme:light){
+  :root{--bg:#07080F;--bg2:#0D0E1A;--bg3:#131525;--card:#10111E;--text:#F0E8D8;--muted:#6B6485;}
+  body{background:#07080F;color:#F0E8D8;}
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{width:100%;height:100%;overflow:hidden;}
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;display:flex;flex-direction:column;height:100dvh;}
@@ -97,7 +103,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .gcontent{flex:1;overflow-y:auto;overflow-x:hidden;}
 /* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(7,8,16,.97);border-top:1px solid var(--border);display:flex;height:52px;}
-.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:color .14s;position:relative;}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;border:none;background:transparent;color:rgba(255,255,255,0.5);transition:color .14s;position:relative;}
 .bn.active{color:var(--btc);}
 .bn-ico{font-size:1.1rem;line-height:1;}
 .bn-lbl{font-size:.43rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
