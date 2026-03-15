@@ -493,6 +493,24 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .sp-toggle.off::after{left:3px;}
 .snd-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.9rem;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .snd-btn.active{border-color:var(--btc);color:var(--btc);}
+/* TUTORIAL */
+#tut-overlay{position:fixed;inset:0;z-index:1100;pointer-events:none;}
+#tut-overlay.active{pointer-events:all;}
+#tut-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1101;opacity:0;transition:opacity .3s;}
+#tut-overlay.active #tut-backdrop{opacity:1;}
+#tut-spotlight{position:fixed;z-index:1102;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.75);border:2px solid var(--btc);transition:all .35s cubic-bezier(.34,1.2,.64,1);pointer-events:none;}
+#tut-card{position:fixed;z-index:1103;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
+.tut-step{font-size:.52rem;color:var(--btc);letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:6px;}
+.tut-emoji{font-size:1.8rem;margin-bottom:6px;display:block;}
+.tut-title{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:2px;color:#fff;margin-bottom:6px;}
+.tut-desc{font-size:.72rem;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+.tut-btns{display:flex;gap:8px;}
+.tut-btn{flex:1;padding:10px;border:none;border-radius:9px;font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:1.5px;cursor:pointer;}
+.tut-btn.next{background:var(--btc);color:#000;}
+.tut-btn.skip{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--muted);}
+/* DEMO REDEEM POPUP */
+#demo-redeem-popup{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);}
+#demo-redeem-popup.show{display:flex;}
 .hdr-avatar:active{border-color:var(--gold);}
 .hdr-avatar img{width:100%;height:100%;object-fit:cover;}
 .hdr-lvl-badge{position:absolute;bottom:-4px;right:-4px;background:linear-gradient(135deg,var(--btc),var(--gold));color:#000;font-family:'Bebas Neue',sans-serif;font-size:.38rem;padding:1px 3px;border-radius:4px;line-height:1.2;font-weight:900;border:1px solid rgba(0,0,0,.4);}
@@ -1014,6 +1032,8 @@ window.confirmAge = function() {
   // Ensure systems are running (guards against authInit timeout)
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
+  // Show tutorial if demo disclaimer isn't showing
+  if(localStorage.getItem('sah_demo_ok')) setTimeout(tutStart, 400);
 };
 window.closeDemoDisclaimer = function() {
   var dd = document.getElementById('demo-disclaimer');
@@ -1021,6 +1041,8 @@ window.closeDemoDisclaimer = function() {
   try { localStorage.setItem('sah_demo_ok','ok'); } catch(e) {}
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
+  // Start tutorial after demo disclaimer is dismissed
+  setTimeout(tutStart, 400);
 };
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
@@ -1044,6 +1066,36 @@ window.declineAge = function() {
   </div>
   <button onclick="closeSoundPanel()" style="width:100%;padding:11px;margin-top:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;cursor:pointer;">CLOSE</button>
 </div>
+<!-- TUTORIAL OVERLAY -->
+<div id="tut-overlay">
+  <div id="tut-backdrop" onclick="tutSkip()"></div>
+  <div id="tut-spotlight"></div>
+  <div id="tut-card">
+    <div class="tut-step" id="tut-step">STEP 1 OF 7</div>
+    <span class="tut-emoji" id="tut-emoji">👋</span>
+    <div class="tut-title" id="tut-title">Welcome!</div>
+    <div class="tut-desc" id="tut-desc">Let's take a quick tour.</div>
+    <div class="tut-btns">
+      <button class="tut-btn skip" onclick="tutSkip()">SKIP</button>
+      <button class="tut-btn next" id="tut-next-btn" onclick="tutNext()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEMO REDEEM POPUP -->
+<div id="demo-redeem-popup">
+  <div style="background:linear-gradient(145deg,#1a1a2e,#16213e);border:1px solid rgba(0,229,255,.4);border-radius:16px;padding:26px 22px;max-width:320px;width:100%;text-align:center;">
+    <div style="font-size:2rem;margin-bottom:10px;">⚠️</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:var(--cyan);margin-bottom:10px;">DEMO MODE</div>
+    <div style="font-size:.78rem;color:#ccc;line-height:1.6;margin-bottom:16px;">
+      Sats Arcade Hub is currently in <strong style="color:#fff">demo mode</strong>.<br><br>
+      ₿ Sats shown in your balance are <strong style="color:var(--cyan)">not yet redeemable</strong> for real Bitcoin. We're building the payout system now — real withdrawals are coming soon!<br><br>
+      <span style="color:var(--gold)">Keep earning — your balance will carry over when we launch. 🚀</span>
+    </div>
+    <button onclick="document.getElementById('demo-redeem-popup').classList.remove('show')" style="width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--cyan),rgba(0,200,255,.7));color:#000;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;cursor:pointer;">GOT IT — KEEP EARNING</button>
+  </div>
+</div>
+
 <div id="age-gate">
   <div class="ag-card">
     <div class="ag-logo">&#x26A1; <span>SATS ARCADE HUB</span> &#x26A1;</div>
@@ -2393,6 +2445,136 @@ function checkSignupRateLimit(){
 const IN_IFRAME = (window.self !== window.top) && !window.TG_USER;
 let _systemsStarted = false; // declared early so confirmAge/closeDemoDisclaimer can access it
 
+// ── TUTORIAL ENGINE ──────────────────────────────────────────────
+const TUT_STEPS = [
+  {
+    target: 'hdr-avatar',
+    emoji: '👤',
+    title: 'Your Profile',
+    desc: 'Tap your avatar to view your profile, check your level, see stats, and sign in to save your progress across devices.',
+    pos: 'below'
+  },
+  {
+    target: 'global-coins',
+    emoji: '🪙',
+    title: 'Coins',
+    desc: 'Coins are your playing currency — completely free to earn through gameplay. Use them to bet on all 21+ games. Tap to visit the shop.',
+    pos: 'below'
+  },
+  {
+    target: 'global-jackpot',
+    emoji: '💰',
+    title: 'Jackpot Pool',
+    desc: 'The live jackpot grows every few seconds. Hit the jackpot on Slots, Plinko, or other games to win the entire pool instantly!',
+    pos: 'below'
+  },
+  {
+    target: 'global-sats',
+    emoji: '⚡',
+    title: 'Bitcoin Sats',
+    desc: 'Real Bitcoin satoshis — earned FREE through daily streaks, milestones, and time rewards. Never purchased. Tap to visit the Redeem page.',
+    pos: 'below'
+  },
+  {
+    target: 'hdr-rank-chip',
+    emoji: '🌱',
+    title: 'Your Level',
+    desc: 'Level up by playing games and maintaining streaks. Higher levels unlock better rewards and show off your experience on the leaderboard.',
+    pos: 'below'
+  },
+  {
+    target: 'snd-btn',
+    emoji: '🔊',
+    title: 'Sound Settings',
+    desc: 'Tap to adjust sound effects and background music volume separately. Settings are saved automatically.',
+    pos: 'below'
+  },
+  {
+    target: null,
+    emoji: '🎮',
+    title: 'Ready to Play!',
+    desc: 'Claim your daily streak for free sats, spin the slots, drop some Plinko balls, and climb the leaderboard. Good luck! ⚡',
+    pos: 'center'
+  },
+];
+
+let _tutStep = 0;
+let _tutActive = false;
+
+function tutStart(){
+  if(IN_IFRAME) return; // skip tutorial in GD embed
+  try{ if(localStorage.getItem('sah_tutorial_done')) return; }catch(e){}
+  _tutActive = true;
+  _tutStep = 0;
+  document.getElementById('tut-overlay').classList.add('active');
+  tutShow(_tutStep);
+}
+
+function tutShow(idx){
+  const step = TUT_STEPS[idx];
+  if(!step){ tutDone(); return; }
+  document.getElementById('tut-step').textContent = 'STEP '+(idx+1)+' OF '+TUT_STEPS.length;
+  document.getElementById('tut-emoji').textContent = step.emoji;
+  document.getElementById('tut-title').textContent = step.title;
+  document.getElementById('tut-desc').textContent = step.desc;
+  const nextBtn = document.getElementById('tut-next-btn');
+  nextBtn.textContent = idx === TUT_STEPS.length-1 ? "LET'S GO! 🚀" : 'NEXT →';
+
+  const spotlight = document.getElementById('tut-spotlight');
+  const card = document.getElementById('tut-card');
+
+  if(!step.target || step.pos === 'center'){
+    // Center card, no spotlight
+    spotlight.style.display = 'none';
+    card.style.top = '50%';
+    card.style.left = '50%';
+    card.style.transform = 'translate(-50%,-50%)';
+    card.style.bottom = 'auto';
+    return;
+  }
+
+  const el = document.getElementById(step.target);
+  if(!el){ tutNext(); return; }
+
+  spotlight.style.display = 'block';
+  const r = el.getBoundingClientRect();
+  const pad = 6;
+  spotlight.style.left = (r.left - pad) + 'px';
+  spotlight.style.top = (r.top - pad) + 'px';
+  spotlight.style.width = (r.width + pad*2) + 'px';
+  spotlight.style.height = (r.height + pad*2) + 'px';
+
+  // Position card below or above target
+  const cardW = Math.min(280, window.innerWidth - 32);
+  let cardLeft = r.left + r.width/2 - cardW/2;
+  cardLeft = Math.max(16, Math.min(cardLeft, window.innerWidth - cardW - 16));
+  card.style.left = cardLeft + 'px';
+  card.style.transform = 'none';
+
+  const spaceBelow = window.innerHeight - r.bottom;
+  if(spaceBelow > 180){
+    card.style.top = (r.bottom + 14) + 'px';
+    card.style.bottom = 'auto';
+  } else {
+    card.style.bottom = (window.innerHeight - r.top + 14) + 'px';
+    card.style.top = 'auto';
+  }
+}
+
+function tutNext(){
+  _tutStep++;
+  if(_tutStep >= TUT_STEPS.length){ tutDone(); return; }
+  tutShow(_tutStep);
+}
+
+function tutSkip(){ tutDone(); }
+
+function tutDone(){
+  _tutActive = false;
+  document.getElementById('tut-overlay').classList.remove('active');
+  try{ localStorage.setItem('sah_tutorial_done','1'); }catch(e){}
+}
+
 // ============================================================
 // SOUND ENGINE v2 - Realistic casino sounds via Web Audio API
 // ============================================================
@@ -2895,6 +3077,15 @@ function syncAll(){
 
 /* NAVIGATION */
 function navTo(s){
+  // Show demo reminder when visiting redeem page
+  if(s==='redeem'){
+    try{
+      if(!localStorage.getItem('sah_redeem_warned')){
+        localStorage.setItem('sah_redeem_warned','1');
+        setTimeout(()=>document.getElementById('demo-redeem-popup').classList.add('show'),300);
+      }
+    }catch(e){}
+  }
   document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
   document.getElementById('screen-'+s).classList.add('active');
   ['hub','rewards','redeem','legal'].forEach(id=>{const b=document.getElementById('bn-'+id);if(b)b.classList.toggle('active',id===s);});
@@ -3218,24 +3409,68 @@ function showRewardPopup(icon,title,rewards,color){
 }
 
 /* REDEEM */
-function submitRedeem(){
+async function submitRedeem(){
+  if(!_authUser){hubToast('Sign in to withdraw sats!');return;}
   const addr=document.getElementById('ln-addr').value.trim();
-  if(!addr){hubToast('Enter your Lightning address!');return;}
-  if(SATS<=0){hubToast('You have no \u20BF to redeem!');return;}
-  const today=new Date().toDateString();
-  if(DAILY_REDEEM_DATE!==today){DAILY_REDEEMED=0;DAILY_REDEEM_DATE=today;}
-  const dailyLeft=Math.max(0,300-DAILY_REDEEMED);
-  if(dailyLeft<=0){hubToast('Daily limit reached  -  resets tomorrow!');return;}
+  if(!addr){hubToast('Enter your Lightning address or invoice!');return;}
+  if(SATS<50){hubToast('Minimum withdrawal is \u20BF50!');return;}
   const inputEl=document.getElementById('rdm-amt-input');
-  let amt=parseInt(inputEl?inputEl.value:SATS)||1;
-  amt=Math.max(1,Math.min(amt,SATS,dailyLeft));
+  let amt=parseInt(inputEl?inputEl.value:SATS)||50;
+  amt=Math.max(50,Math.min(amt,SATS,300));
+  if(amt<50){hubToast('Minimum withdrawal is \u20BF50!');return;}
+
+  // Disable button to prevent double-submit
+  const btn=document.getElementById('rdm-btn');
+  if(btn){btn.disabled=true;btn.textContent='\u23F3 Processing...';}
+
+  const sb=getSupabase();if(!sb){hubToast('Connection error');if(btn){btn.disabled=false;btn.textContent='\u26A1 REDEEM VIA LIGHTNING';}return;}
+
+  // Call server-side RPC - validates balance, deducts, creates withdrawal record
+  const {data,error}=await sb.rpc('request_withdrawal',{
+    p_user_id:_authUser.id,
+    p_amount_sats:amt,
+    p_lightning_invoice:addr,
+  });
+
+  if(btn){btn.disabled=false;btn.textContent='\u26A1 REDEEM VIA LIGHTNING';}
+
+  if(error||!data){hubToast('Withdrawal error - try again');console.error('[Redeem]',error);return;}
+
+  if(data.error){
+    const msgs={
+      'unauthorized':'Sign in to withdraw.',
+      'below_minimum':'Minimum withdrawal is \u20BF50.',
+      'insufficient_balance':'Not enough sats.',
+      'daily_limit_exceeded':`Daily limit reached. Remaining: \u20BF${data.remaining||0}`,
+      'withdrawal_pending':'You already have a withdrawal in progress.',
+      'account_locked':'Account locked. Contact support.',
+      'invalid_invoice':'Invalid Lightning address or invoice.',
+    };
+    hubToast(msgs[data.error]||'Withdrawal failed: '+data.error);
+    return;
+  }
+
+  // Success - update local state with server-confirmed balance
+  SATS=data.new_balance;
+  syncAll();saveState();
+
+  // Call Edge Function to process payment
   const short=addr.length>20?addr.slice(0,9)+'...'+addr.slice(-7):addr;
-  SATS-=amt;DAILY_REDEEMED+=amt;DAILY_REDEEM_DATE=today;
-  REDEEM_HIST.unshift({addr:short,date:new Date().toLocaleDateString(),amount:amt,status:'pending'});
-  syncAll();saveState();document.getElementById('ln-addr').value='';
-  if(inputEl)inputEl.value=1;
+  REDEEM_HIST.unshift({addr:short,date:new Date().toLocaleDateString(),amount:amt,status:'pending',id:data.withdrawal_id});
+  saveState();renderRedeemHist();
+
+  // Trigger Edge Function (fire and forget - it handles refund on failure)
+  fetch(`${SUPABASE_URL}/functions/v1/process-withdrawal`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON_KEY},
+    body:JSON.stringify({withdrawal_id:data.withdrawal_id,user_id:_authUser.id})
+  }).catch(e=>console.error('[Redeem] Edge function error:',e));
+
+  document.getElementById('ln-addr').value='';
+  if(inputEl)inputEl.value=50;
   document.getElementById('rs-desc').textContent=`\u20BF${amt.toLocaleString()} requested to ${short}. Processing within 24-72 hours.`;
-  document.getElementById('rs-ov').classList.add('show');renderRedeemHist();confetti();
+  document.getElementById('rs-ov').classList.add('show');
+  confetti();
 }
 function renderRedeemHist(){
   const el=document.getElementById('rdm-hist-list');if(!el)return;
@@ -5866,6 +6101,8 @@ async function lbFetchTop(){
 
 /* === SUPABASE AUTH ========================================== */
 const SUPA_URL='https://udrymlujfjysiobfhhix.supabase.co';
+const SUPABASE_URL=SUPA_URL;
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0';
 let _supa=null,_authUser=null,_syncTimer=null,_tgId=null;
 
