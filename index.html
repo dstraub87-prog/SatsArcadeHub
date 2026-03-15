@@ -1031,7 +1031,8 @@ window.confirmAge = function() {
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
   // Show tutorial if demo disclaimer isn't showing
-  // Tutorial only fires from closeDemoDisclaimer, not here
+  // If demo already seen, trigger tutorial directly
+  if(localStorage.getItem('sah_demo_ok')) setTimeout(_tutWhenReady, 300);
 };
 window.closeDemoDisclaimer = function() {
   var dd = document.getElementById('demo-disclaimer');
@@ -4895,11 +4896,23 @@ document.addEventListener('DOMContentLoaded',async function(){
         // Skip demo disclaimer in iframe (GD/embedded context)
         if(_inIframe)localStorage.setItem('sah_demo_ok','ok');
       }catch(e){}
-      if(!_inIframe&&!localStorage.getItem('sah_demo_ok')){var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';}
+      if(!_inIframe&&!localStorage.getItem('sah_demo_ok')){
+        var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';
+        // tutorial fires from closeDemoDisclaimer
+      } else if(!_inIframe){
+        // demo already seen - trigger tutorial after auth resolves
+        setTimeout(_tutWhenReady, 500);
+      }
     } else if(localStorage.getItem('sah_age')==='ok'){
       var ag=document.getElementById('age-gate');
       if(ag)ag.style.display='none';
-      if(!localStorage.getItem('sah_demo_ok')){var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';}
+      if(!localStorage.getItem('sah_demo_ok')){
+        var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';
+        // tutorial fires from closeDemoDisclaimer after user dismisses
+      } else {
+        // age+demo already cleared - trigger tutorial after auth resolves
+        setTimeout(_tutWhenReady, 500);
+      }
     }
   }catch(e){}
   loadSoundPrefs();
