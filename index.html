@@ -494,10 +494,10 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .snd-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.9rem;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .snd-btn.active{border-color:var(--btc);color:var(--btc);}
 /* TUTORIAL */
-/* tut z-index MUST stay below age-gate(900) and demo-disclaimer(895) */
-#tut-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:850;}
-#tut-spotlight{display:none;position:fixed;z-index:851;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.78);border:2.5px solid var(--btc);transition:left .3s,top .3s,width .3s,height .3s;pointer-events:all;cursor:pointer;}
-#tut-card{display:none;position:fixed;z-index:852;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
+/* tutorial sits BELOW age-gate(900) and demo-disclaimer(895) */
+#tut-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:800;}
+#tut-spotlight{display:none;position:fixed;z-index:801;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.78);border:2.5px solid var(--btc);transition:left .3s,top .3s,width .3s,height .3s;pointer-events:all;cursor:pointer;}
+#tut-card{display:none;position:fixed;z-index:802;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
 .tut-step{font-size:.58rem;color:var(--btc);letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:6px;}
 .tut-emoji{font-size:2rem;margin-bottom:6px;display:block;}
 .tut-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:#fff;margin-bottom:6px;}
@@ -1017,22 +1017,23 @@ function showGDAd(){
 }
 
 window.confirmAge = function() {
+  // Hide age gate
   var ag = document.getElementById('age-gate');
-  if (ag) ag.style.display = 'none';
-  try { localStorage.setItem('sah_age', 'ok'); } catch(e) {}
-  // Show demo disclaimer unless already seen
-  try {
-    if(!localStorage.getItem('sah_demo_ok')) {
-      var dd = document.getElementById('demo-disclaimer');
-      if(dd) dd.style.display = 'flex';
-    }
-  } catch(e) {}
-  // Ensure systems are running (guards against authInit timeout)
-  try{if(!_systemsStarted)startSystems();}catch(e){}
-  try{syncAll();}catch(e){}
-  // Show tutorial if demo disclaimer isn't showing
-  // If demo already seen, trigger tutorial directly
-  if(localStorage.getItem('sah_demo_ok')) setTimeout(_tutWhenReady, 300);
+  if(ag) ag.style.display = 'none';
+  try { localStorage.setItem('sah_age','ok'); } catch(e) {}
+  // Show demo disclaimer if not yet seen
+  var demoSeen = false;
+  try { demoSeen = !!localStorage.getItem('sah_demo_ok'); } catch(e) {}
+  if(!demoSeen) {
+    var dd = document.getElementById('demo-disclaimer');
+    if(dd) dd.style.display = 'flex';
+    // tutorial will fire from closeDemoDisclaimer
+  } else {
+    // demo already seen - go straight to tutorial after auth
+    try{if(!_systemsStarted)startSystems();}catch(e){}
+    try{syncAll();}catch(e){}
+    setTimeout(function(){ if(typeof _tutWhenReady==='function') _tutWhenReady(); }, 500);
+  }
 };
 window.closeDemoDisclaimer = function() {
   var dd = document.getElementById('demo-disclaimer');
@@ -1040,7 +1041,8 @@ window.closeDemoDisclaimer = function() {
   try { localStorage.setItem('sah_demo_ok','ok'); } catch(e) {}
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
-  _tutWhenReady();
+  // Fire tutorial after auth resolves
+  setTimeout(function(){ if(typeof _tutWhenReady==='function') _tutWhenReady(); }, 500);
 };
 window.declineAge = function() {
   document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;text-align:center;padding:20px"><div><div style="font-size:3rem;margin-bottom:12px">🔞</div>You must be 18 or older.</div></div>';
@@ -2526,18 +2528,22 @@ let _tutStep = 0;
 let _tutActive = false;
 
 function _tutWhenReady(){
+  // Guard: don't queue multiple instances
+  if(window._tutWhenReadyRunning) return;
+  window._tutWhenReadyRunning = true;
   let waited = 0;
-  const check = setInterval(()=>{
+  const check = setInterval(function(){
     waited += 200;
-    // Age gate must be hidden
+    // Age gate must be gone
     const ag = document.getElementById('age-gate');
-    if(ag && ag.style.display !== 'none') return;
-    // Demo disclaimer must not be showing (flex = visible)
+    if(ag && ag.style.display !== 'none'){ return; }
+    // Demo must not be visible (flex = showing)
     const dd = document.getElementById('demo-disclaimer');
-    if(dd && dd.style.display === 'flex') return;
-    // Auth must have resolved
+    if(dd && dd.style.display === 'flex'){ return; }
+    // Auth must have resolved (or timeout after 6s)
     if(!!_authUser || window._authInitDone || waited >= 6000){
       clearInterval(check);
+      window._tutWhenReadyRunning = false;
       tutStart();
     }
   }, 200);
@@ -4888,31 +4894,46 @@ function ballsBuyAd(){
 document.addEventListener('DOMContentLoaded',async function(){
   // Handle age gate / TG bypass FIRST before anything renders
   try{
-    var _inIframe=IN_IFRAME; // uses same logic - excludes Telegram
-    if(window.isTelegram()||_inIframe){
-      var ag=document.getElementById('age-gate');if(ag)ag.style.display='none';
-      try{
-        localStorage.setItem('sah_age','ok');
-        // Skip demo disclaimer in iframe (GD/embedded context)
-        if(_inIframe)localStorage.setItem('sah_demo_ok','ok');
-      }catch(e){}
-      if(!_inIframe&&!localStorage.getItem('sah_demo_ok')){
-        var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';
-        // tutorial fires from closeDemoDisclaimer
-      } else if(!_inIframe){
-        // demo already seen - trigger tutorial after auth resolves
-        setTimeout(_tutWhenReady, 500);
-      }
-    } else if(localStorage.getItem('sah_age')==='ok'){
+    var _inIframe=IN_IFRAME;
+    var _isTG=window.isTelegram();
+
+    if(_isTG || _inIframe){
+      // TG/embed: skip age gate
       var ag=document.getElementById('age-gate');
-      if(ag)ag.style.display='none';
-      if(!localStorage.getItem('sah_demo_ok')){
-        var dd=document.getElementById('demo-disclaimer');if(dd)dd.style.display='flex';
-        // tutorial fires from closeDemoDisclaimer after user dismisses
+      if(ag) ag.style.display='none';
+      try{ localStorage.setItem('sah_age','ok'); }catch(e){}
+      if(_inIframe){
+        // GD embed: skip demo too
+        try{ localStorage.setItem('sah_demo_ok','ok'); }catch(e){}
       } else {
-        // age+demo already cleared - trigger tutorial after auth resolves
-        setTimeout(_tutWhenReady, 500);
+        // Telegram: show demo if not seen, else queue tutorial
+        var _demoSeen=false;
+        try{ _demoSeen=!!localStorage.getItem('sah_demo_ok'); }catch(e){}
+        if(!_demoSeen){
+          var dd=document.getElementById('demo-disclaimer');
+          if(dd) dd.style.display='flex';
+          // tutorial fires from closeDemoDisclaimer
+        }
+        // if demo already seen, tutorial fires after authInit completes below
       }
+    } else {
+      // Regular browser
+      var _ageOk=false;
+      try{ _ageOk=localStorage.getItem('sah_age')==='ok'; }catch(e){}
+      if(_ageOk){
+        // Returning browser user - hide age gate
+        var ag=document.getElementById('age-gate');
+        if(ag) ag.style.display='none';
+        var _demoSeen2=false;
+        try{ _demoSeen2=!!localStorage.getItem('sah_demo_ok'); }catch(e){}
+        if(!_demoSeen2){
+          var dd=document.getElementById('demo-disclaimer');
+          if(dd) dd.style.display='flex';
+          // tutorial fires from closeDemoDisclaimer
+        }
+        // if demo already seen, tutorial fires after authInit completes below
+      }
+      // else: new browser user - age gate stays visible (CSS display:flex)
     }
   }catch(e){}
   loadSoundPrefs();
@@ -4925,6 +4946,16 @@ document.addEventListener('DOMContentLoaded',async function(){
   }catch(e){console.error('authInit:',e.message);}
   handlePurchaseReturn();
   try{startSystems();}catch(e){console.error('startSystems:',e);}
+  // After auth resolves, fire tutorial if age+demo already cleared
+  try{
+    var _agEl=document.getElementById('age-gate');
+    var _ddEl=document.getElementById('demo-disclaimer');
+    var _ageGone=!_agEl||_agEl.style.display==='none';
+    var _demoGone=!_ddEl||(_ddEl.style.display!=='flex');
+    if(_ageGone&&_demoGone&&typeof _tutWhenReady==='function'){
+      _tutWhenReady();
+    }
+  }catch(e){}
   try{buildFeed();}catch(e){console.error('buildFeed:',e);}
   try{syncAll();}catch(e){console.error('syncAll:',e);}
   try{renderStreakHub();}catch(e){console.error('renderStreakHub:',e);}
