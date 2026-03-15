@@ -2445,49 +2445,77 @@ const TUT_STEPS = [
     target: 'hdr-avatar',
     emoji: '👤',
     title: 'Your Profile',
-    desc: 'Tap your avatar to view your profile, check your level, see stats, and sign in to save your progress across devices.',
+    desc: 'Tap your avatar to sign in, check your level, and save progress across all your devices.',
     pos: 'below'
   },
   {
     target: 'global-coins',
     emoji: '🪙',
     title: 'Coins',
-    desc: 'Coins are your playing currency — completely free to earn through gameplay. Use them to bet on all 21+ games. Tap to visit the shop.',
+    desc: 'Free playing currency — earn coins through gameplay and use them to bet on all 21+ games.',
     pos: 'below'
   },
   {
     target: 'global-jackpot',
     emoji: '💰',
-    title: 'Jackpot Pool',
-    desc: 'The live jackpot grows every few seconds. Hit the jackpot on Slots, Plinko, or other games to win the entire pool instantly!',
+    title: 'Live Jackpot',
+    desc: 'Grows every few seconds. Hit it on Slots or Plinko to win the entire pool instantly!',
     pos: 'below'
   },
   {
     target: 'global-sats',
     emoji: '⚡',
     title: 'Bitcoin Sats',
-    desc: 'Real Bitcoin satoshis — earned FREE through daily streaks, milestones, and time rewards. Never purchased. Tap to visit the Redeem page.',
+    desc: 'Real Bitcoin satoshis earned FREE — never purchased. Stack them through daily streaks and milestones.',
     pos: 'below'
   },
   {
     target: 'hdr-rank-chip',
     emoji: '🌱',
     title: 'Your Level',
-    desc: 'Level up by playing games and maintaining streaks. Higher levels unlock better rewards and show off your experience on the leaderboard.',
+    desc: 'Level up by playing games and keeping your streak alive. Higher levels mean bigger rewards.',
     pos: 'below'
+  },
+  {
+    target: 'bn-hub',
+    emoji: '🏠',
+    title: 'Hub',
+    desc: 'Your home base — all 21+ games live here. Tap any game card to jump straight in.',
+    pos: 'above'
+  },
+  {
+    target: 'bn-rewards',
+    emoji: '₿',
+    title: 'Rewards Tab',
+    desc: 'Claim your daily streak sats here every 24 hours. Hit day 7 for a fire bonus. Also track weekly and monthly milestones.',
+    pos: 'above'
+  },
+  {
+    target: 'bn-redeem',
+    emoji: '⚡',
+    title: 'Redeem Tab',
+    desc: 'Send your earned sats to any Lightning wallet. Real Bitcoin, no purchase needed to earn it.',
+    pos: 'above'
+  },
+  {
+    target: 'bn-leaderboard',
+    emoji: '🏆',
+    title: 'Leaderboard',
+    desc: 'See how you rank against other players. Compete for the top spot in coins, sats earned, and win streaks.',
+    pos: 'above'
   },
   {
     target: 'snd-btn',
     emoji: '🔊',
     title: 'Sound Settings',
-    desc: 'Tap to adjust sound effects and background music volume separately. Settings are saved automatically.',
+    desc: 'Adjust sound effects and background music independently. Casino sounds + jazz ambience included.',
     pos: 'below'
   },
   {
     target: null,
     emoji: '🎮',
-    title: 'Ready to Play!',
-    desc: 'Claim your daily streak for free sats, spin the slots, drop some Plinko balls, and climb the leaderboard. Good luck! ⚡',
+    title: "You're Ready!",
+    desc: 'Claim your daily streak first for free sats, then pick a game and start stacking. Good luck! ⚡',
     pos: 'center'
   },
 ];
@@ -2496,12 +2524,15 @@ let _tutStep = 0;
 let _tutActive = false;
 
 function _tutWhenReady(){
-  // Wait up to 4 seconds for auth to resolve, then decide
+  // Only start after: demo disclaimer gone + auth resolved
   let waited = 0;
   const check = setInterval(()=>{
     waited += 200;
+    // Don't start if demo disclaimer is still visible
+    const dd = document.getElementById('demo-disclaimer');
+    if(dd && dd.style.display !== 'none' && dd.style.display !== '') return;
     const authDone = !!_authUser || window._authInitDone;
-    if(authDone || waited >= 4000){
+    if(authDone || waited >= 5000){
       clearInterval(check);
       tutStart();
     }
@@ -2568,17 +2599,21 @@ function tutShow(idx){
 
     const spaceBelow = window.innerHeight - r.bottom - 20;
     const spaceAbove = r.top - 20;
+    const preferAbove = step.pos === 'above';
 
-    if(spaceBelow >= cardH){
-      // Enough space below
+    if(preferAbove && spaceAbove >= cardH){
+      card.style.bottom = (window.innerHeight - r.top + 14) + 'px';
+      card.style.top = 'auto';
+    } else if(!preferAbove && spaceBelow >= cardH){
       card.style.top = (r.bottom + 14) + 'px';
       card.style.bottom = 'auto';
     } else if(spaceAbove >= cardH){
-      // Place above
       card.style.bottom = (window.innerHeight - r.top + 14) + 'px';
       card.style.top = 'auto';
+    } else if(spaceBelow >= cardH){
+      card.style.top = (r.bottom + 14) + 'px';
+      card.style.bottom = 'auto';
     } else {
-      // Not enough space either side — center vertically
       card.style.top = '50%';
       card.style.left = '50%';
       card.style.transform = 'translate(-50%,-50%)';
