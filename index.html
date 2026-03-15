@@ -1038,7 +1038,6 @@ window.closeDemoDisclaimer = function() {
   try { localStorage.setItem('sah_demo_ok','ok'); } catch(e) {}
   try{if(!_systemsStarted)startSystems();}catch(e){}
   try{syncAll();}catch(e){}
-  // Start tutorial only after auth has resolved
   _tutWhenReady();
 };
 window.declineAge = function() {
@@ -2606,6 +2605,15 @@ function tutDone(){
   });
   window._tutSuppressed = true;
   try{ localStorage.setItem('sah_tutorial_done','1'); }catch(e){}
+  // Save to Supabase so it persists across devices/sessions
+  try{
+    const sb=getSupabase();
+    if(sb&&_authUser){
+      sb.from('profiles').update({tutorial_done:true}).eq('id',_authUser.id).then(()=>{});
+    } else if(sb&&_tgId){
+      sb.from('profiles').update({tutorial_done:true}).eq('tg_id',_tgId).then(()=>{});
+    }
+  }catch(e){}
 }
 
 // ============================================================
@@ -6264,7 +6272,8 @@ async function onAuthSuccess(user,displayName){
     if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
     else{CLAIMED_TODAY=false;}
     syncAll();saveState();
-    window._tutSuppressed = true; // returning user - skip tutorial
+    // Suppress tutorial if already completed (server or localStorage)
+    if(existing.tutorial_done) window._tutSuppressed = true;
     hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
   }
   updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
@@ -6409,7 +6418,9 @@ async function authInit(){
         // Use saved display_name from Supabase; fallback to Telegram name
         if(existing.display_name&&!existing.display_name.startsWith('tg_'))PLAYER_NAME=sanitizeName(existing.display_name);
         _authUser={id:existing.id,email:tgId};_tgId=tgId;
-        syncAll();saveState();window._tutSuppressed=true;hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
+        syncAll();saveState();
+        if(existing.tutorial_done) window._tutSuppressed=true;
+        hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
       } else {
         // New TG user - upsert on tg_id to prevent duplicates
         const newId=crypto.randomUUID();
