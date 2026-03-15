@@ -498,7 +498,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 #tut-overlay.active{pointer-events:all;}
 #tut-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1101;opacity:0;transition:opacity .3s;}
 #tut-overlay.active #tut-backdrop{opacity:1;}
-#tut-spotlight{position:fixed;z-index:1102;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.75);border:2px solid var(--btc);transition:all .35s cubic-bezier(.34,1.2,.64,1);pointer-events:none;}
+#tut-spotlight{position:fixed;z-index:1102;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.75);border:2px solid var(--btc);transition:all .35s cubic-bezier(.34,1.2,.64,1);pointer-events:all;cursor:pointer;}
 #tut-card{position:fixed;z-index:1103;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
 .tut-step{font-size:.52rem;color:var(--btc);letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:6px;}
 .tut-emoji{font-size:1.8rem;margin-bottom:6px;display:block;}
@@ -1069,7 +1069,7 @@ window.declineAge = function() {
 <!-- TUTORIAL OVERLAY -->
 <div id="tut-overlay">
   <div id="tut-backdrop" onclick="tutSkip()"></div>
-  <div id="tut-spotlight"></div>
+  <div id="tut-spotlight" onclick="tutNext()"></div>
   <div id="tut-card">
     <div class="tut-step" id="tut-step">STEP 1 OF 7</div>
     <span class="tut-emoji" id="tut-emoji">👋</span>
@@ -2511,53 +2511,74 @@ function tutStart(){
 }
 
 function tutShow(idx){
-  const step = TUT_STEPS[idx];
-  if(!step){ tutDone(); return; }
-  document.getElementById('tut-step').textContent = 'STEP '+(idx+1)+' OF '+TUT_STEPS.length;
-  document.getElementById('tut-emoji').textContent = step.emoji;
-  document.getElementById('tut-title').textContent = step.title;
-  document.getElementById('tut-desc').textContent = step.desc;
-  const nextBtn = document.getElementById('tut-next-btn');
-  nextBtn.textContent = idx === TUT_STEPS.length-1 ? "LET'S GO! 🚀" : 'NEXT →';
+  try{
+    const step = TUT_STEPS[idx];
+    if(!step){ tutDone(); return; }
+    document.getElementById('tut-step').textContent = 'STEP '+(idx+1)+' OF '+TUT_STEPS.length;
+    document.getElementById('tut-emoji').textContent = step.emoji;
+    document.getElementById('tut-title').textContent = step.title;
+    document.getElementById('tut-desc').textContent = step.desc;
+    const nextBtn = document.getElementById('tut-next-btn');
+    nextBtn.textContent = idx === TUT_STEPS.length-1 ? "LET'S GO! 🚀" : 'NEXT →';
 
-  const spotlight = document.getElementById('tut-spotlight');
-  const card = document.getElementById('tut-card');
+    const spotlight = document.getElementById('tut-spotlight');
+    const card = document.getElementById('tut-card');
 
-  if(!step.target || step.pos === 'center'){
-    // Center card, no spotlight
-    spotlight.style.display = 'none';
-    card.style.top = '50%';
-    card.style.left = '50%';
-    card.style.transform = 'translate(-50%,-50%)';
-    card.style.bottom = 'auto';
-    return;
-  }
+    if(!step.target || step.pos === 'center'){
+      spotlight.style.display = 'none';
+      card.style.position = 'fixed';
+      card.style.top = '50%';
+      card.style.left = '50%';
+      card.style.transform = 'translate(-50%,-50%)';
+      card.style.bottom = 'auto';
+      return;
+    }
 
-  const el = document.getElementById(step.target);
-  if(!el){ tutNext(); return; }
+    const el = document.getElementById(step.target);
+    if(!el){ tutNext(); return; }
 
-  spotlight.style.display = 'block';
-  const r = el.getBoundingClientRect();
-  const pad = 6;
-  spotlight.style.left = (r.left - pad) + 'px';
-  spotlight.style.top = (r.top - pad) + 'px';
-  spotlight.style.width = (r.width + pad*2) + 'px';
-  spotlight.style.height = (r.height + pad*2) + 'px';
+    const r = el.getBoundingClientRect();
+    // Skip if element is not visible
+    if(r.width === 0 || r.height === 0){ tutNext(); return; }
 
-  // Position card below or above target
-  const cardW = Math.min(280, window.innerWidth - 32);
-  let cardLeft = r.left + r.width/2 - cardW/2;
-  cardLeft = Math.max(16, Math.min(cardLeft, window.innerWidth - cardW - 16));
-  card.style.left = cardLeft + 'px';
-  card.style.transform = 'none';
+    const pad = 8;
+    spotlight.style.display = 'block';
+    spotlight.style.left = (r.left - pad) + 'px';
+    spotlight.style.top = (r.top - pad) + 'px';
+    spotlight.style.width = (r.width + pad*2) + 'px';
+    spotlight.style.height = (r.height + pad*2) + 'px';
 
-  const spaceBelow = window.innerHeight - r.bottom;
-  if(spaceBelow > 180){
-    card.style.top = (r.bottom + 14) + 'px';
-    card.style.bottom = 'auto';
-  } else {
-    card.style.bottom = (window.innerHeight - r.top + 14) + 'px';
-    card.style.top = 'auto';
+    // Card positioning - always fully on screen
+    const cardW = Math.min(280, window.innerWidth - 32);
+    const cardH = 180; // estimated card height
+    let cardLeft = r.left + r.width/2 - cardW/2;
+    cardLeft = Math.max(16, Math.min(cardLeft, window.innerWidth - cardW - 16));
+
+    card.style.position = 'fixed';
+    card.style.left = cardLeft + 'px';
+    card.style.transform = 'none';
+
+    const spaceBelow = window.innerHeight - r.bottom - 20;
+    const spaceAbove = r.top - 20;
+
+    if(spaceBelow >= cardH){
+      // Enough space below
+      card.style.top = (r.bottom + 14) + 'px';
+      card.style.bottom = 'auto';
+    } else if(spaceAbove >= cardH){
+      // Place above
+      card.style.bottom = (window.innerHeight - r.top + 14) + 'px';
+      card.style.top = 'auto';
+    } else {
+      // Not enough space either side — center vertically
+      card.style.top = '50%';
+      card.style.left = '50%';
+      card.style.transform = 'translate(-50%,-50%)';
+      card.style.bottom = 'auto';
+    }
+  }catch(e){
+    console.error('[Tutorial]',e);
+    tutDone(); // if anything breaks, just end the tutorial
   }
 }
 
