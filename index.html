@@ -501,8 +501,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .snd-btn.active{border-color:var(--btc);color:var(--btc);}
 /* TUTORIAL */
 /* tutorial sits BELOW age-gate(900) and demo-disclaimer(895) */
-#tut-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:800;}
-#tut-spotlight{display:none;position:fixed;z-index:801;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.85),0 0 0 4px var(--btc),0 0 24px rgba(247,147,26,.7);border:2px solid var(--btc);transition:left .3s,top .3s,width .3s,height .3s;pointer-events:all;cursor:pointer;}
+#tut-backdrop{display:none;position:fixed;inset:0;background:transparent;z-index:800;pointer-events:none;}
+#tut-spotlight{display:none;position:fixed;z-index:801;border-radius:12px;box-shadow:0 0 0 3px var(--btc),0 0 20px rgba(247,147,26,.8);border:2px solid var(--btc);transition:left .3s,top .3s,width .3s,height .3s;pointer-events:all;cursor:pointer;}
 #tut-card{display:none;position:fixed;z-index:802;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
 .tut-step{font-size:.58rem;color:var(--btc);letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:6px;}
 .tut-emoji{font-size:2rem;margin-bottom:6px;display:block;}
