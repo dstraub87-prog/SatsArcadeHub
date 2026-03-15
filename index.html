@@ -494,10 +494,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .snd-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:.9rem;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .snd-btn.active{border-color:var(--btc);color:var(--btc);}
 /* TUTORIAL */
-#tut-overlay{position:fixed;inset:0;z-index:1100;pointer-events:none;}
-#tut-overlay.active{pointer-events:all;}
 #tut-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1101;opacity:0;transition:opacity .3s;}
-#tut-overlay.active #tut-backdrop{opacity:1;}
 #tut-spotlight{position:fixed;z-index:1102;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.75);border:2px solid var(--btc);transition:all .35s cubic-bezier(.34,1.2,.64,1);pointer-events:all;cursor:pointer;}
 #tut-card{position:fixed;z-index:1103;background:var(--bg2);border:1px solid var(--btc);border-radius:16px;padding:18px 16px 14px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 8px 32px rgba(247,147,26,.25);transition:all .35s cubic-bezier(.34,1.2,.64,1);}
 .tut-step{font-size:.52rem;color:var(--btc);letter-spacing:2px;font-family:'Space Mono',monospace;margin-bottom:6px;}
@@ -1067,7 +1064,6 @@ window.declineAge = function() {
   <button onclick="closeSoundPanel()" style="width:100%;padding:11px;margin-top:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;cursor:pointer;">CLOSE</button>
 </div>
 <!-- TUTORIAL OVERLAY -->
-<div id="tut-overlay">
   <div id="tut-backdrop" onclick="tutSkip()"></div>
   <div id="tut-spotlight" onclick="tutNext()"></div>
   <div id="tut-card">
@@ -1079,7 +1075,6 @@ window.declineAge = function() {
       <button class="tut-btn skip" onclick="tutSkip()">SKIP</button>
       <button class="tut-btn next" id="tut-next-btn" onclick="tutNext()">NEXT →</button>
     </div>
-  </div>
 </div>
 
 <!-- DEMO REDEEM POPUP -->
@@ -2506,7 +2501,8 @@ function tutStart(){
   try{ if(localStorage.getItem('sah_tutorial_done')) return; }catch(e){}
   _tutActive = true;
   _tutStep = 0;
-  document.getElementById('tut-overlay').classList.add('active');
+  document.getElementById('tut-backdrop').style.display='block';
+  document.getElementById('tut-card').style.display='block';
   tutShow(_tutStep);
 }
 
@@ -2554,7 +2550,6 @@ function tutShow(idx){
     let cardLeft = r.left + r.width/2 - cardW/2;
     cardLeft = Math.max(16, Math.min(cardLeft, window.innerWidth - cardW - 16));
 
-    card.style.position = 'fixed';
     card.style.left = cardLeft + 'px';
     card.style.transform = 'none';
 
@@ -2592,7 +2587,9 @@ function tutSkip(){ tutDone(); }
 
 function tutDone(){
   _tutActive = false;
-  document.getElementById('tut-overlay').classList.remove('active');
+  ['tut-backdrop','tut-spotlight','tut-card'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='none';
+  });
   try{ localStorage.setItem('sah_tutorial_done','1'); }catch(e){}
 }
 
