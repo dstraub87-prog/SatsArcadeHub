@@ -1,0 +1,58 @@
+SATS ARCADE HUB - VERSION CHANGELOG
+=====================================
+GitHub: github.com/dstraub87-prog/SatsArcadeHub
+Live URL: satsarcadehub.com
+Telegram Mini App: t.me/SatsArcadeHubBot/SatsArcadeHub
+GD Game ID: 1cec31a16cf34305acec31364182b7fb
+=====================================
+
+v1.0.2 - Jackpot Alerts & Polish (2026-03-15)
+------------------------------------------
+- Win popup title changed from "BIG WIN!" to "JACKPOT!"
+- Jackpot wins recorded to Supabase jackpot_wins table
+- New jackpot-alert Edge Function posts winner announcements to @SatsArcadeHubNews automatically
+- Font contrast improved across all games (--muted lightened, a-tab, a-hint, bj-rank fixed)
+- Tutorial dark overlay removed so game UI is visible during tour
+- Tutorial spotlight uses orange glow border only
+- CHANGELOG.txt now included in every deployment zip
+
+
+v1.0.1 - Bug Fixes & Polish (2026-03-15)
+------------------------------------------
+- Fixed GameDistribution SDK init (GD_OPTIONS pattern, correct game ID format)
+- Fixed age gate and demo disclaimer flow for all user types (browser, Telegram, GD embed)
+- Fixed Adsterra ads disabled in iframe context to prevent ad conflicts with GD
+- Fixed cross-origin script error suppression
+- Resolved game freeze after age gate on all devices
+- Daily streak and Plinko balls now persist to Supabase correctly
+- Fixed last_claim column type mismatch (date vs text) causing all profile syncs to fail
+- Ad watch cooldown now server-side, persists across logouts
+- Plinko balls default changed to 0 (players purchase with coins)
+- Sign out button fixed
+- Added 11-step interactive tutorial with server-side completion tracking (tutorial_done in profiles)
+- Added demo mode disclaimer popup on Redeem page
+- Improved font contrast across all games for dark mode visibility
+- Tutorial overlay dark backdrop removed so game UI is visible during tour
+- Sound effects added to all 21+ games (cards, plinko bounces, dice, slots, etc.)
+- Background music added (jazz stream) with independent volume controls
+- Telegram auto-posting bot scheduled twice daily (9am and 6pm CST)
+- Security hardened: all sats awards server-validated via award_sats RPC
+- Plinko balls validated server-side and synced to Supabase
+- Withdrawal infrastructure built (pending provider integration)
+- Pop-under ad removed
+- Ad watch cooldown toast removed (keeps reward feeling randomized)
+
+
+v1.0.0 - Initial Release (2026-03-13)
+------------------------------------------
+- 21+ arcade and casino-style games including Plinko, Slots, Blackjack,
+  Roulette, Baccarat, Texas Hold'em, and more
+- GameDistribution SDK integrated with preroll and interstitial ads every 3 games
+- Rewarded ad buttons wired to GD SDK in embedded context
+- All Adsterra ads disabled when running in iframe to prevent ad conflicts
+- Cross-origin script error suppression
+- Age gate auto-bypassed in embedded/iframe context
+- Responsive layout at 1280x720
+- Bitcoin Satoshi rewards system (sweepstakes model)
+- Daily streak, weekly and monthly milestones
+- Player profiles, leaderboard, and XP leveling system

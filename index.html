@@ -3220,7 +3220,37 @@ function addFeedWin(g,n){extraFeed.unshift({u:'You',g,a:'+'+n});if(extraFeed.len
 
 
 /* JACKPOT */
-function triggerJackpot(){SFX.jackpot();const jp=JACKPOT;JACKPOT=Math.floor(500+Math.random()*300);earnCoins(jp,'Jackpot');document.getElementById('jp-amount').textContent='+'+jp+' COINS';document.getElementById('jp-overlay').classList.add('show');confetti();}
+function triggerJackpot(){
+  SFX.jackpot();
+  const jp=JACKPOT;
+  JACKPOT=Math.floor(500+Math.random()*300);
+  earnCoins(jp,'Jackpot');
+  document.getElementById('jp-amount').textContent='+'+jp+' COINS';
+  document.getElementById('jp-overlay').classList.add('show');
+  confetti();
+  // Record win and post to Telegram channel
+  _recordJackpotWin(jp,'Global Jackpot');
+}
+
+async function _recordJackpotWin(amount, game){
+  try{
+    const sb=getSupabase();if(!sb)return;
+    const winner=PLAYER_NAME||'Anonymous';
+    // Save to jackpot_wins table
+    await sb.from('jackpot_wins').insert({
+      player_name: sanitizeName(winner),
+      amount_coins: amount,
+      game: game,
+      user_id: _authUser?_authUser.id:null,
+    });
+    // Ping Edge Function to post in Telegram channel
+    fetch('https://udrymlujfjysiobfhhix.supabase.co/functions/v1/jackpot-alert',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0'},
+      body:JSON.stringify({player:sanitizeName(winner),amount:amount,game:game})
+    }).catch(()=>{});
+  }catch(e){console.warn('[Jackpot]',e);}
+}
 function closeJackpot(){document.getElementById('jp-overlay').classList.remove('show');}
 function confetti(){const r=document.getElementById('confetti-root'),cols=['#FFD700','#F7931A','#00E5FF','#A855F7','#39FF14','#FF2D78'];for(let i=0;i<50;i++){const el=document.createElement('div');el.className='conf';el.style.cssText=`left:${Math.random()*100}vw;top:-6px;background:${cols[~~(Math.random()*cols.length)]};width:${Math.random()*6+3}px;height:${Math.random()*6+3}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*.4}s;`;r.appendChild(el);setTimeout(()=>el.remove(),4800);}}
 
@@ -3887,7 +3917,7 @@ function sClearHolds(){SS.held.fill(false);for(let i=0;i<9;i++){const el=documen
 function sBuildPaytable(){const pg=document.getElementById('s-pay-grid');if(!pg)return;pg.innerHTML=SYMS.filter(s=>s.m>0).map(s=>`<div class="s-pay-row"><span class="s-pay-syms">${s.e}${s.e}${s.e}</span><span class="s-pay-rew">${s.m}\u00D7 Bet</span></div>`).join('');}
 function sSpin(){if(SS.spinning)return;SFX.slotSpin();const isFree=SS.freeSpins>0;if(!isFree&&!spendCoins(SS.bet))return;if(isFree){SS.freeSpins--;sFreeUI();}trackGame();SS.spinning=true;const btn=document.getElementById('s-spin-btn');btn.disabled=true;btn.classList.add('spinning');btn.textContent='\u23F3...';sSetResult('','');for(let i=0;i<9;i++){const el=document.getElementById('sc'+i);if(el)el.classList.remove('winning');}const ns=[...SS.symbols];for(let i=0;i<9;i++)if(!SS.held[i])ns[i]=sRand();const toSpin=[];for(let i=0;i<9;i++)if(!SS.held[i])toSpin.push(i);if(!toSpin.length){sFinalize(ns);return;}let done=0;toSpin.forEach(i=>{const cell=document.getElementById('sc'+i),em=document.getElementById('se'+i);if(!cell||!em)return;cell.classList.add('spinning');const dur=560+(i%3)*150+Math.random()*100,maxF=~~(dur/75);let f=0;const iv=setInterval(()=>{em.textContent=SYMS[sRand()].e;f++;if(f>=maxF){clearInterval(iv);cell.classList.remove('spinning');em.textContent=SYMS[ns[i]].e;SFX.slotStop();done++;if(done===toSpin.length)sFinalize(ns);}},75);});}
 function sFinalize(ns){SS.symbols=ns;SS.spinning=false;const btn=document.getElementById('s-spin-btn');btn.disabled=false;btn.classList.remove('spinning');btn.textContent='\u{1F3B0} SPIN';sClearHolds();syncAll();sEval();if(SS.autoActive&&SS.autoCount>0){SS.autoCount--;sAutoUI();if(SS.autoCount===0)sStopAuto();else SS.autoTimer=setTimeout(sSpin,750);}}
-function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById('sc'+i);if(el)el.classList.add('winning');});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,'SatSlots Jackpot');const jel=document.getElementById('s-jp-amt');if(jel)jel.textContent=SS.jackpot+' COINS';sSetResult('\u20BF JACKPOT! +'+jp+'!','win');sAddHist('JACKPOT!','win');triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,'SatSlots');parts.push('+'+coinWin+' COINS');}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push('+'+freeWin+' FREE');}const txt=parts.join(' \u00B7 ');sSetResult(txt,'win');sAddHist(txt,'win');
+function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById('sc'+i);if(el)el.classList.add('winning');});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,'SatSlots Jackpot');const jel=document.getElementById('s-jp-amt');if(jel)jel.textContent=SS.jackpot+' COINS';sSetResult('\u20BF JACKPOT! +'+jp+'!','win');sAddHist('JACKPOT!','win');_recordJackpotWin(jp,'SatSlots');triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,'SatSlots');parts.push('+'+coinWin+' COINS');}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push('+'+freeWin+' FREE');}const txt=parts.join(' \u00B7 ');sSetResult(txt,'win');sAddHist(txt,'win');
   showWinPopup(coinWin,'SatSlots',coinWin>=SS.bet*5?'\u{1F4B0}':'\u{1F389}');
   if(SS.autoActive)sStopAuto();}else{sSetResult('No match - try again!','lose');sAddHist(' - ','lose');}}
 function sSetResult(t,c){const el=document.getElementById('s-result');if(el){el.textContent=t||'\u{1F3B0} Good Luck!';el.className='s-result '+(c||'');}}
@@ -6403,7 +6433,7 @@ function showWinPopup(coins, game, emoji){
   if(!coins||coins<=0)return;
   const emoji_map={big:'\u{1F4B0}',jackpot:'\u{1F3B0}',default:'\u{1F389}'};
   document.getElementById('win-popup-emoji').textContent=emoji||(coins>=500?'\u{1F4B0}':coins>=100?'\u{1F38A}':'\u{1F389}');
-  document.getElementById('win-popup-title').textContent=coins>=500?'BIG WIN!':'YOU WIN!';
+  document.getElementById('win-popup-title').textContent=coins>=500?'🎰 JACKPOT!':'YOU WIN!';
   document.getElementById('win-popup-game').textContent=(game||'').toUpperCase();
   document.getElementById('win-popup-amount').textContent='+'+coins.toLocaleString();
   document.getElementById('win-popup').classList.add('show');
