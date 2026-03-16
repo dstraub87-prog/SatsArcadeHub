@@ -2243,7 +2243,7 @@ window.declineAge = function() {
   <button class="bn" id="bn-leaderboard" onclick="navTo('leaderboard');lbBuild()"><div class="bn-ico">🏆</div><div class="bn-lbl">Ranks</div></button>
 </nav>
 <div id="hub-toast"></div>
-<div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">BIG WIN!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
+<div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">🎰 JACKPOT!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
 <div id="confetti-root"></div>
 <div id="ad-popup">
   <div class="ad-card">
@@ -3248,7 +3248,7 @@ async function _recordJackpotWin(amount, game){
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcnltbHVqZmp5c2lvYmZoaGl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDU3NTcsImV4cCI6MjA4ODQ4MTc1N30.9ECzc7xdfwgyImzuoiI5rLo3wfgwSGiG722q6A9J1U0'},
       body:JSON.stringify({player:sanitizeName(winner),amount:amount,game:game})
-    }).catch(()=>{});
+    }).then(r=>r.json()).then(d=>console.log('[JackpotAlert]',d)).catch(e=>console.error('[JackpotAlert] failed:',e));
   }catch(e){console.warn('[Jackpot]',e);}
 }
 function closeJackpot(){document.getElementById('jp-overlay').classList.remove('show');}
@@ -5822,19 +5822,19 @@ function vpDraw(){
    =========================================================== */
 const SC_TYPES={
   classic:{cost:10,grid:3,prizes:[
-    {ico:'\u{1F480}',val:0,w:30},{ico:'\u{1F39F}\uFE0F',val:10,w:22},{ico:'\u{1F48E}',val:25,w:16},
-    {ico:'\u26A1',val:50,w:12},{ico:'\u{1F3C6}',val:100,w:8},{ico:'\u{1F3B0}',val:200,w:6},
-    {ico:'\u20BF',val:500,w:4},{ico:'\u{1F31F}',val:1000,w:2}
+    {ico:'\u{1F480}',val:0,w:40},{ico:'\u{1F39F}\uFE0F',val:10,w:25},{ico:'\u{1F48E}',val:25,w:16},
+    {ico:'\u26A1',val:50,w:10},{ico:'\u{1F3C6}',val:100,w:6},{ico:'\u{1F3B0}',val:200,w:2},
+    {ico:'\u20BF',val:500,w:1},{ico:'\u{1F31F}',val:1000,w:0.3}
   ]},
   deluxe:{cost:25,grid:4,prizes:[
-    {ico:'\u{1F480}',val:0,w:25},{ico:'\u{1F39F}\uFE0F',val:25,w:20},{ico:'\u{1F48E}',val:75,w:16},
-    {ico:'\u26A1',val:150,w:12},{ico:'\u{1F3C6}',val:300,w:9},{ico:'\u{1F3B0}',val:600,w:6},
-    {ico:'\u20BF',val:1500,w:4},{ico:'\u{1F31F}',val:3000,w:2}
+    {ico:'\u{1F480}',val:0,w:35},{ico:'\u{1F39F}\uFE0F',val:25,w:22},{ico:'\u{1F48E}',val:75,w:16},
+    {ico:'\u26A1',val:150,w:10},{ico:'\u{1F3C6}',val:300,w:6},{ico:'\u{1F3B0}',val:600,w:2},
+    {ico:'\u20BF',val:1500,w:0.8},{ico:'\u{1F31F}',val:3000,w:0.2}
   ]},
   mega:{cost:50,grid:3,prizes:[
-    {ico:'\u{1F480}',val:0,w:20},{ico:'\u{1F39F}\uFE0F',val:75,w:18},{ico:'\u{1F48E}',val:200,w:15},
-    {ico:'\u26A1',val:400,w:13},{ico:'\u{1F3C6}',val:800,w:10},{ico:'\u{1F3B0}',val:1500,w:8},
-    {ico:'\u20BF',val:5000,w:5},{ico:'\u{1F31F}',val:10000,w:2}
+    {ico:'\u{1F480}',val:0,w:30},{ico:'\u{1F39F}\uFE0F',val:75,w:22},{ico:'\u{1F48E}',val:200,w:16},
+    {ico:'\u26A1',val:400,w:10},{ico:'\u{1F3C6}',val:800,w:6},{ico:'\u{1F3B0}',val:1500,w:2},
+    {ico:'\u20BF',val:5000,w:0.5},{ico:'\u{1F31F}',val:10000,w:0.1}
   ]}
 };
 let scType='classic',scBoard=[],scScratched=[],scDone=false;
@@ -5850,7 +5850,7 @@ function scRandPrize(prizes){
 }
 function scGenBoard(){
   const t=SC_TYPES[scType],n=t.grid*t.grid,arr=[];
-  if(Math.random()<.40){
+  if(Math.random()<.25){
     const winner=scRandPrize(t.prizes.filter(p=>p.val>0));
     const pos=new Set();while(pos.size<3)pos.add(~~(Math.random()*n));
     for(let i=0;i<n;i++)arr.push(pos.has(i)?{...winner}:{...scRandPrize(t.prizes)});
@@ -6433,7 +6433,7 @@ function showWinPopup(coins, game, emoji){
   if(!coins||coins<=0)return;
   const emoji_map={big:'\u{1F4B0}',jackpot:'\u{1F3B0}',default:'\u{1F389}'};
   document.getElementById('win-popup-emoji').textContent=emoji||(coins>=500?'\u{1F4B0}':coins>=100?'\u{1F38A}':'\u{1F389}');
-  document.getElementById('win-popup-title').textContent=coins>=500?'🎰 JACKPOT!':'YOU WIN!';
+  document.getElementById('win-popup-title').textContent=coins>=500?'BIG WIN!':'YOU WIN!';
   document.getElementById('win-popup-game').textContent=(game||'').toUpperCase();
   document.getElementById('win-popup-amount').textContent='+'+coins.toLocaleString();
   document.getElementById('win-popup').classList.add('show');

@@ -15,6 +15,9 @@ v1.0.2 - Jackpot Alerts & Polish (2026-03-15)
 - Tutorial dark overlay removed so game UI is visible during tour
 - Tutorial spotlight uses orange glow border only
 - CHANGELOG.txt now included in every deployment zip
+- Fixed jackpot overlay toast still showing "BIG WIN!" — now correctly shows "🎰 JACKPOT!"
+- Scratch card big win prizes reweighted (5k/10k wins are now very rare)
+- Scratch card win rate reduced from 40% to 25% for better economy balance
 
 
 v1.0.1 - Bug Fixes & Polish (2026-03-15)
