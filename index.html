@@ -9,6 +9,8 @@
 <!-- Adsterra Anti-Popup-Blocker Pop-under -->
 <!-- pop-under removed -->
 <title>⚡ Sats Arcade Hub</title>
+<!-- Monetag push notifications -->
+<script>(function(s){s.dataset.zone='10752824',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
@@ -3291,6 +3293,60 @@ async function shopBuy(priceId,coins){
 function shopWatchAd(){closeShop();_adWatchType='coins';showAdPopup();}
 
 /* POPUP ADS - rotate 3min/5min, fund sat pool conceptually */
+// ── AD WATERFALL ──────────────────────────────────────────────
+// Priority: Adsterra → Monetag → House ad
+// Each network gets 2.5s to fill before falling to next
+function _loadAdWaterfall(slot){
+  slot.innerHTML = '';
+
+  // TIER 1: Adsterra 300x250
+  const fr = document.createElement('iframe');
+  fr.style.cssText = 'width:300px;height:250px;border:none;overflow:hidden;';
+  fr.scrolling = 'no';
+  fr.srcdoc = "<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
+  slot.appendChild(fr);
+
+  // Check after 2.5s if Adsterra filled — if slot appears empty, try Monetag
+  setTimeout(()=>{
+    const filled = fr.offsetHeight > 10 && fr.contentDocument &&
+      fr.contentDocument.body && fr.contentDocument.body.innerHTML.length > 100;
+    if(!filled){
+      console.log('[Ads] Adsterra empty, trying Monetag');
+      _loadMonetag(slot);
+    }
+  }, 2500);
+}
+
+function _loadMonetag(slot){
+  // TIER 2: Monetag push banner (zone 10752824)
+  slot.innerHTML = '';
+  const s = document.createElement('script');
+  s.dataset.zone = '10752824';
+  s.src = 'https://nap5k.com/tag.min.js';
+  slot.appendChild(s);
+
+  // Check after 2.5s — if still empty, show house ad
+  setTimeout(()=>{
+    if(slot.innerHTML.trim() === '' || slot.childElementCount <= 1){
+      console.log('[Ads] Monetag empty, showing house ad');
+      _loadHouseAd(slot);
+    }
+  }, 2500);
+}
+
+function _loadHouseAd(slot){
+  // TIER 3: House ad — promotes Telegram channel
+  slot.innerHTML = '';
+  slot.style.cssText = 'width:300px;height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0d0e1a,#131525);border:1px solid rgba(247,147,26,.3);border-radius:8px;cursor:pointer;text-align:center;padding:16px;box-sizing:border-box;';
+  slot.onclick = ()=>{ try{ window.open('https://t.me/SatsArcadeHubNews','_blank'); }catch(e){} };
+  slot.innerHTML = '<div style="font-size:1.8rem;margin-bottom:8px;">⚡</div>' +
+    '<div style="font-family:Bebas Neue,sans-serif;font-size:1.1rem;letter-spacing:2px;color:#F7931A;margin-bottom:6px;">JOIN OUR CHANNEL</div>' +
+    '<div style="font-size:.65rem;color:#9A93B0;line-height:1.4;margin-bottom:10px;">Get jackpot alerts, daily tips,<br>and community updates</div>' +
+    '<div style="background:#F7931A;color:#000;font-family:Bebas Neue,sans-serif;font-size:.8rem;letter-spacing:2px;padding:6px 14px;border-radius:6px;">@SatsArcadeHubNews</div>';
+}
+
+// ── END AD WATERFALL ──────────────────────────────────────────
+
 function scheduleNextAd(){if(IN_IFRAME)return;setTimeout(showAdPopup,AD_INTERVALS[adIdx++%2]);}
 let adPopupOpen=false,_adWatchType='timed';
 function showAdPopup(){
@@ -3319,11 +3375,7 @@ function showAdPopup(){
   const slot=document.getElementById('ad-banner-slot');
   if(slot){
     slot.innerHTML='';
-    const fr=document.createElement('iframe');
-    fr.style.cssText='width:300px;height:250px;border:none;overflow:hidden;';
-    fr.scrolling='no';
-    if(!IN_IFRAME)fr.srcdoc="<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
-    slot.appendChild(fr);
+    if(!IN_IFRAME) _loadAdWaterfall(slot);
   }
   popup.classList.add('show');
   let cnt=15;
