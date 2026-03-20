@@ -9,8 +9,7 @@
 <!-- Adsterra Anti-Popup-Blocker Pop-under -->
 <!-- pop-under removed -->
 <title>⚡ Sats Arcade Hub</title>
-<!-- Monetag push notifications -->
-<script>(function(s){s.dataset.zone='10752824',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<!-- Monetag vignette loaded on rewarded ad buttons -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Audiowide&family=Space+Mono:wght@400;700&family=Bungee&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
@@ -3306,33 +3305,18 @@ function _loadAdWaterfall(slot){
   fr.srcdoc = "<script>window.atOptions={'key':'224430875b3c2f68327436355832e3f6','format':'iframe','height':250,'width':300,'params':{}}<\/script><script src='https://www.highperformanceformat.com/224430875b3c2f68327436355832e3f6/invoke.js'><\/script>";
   slot.appendChild(fr);
 
-  // Check after 2.5s if Adsterra filled — if slot appears empty, try Monetag
+  // Check after 2.5s - if Adsterra empty fall to house ad (Clickadu slots in here when ready)
   setTimeout(()=>{
-    const filled = fr.offsetHeight > 10 && fr.contentDocument &&
-      fr.contentDocument.body && fr.contentDocument.body.innerHTML.length > 100;
+    const filled = fr.contentDocument && fr.contentDocument.body &&
+      fr.contentDocument.body.innerHTML.length > 100;
     if(!filled){
-      console.log('[Ads] Adsterra empty, trying Monetag');
-      _loadMonetag(slot);
-    }
-  }, 2500);
-}
-
-function _loadMonetag(slot){
-  // TIER 2: Monetag push banner (zone 10752824)
-  slot.innerHTML = '';
-  const s = document.createElement('script');
-  s.dataset.zone = '10752824';
-  s.src = 'https://nap5k.com/tag.min.js';
-  slot.appendChild(s);
-
-  // Check after 2.5s — if still empty, show house ad
-  setTimeout(()=>{
-    if(slot.innerHTML.trim() === '' || slot.childElementCount <= 1){
-      console.log('[Ads] Monetag empty, showing house ad');
+      console.log('[Ads] Adsterra empty, showing house ad');
       _loadHouseAd(slot);
     }
   }, 2500);
 }
+
+
 
 function _loadHouseAd(slot){
   // TIER 3: House ad — promotes Telegram channel
@@ -3434,12 +3418,31 @@ function updateAdWatchBtn(){
   else{const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);btn.textContent=`${m}:${String(s).padStart(2,'0')}`;btn.className='awc-btn locked';}
 }
 function watchAdForBigCoins(){
-  _adWatchType='bigcoins';showAdPopup();
+  _adWatchType='bigcoins';
+  _showMonetagVignette(()=>showAdPopup());
 }
 function watchAdForCoins(){
   if(Date.now()<AD_WATCH_NEXT)return;
-  _adWatchType='coins';showAdPopup();
+  _adWatchType='coins';
+  _showMonetagVignette(()=>showAdPopup());
 }
+// Monetag vignette interstitial (zone 10752877)
+// Loads once, subsequent calls just trigger the show
+let _monetagVigLoaded = false;
+function _showMonetagVignette(callback){
+  // Always call the callback - the vignette is an overlay, not blocking
+  if(typeof callback === 'function') callback();
+  try{
+    if(!_monetagVigLoaded){
+      _monetagVigLoaded = true;
+      (function(s){
+        s.dataset.zone='10752877';
+        s.src='https://izcle.com/vignette.min.js';
+      })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+    }
+  }catch(e){ console.warn('[Monetag]',e); }
+}
+
 setInterval(updateAdWatchBtn,5000);
 
 /* === DAILY STREAK (Sats earned here) === */
