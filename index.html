@@ -418,6 +418,15 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .jp-amount{font-family:'Space Mono',monospace;font-size:1.25rem;color:var(--green);margin:6px 0 3px;}
 .jp-sub{color:var(--muted);font-size:.64rem;margin-bottom:14px;}
 .jp-close-btn{background:linear-gradient(135deg,var(--gold),var(--btc));border:none;border-radius:8px;padding:9px 26px;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;color:#000;cursor:pointer;}
+/* CONTEST WIN OVERLAY */
+#contest-win-overlay{position:fixed;inset:0;z-index:510;background:rgba(0,0,0,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px);}
+#contest-win-overlay.show{opacity:1;pointer-events:all;}
+.cwo-emoji{font-size:3.2rem;margin-bottom:6px;animation:jpPulse .6s ease infinite alternate;}
+.cwo-title{font-family:'Bebas Neue',sans-serif;font-size:2.1rem;letter-spacing:5px;color:var(--gold);text-shadow:0 0 30px rgba(255,215,0,.5);margin-bottom:4px;}
+.cwo-contest{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:3px;color:var(--muted);margin-bottom:12px;}
+.cwo-prize{font-family:'Space Mono',monospace;font-size:1.6rem;color:var(--cyan);font-weight:700;text-shadow:0 0 20px rgba(0,229,255,.4);margin-bottom:4px;}
+.cwo-sub{color:var(--muted);font-size:.62rem;margin-bottom:20px;letter-spacing:1px;}
+.cwo-btn{background:linear-gradient(135deg,var(--gold),var(--btc));border:none;border-radius:10px;padding:12px 32px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:#000;cursor:pointer;box-shadow:0 4px 20px rgba(255,215,0,.3);}
 #confetti-root{position:fixed;inset:0;z-index:490;pointer-events:none;overflow:hidden;}
 .conf{position:absolute;animation:confFall linear forwards;}
 @keyframes confFall{from{transform:translateY(-8px) rotate(0);opacity:1}to{transform:translateY(105vh) rotate(720deg);opacity:0}}
@@ -2312,6 +2321,14 @@ window.declineAge = function() {
 </nav>
 <div id="hub-toast"></div>
 <div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">🎰 JACKPOT!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
+<div id="contest-win-overlay">
+  <div class="cwo-emoji">🏆</div>
+  <div class="cwo-title">CONTEST WON!</div>
+  <div class="cwo-contest" id="cwo-contest-name"></div>
+  <div class="cwo-prize" id="cwo-prize">+0 ₿</div>
+  <div class="cwo-sub">Real Bitcoin sats added to your balance</div>
+  <button class="cwo-btn" onclick="closeContestWin()">⚡ CLAIM PRIZE!</button>
+</div>
 <div id="confetti-root"></div>
 <div id="ad-popup">
   <div class="ad-card">
@@ -3242,7 +3259,7 @@ async function contestCheckProgress(){
       p_contest_id: _contest.id, p_user_id: _authUser.id
     });
     if(data?.won){
-      hubToast('🏆 YOU WON THE CONTEST! +'+_contest.reward_sats+' sats!');
+      showContestWin(_contest.title, _contest.reward_sats);
       contestDismiss();
       loadContest();
       return;
@@ -3518,6 +3535,20 @@ async function _recordJackpotWin(amount, game){
   }catch(e){console.warn('[Jackpot]',e);}
 }
 function closeJackpot(){document.getElementById('jp-overlay').classList.remove('show');}
+function showContestWin(contestTitle, sats){
+  SFX.jackpot();
+  const el=document.getElementById('contest-win-overlay');
+  if(!el)return;
+  const nameEl=document.getElementById('cwo-contest-name');
+  if(nameEl)nameEl.textContent=contestTitle||'Weekly Contest';
+  const prizeEl=document.getElementById('cwo-prize');
+  if(prizeEl)prizeEl.textContent='+'+sats+' ₿ SATS';
+  el.classList.add('show');
+  confetti();
+}
+function closeContestWin(){
+  document.getElementById('contest-win-overlay').classList.remove('show');
+}
 function confetti(){const r=document.getElementById('confetti-root'),cols=['#FFD700','#F7931A','#00E5FF','#A855F7','#39FF14','#FF2D78'];for(let i=0;i<50;i++){const el=document.createElement('div');el.className='conf';el.style.cssText=`left:${Math.random()*100}vw;top:-6px;background:${cols[~~(Math.random()*cols.length)]};width:${Math.random()*6+3}px;height:${Math.random()*6+3}px;border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${Math.random()*2+2}s;animation-delay:${Math.random()*.4}s;`;r.appendChild(el);setTimeout(()=>el.remove(),4800);}}
 
 /* TOAST */
