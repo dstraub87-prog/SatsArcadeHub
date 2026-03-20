@@ -518,7 +518,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 
 /* CONTEST SYSTEM */
 #contest-popup{display:none;position:fixed;inset:0;z-index:880;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);}
-#contest-popup.show{display:flex;}
+/* contest-popup visibility controlled via inline style */
 .cp-card{background:linear-gradient(145deg,#0d0e1a,#131525);border:1px solid var(--gold);border-radius:18px;padding:22px 20px 18px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(255,215,0,.15);}
 .cp-badge{background:var(--gold);color:#000;font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:2px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;}
 .cp-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#fff;margin-bottom:6px;}
@@ -1134,7 +1134,7 @@ window.declineAge = function() {
 </div>
 
 <!-- CONTEST POPUP -->
-<div id="contest-popup">
+<div id="contest-popup" style="display:none">
   <div class="cp-card">
     <div class="cp-badge">🏆 WEEKLY CONTEST</div>
     <div class="cp-title" id="cp-title">Coin Grinder Challenge</div>
@@ -3166,10 +3166,20 @@ async function loadContest(){
     }
     renderContestWidget();
     loadContestWinners();
-    // Show popup once per contest if not joined and not dismissed
+    // Show popup once per contest — only after demo is dismissed and user is logged in
     const dismissed = localStorage.getItem('contest_dismissed_'+data.id);
     if(!_contestEntry && !dismissed && _authUser){
-      setTimeout(()=>openContestPopup(), 3000);
+      // Wait until demo-disclaimer is gone before showing contest popup
+      const _waitForDemo = setInterval(()=>{
+        const dd = document.getElementById('demo-disclaimer');
+        const ag = document.getElementById('age-gate');
+        const demoGone = !dd || dd.style.display !== 'flex';
+        const ageGone = !ag || ag.style.display === 'none';
+        if(demoGone && ageGone){
+          clearInterval(_waitForDemo);
+          setTimeout(openContestPopup, 1500);
+        }
+      }, 500);
     }
   }catch(e){ console.warn('[Contest]',e); }
 }
@@ -3192,11 +3202,11 @@ function openContestPopup(){
     document.getElementById('cp-join-btn').onclick = contestJoin;
     document.getElementById('cp-progress-wrap').style.display = 'none';
   }
-  document.getElementById('contest-popup').classList.add('show');
+  const _cpEl=document.getElementById('contest-popup');_cpEl.style.display='flex';
 }
 
 function contestDismiss(){
-  document.getElementById('contest-popup').classList.remove('show');
+  document.getElementById('contest-popup').style.display='none';
   if(_contest) try{ localStorage.setItem('contest_dismissed_'+_contest.id,'1'); }catch(e){}
 }
 
