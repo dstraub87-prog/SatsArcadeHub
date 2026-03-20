@@ -515,6 +515,36 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .tut-btn{flex:1;padding:10px;border:none;border-radius:9px;font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:1.5px;cursor:pointer;}
 .tut-btn.next{background:var(--btc);color:#000;}
 .tut-btn.skip{background:rgba(255,255,255,.06);border:1px solid var(--border);color:#fff;}
+
+/* CONTEST SYSTEM */
+#contest-popup{display:none;position:fixed;inset:0;z-index:880;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);}
+#contest-popup.show{display:flex;}
+.cp-card{background:linear-gradient(145deg,#0d0e1a,#131525);border:1px solid var(--gold);border-radius:18px;padding:22px 20px 18px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(255,215,0,.15);}
+.cp-badge{background:var(--gold);color:#000;font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:2px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;}
+.cp-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#fff;margin-bottom:6px;}
+.cp-desc{font-size:.8rem;color:#ddd;line-height:1.5;margin-bottom:14px;font-weight:500;}
+.cp-reward{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold);margin-bottom:14px;letter-spacing:1px;}
+.cp-countdown{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--cyan);margin-bottom:16px;letter-spacing:1px;}
+.cp-btn-join{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--gold),#ffb347);color:#000;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;margin-bottom:8px;}
+.cp-btn-skip{width:100%;padding:9px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:1px;cursor:pointer;}
+.cp-progress{background:rgba(255,255,255,.08);border-radius:8px;height:8px;margin-bottom:6px;overflow:hidden;}
+.cp-progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),#ffb347);border-radius:8px;transition:width .5s;}
+.cp-pct{font-size:.65rem;color:var(--muted);margin-bottom:14px;}
+/* Contest widget in hub */
+#contest-widget{background:linear-gradient(135deg,rgba(255,215,0,.06),rgba(255,179,71,.03));border:1px solid rgba(255,215,0,.25);border-radius:14px;padding:14px 16px;margin:0 12px 14px;cursor:pointer;}
+.cw-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.cw-badge{background:var(--gold);color:#000;font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:2px;padding:2px 8px;border-radius:12px;}
+.cw-title{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:1.5px;color:#fff;}
+.cw-desc{font-size:.7rem;color:#ccc;line-height:1.4;margin-bottom:8px;}
+.cw-progress{background:rgba(255,255,255,.08);border-radius:6px;height:6px;overflow:hidden;margin-bottom:4px;}
+.cw-bar{height:100%;background:linear-gradient(90deg,var(--gold),#ffb347);border-radius:6px;transition:width .4s;}
+.cw-meta{display:flex;justify-content:space-between;font-size:.6rem;color:var(--muted);}
+/* Winners list */
+#contest-winners{padding:0 12px 14px;}
+.cw-winner{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.12);border-radius:10px;margin-bottom:6px;}
+.cw-winner-medal{font-size:1.1rem;}
+.cw-winner-name{font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#fff;letter-spacing:1px;}
+.cw-winner-detail{font-size:.6rem;color:var(--muted);}
 /* DEMO REDEEM POPUP */
 #demo-redeem-popup{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);}
 #demo-redeem-popup.show{display:flex;}
@@ -1103,6 +1133,23 @@ window.declineAge = function() {
   </div>
 </div>
 
+<!-- CONTEST POPUP -->
+<div id="contest-popup">
+  <div class="cp-card">
+    <div class="cp-badge">🏆 WEEKLY CONTEST</div>
+    <div class="cp-title" id="cp-title">Coin Grinder Challenge</div>
+    <div class="cp-desc" id="cp-desc">First to earn 50,000 coins wins 100 bonus sats!</div>
+    <div class="cp-reward" id="cp-reward">🏆 Prize: 100 SATS</div>
+    <div class="cp-countdown" id="cp-countdown">⏱ Ends in: 6d 12h 00m</div>
+    <div id="cp-progress-wrap" style="display:none">
+      <div class="cp-progress"><div class="cp-progress-bar" id="cp-bar" style="width:0%"></div></div>
+      <div class="cp-pct" id="cp-pct">0% complete</div>
+    </div>
+    <button class="cp-btn-join" id="cp-join-btn" onclick="contestJoin()">⚡ JOIN CONTEST</button>
+    <button class="cp-btn-skip" onclick="contestDismiss()">Maybe Later</button>
+  </div>
+</div>
+
 <div id="age-gate">
   <div class="ag-card">
     <div class="ag-logo">&#x26A1; <span>SATS ARCADE HUB</span> &#x26A1;</div>
@@ -1382,7 +1429,25 @@ window.declineAge = function() {
   <div class="gsw">
     <div class="bbar">
       <button class="bbtn" onclick="navTo('hub')">← HUB</button>
-      <div class="bbtitle" style="color:var(--gold)">🏆 LEADERBOARD</div>
+      <!-- CONTEST WIDGET -->
+<div id="contest-widget" onclick="openContestPopup()">
+  <div class="cw-head">
+    <span class="cw-badge">🏆 WEEKLY CONTEST</span>
+    <span class="cw-title" id="cw-title">Loading...</span>
+  </div>
+  <div class="cw-desc" id="cw-desc">Join this week's challenge and win bonus sats!</div>
+  <div class="cw-progress"><div class="cw-bar" id="cw-bar" style="width:0%"></div></div>
+  <div class="cw-meta">
+    <span id="cw-pct">Not joined</span>
+    <span id="cw-countdown">--</span>
+  </div>
+</div>
+
+<!-- PREVIOUS WINNERS -->
+<div style="padding:0 12px 6px"><div style="font-family:'Bebas Neue',sans-serif;font-size:.9rem;letter-spacing:2px;color:var(--gold);margin-bottom:8px;">🏅 RECENT WINNERS</div>
+<div id="contest-winners"><div style="font-size:.7rem;color:var(--muted);text-align:center;padding:8px">No winners yet — be the first!</div></div></div>
+
+<div class="bbtitle" style="color:var(--gold)">🏆 LEADERBOARD</div>
       <div class="bbcoins">🪙<span id="lb-coins-bar">0</span></div>
     </div>
     <div class="gcontent">
@@ -3081,6 +3146,7 @@ loadState();
 /* COINS ONLY operations */
 function spendCoins(n){if(COINS<n){SFX.error();hubToast('Need more coins! \u{1F6D2}');openShop();return false;}SFX.buy();COINS-=n;syncAll();saveState();return true;}
 function trackGame(){
+  if(_contest&&_contestEntry&&_contest.type==='games_played') setTimeout(()=>contestCheckProgress(),500);
   GAMES_PLAYED++;saveProfileState();updateLevel(true);
   // Use session counter (not GAMES_PLAYED) so %3 is never offset by saved data
   window._gdGameCount++;
@@ -3091,7 +3157,12 @@ let _sessionSatsEarned=0, _sessionCoinsEarned=0;
 const _MAX_SATS_SESSION=500, _MAX_COINS_SESSION=500000, _MAX_SINGLE_SAT=200, _MAX_SINGLE_COIN=10000;
 let _adPopupOpenTime=0; // track when ad popup was actually opened
 
-function earnCoins(n,label){SFX.coin();
+function earnCoins(n,label){
+  // Contest milestone check for coins_earned and big_win contests
+  if(n>0&&_contest&&_contestEntry){
+    if(_contest.type==='coins_earned') setTimeout(()=>contestCheckProgress(),500);
+    if(_contest.type==='big_win') _contestMilestoneCheck(n);
+  }SFX.coin();
   if(typeof n!=='number'||isNaN(n)||n<=0)return;
   n=Math.min(Math.floor(n),_MAX_SINGLE_COIN);
   if(_sessionCoinsEarned+n>_MAX_COINS_SESSION)return;
@@ -3651,10 +3722,185 @@ function renderRedeemHist(){
   el.innerHTML=REDEEM_HIST.map(r=>`<div class="rh-item"><div><div class="rhi-addr">\u26A1 ${r.addr}</div><div class="rhi-date">${r.date}</div></div><div style="text-align:right"><div class="rhi-amt">\u20BF${r.amount.toLocaleString()}</div><span class="rhi-st ${r.status}">${r.status.toUpperCase()}</span></div></div>`).join('');
 }
 
+/* ============================================================
+   WEEKLY CONTEST SYSTEM
+   ============================================================ */
+let _contest = null;          // active contest object
+let _contestEntry = null;     // player's entry
+let _contestCountdownIv = null;
+
+// Load active contest from Supabase
+async function loadContest(){
+  try{
+    const sb = getSupabase(); if(!sb) return;
+    const {data} = await sb.from('contests')
+      .select('*').eq('status','active').order('created_at',{ascending:false}).limit(1).single();
+    if(!data) return;
+    _contest = data;
+    // Load player entry if logged in
+    if(_authUser){
+      const {data:entry} = await sb.from('contest_entries')
+        .select('*').eq('contest_id',data.id).eq('user_id',_authUser.id).single();
+      _contestEntry = entry || null;
+    }
+    renderContestWidget();
+    loadContestWinners();
+    // Show popup once per contest if not joined and not dismissed
+    const dismissed = localStorage.getItem('contest_dismissed_'+data.id);
+    if(!_contestEntry && !dismissed && _authUser){
+      setTimeout(()=>openContestPopup(), 3000);
+    }
+  }catch(e){ console.warn('[Contest]',e); }
+}
+
+function openContestPopup(){
+  if(!_contest) return;
+  const c = _contest;
+  document.getElementById('cp-title').textContent = c.title;
+  document.getElementById('cp-desc').textContent = c.description;
+  document.getElementById('cp-reward').textContent = '🏆 Prize: '+c.reward_sats+' SATS';
+  renderContestCountdown('cp-countdown');
+  // If already joined show progress
+  if(_contestEntry){
+    document.getElementById('cp-join-btn').textContent = '✓ JOINED — VIEW PROGRESS';
+    document.getElementById('cp-join-btn').onclick = contestCheckProgress;
+    document.getElementById('cp-progress-wrap').style.display = 'block';
+    updateContestProgressUI(_contestEntry.best_value, c.goal);
+  } else {
+    document.getElementById('cp-join-btn').textContent = '⚡ JOIN CONTEST';
+    document.getElementById('cp-join-btn').onclick = contestJoin;
+    document.getElementById('cp-progress-wrap').style.display = 'none';
+  }
+  document.getElementById('contest-popup').classList.add('show');
+}
+
+function contestDismiss(){
+  document.getElementById('contest-popup').classList.remove('show');
+  if(_contest) try{ localStorage.setItem('contest_dismissed_'+_contest.id,'1'); }catch(e){}
+}
+
+async function contestJoin(){
+  if(!_authUser){ hubToast('Sign in to join contests!'); return; }
+  if(!_contest){ contestDismiss(); return; }
+  const btn = document.getElementById('cp-join-btn');
+  btn.textContent = 'Joining...'; btn.disabled = true;
+  try{
+    const sb = getSupabase();
+    const {data,error} = await sb.rpc('join_contest',{
+      p_contest_id: _contest.id, p_user_id: _authUser.id
+    });
+    if(error||data?.error){ hubToast('Could not join: '+(data?.error||error.message)); return; }
+    // Reload entry
+    const {data:entry} = await sb.from('contest_entries')
+      .select('*').eq('contest_id',_contest.id).eq('user_id',_authUser.id).single();
+    _contestEntry = entry;
+    hubToast('🏆 You joined the contest! Good luck!');
+    renderContestWidget();
+    btn.textContent = '✓ JOINED!'; btn.disabled = false;
+    setTimeout(contestDismiss, 1200);
+  }catch(e){
+    hubToast('Error joining contest'); btn.textContent = '⚡ JOIN CONTEST'; btn.disabled = false;
+  }
+}
+
+async function contestCheckProgress(){
+  if(!_authUser||!_contest||!_contestEntry) return;
+  try{
+    const sb = getSupabase();
+    const {data} = await sb.rpc('check_contest_progress',{
+      p_contest_id: _contest.id, p_user_id: _authUser.id
+    });
+    if(data?.won){
+      hubToast('🏆 YOU WON THE CONTEST! +'+_contest.reward_sats+' sats!');
+      contestDismiss();
+      loadContest();
+      return;
+    }
+    if(data?.progress !== undefined){
+      updateContestProgressUI(data.progress, data.goal);
+      document.getElementById('cp-progress-wrap').style.display = 'block';
+    }
+  }catch(e){}
+}
+
+function updateContestProgressUI(progress, goal){
+  const pct = Math.min(100, Math.round(progress/goal*100));
+  const bar = document.getElementById('cp-bar'); if(bar) bar.style.width = pct+'%';
+  const pctEl = document.getElementById('cp-pct');
+  if(pctEl) pctEl.textContent = progress.toLocaleString()+' / '+goal.toLocaleString()+' ('+pct+'%)';
+  const wbar = document.getElementById('cw-bar'); if(wbar) wbar.style.width = pct+'%';
+  const wpct = document.getElementById('cw-pct'); if(wpct) wpct.textContent = pct+'% complete';
+}
+
+function renderContestWidget(){
+  if(!_contest) return;
+  const c = _contest;
+  const titleEl = document.getElementById('cw-title'); if(titleEl) titleEl.textContent = c.title;
+  const descEl = document.getElementById('cw-desc');
+  if(descEl) descEl.textContent = _contestEntry ? c.description : 'Tap to join this week's challenge!';
+  if(_contestEntry && _contestEntry.best_value > 0){
+    updateContestProgressUI(_contestEntry.best_value, c.goal);
+  }
+  // Start countdown interval
+  if(_contestCountdownIv) clearInterval(_contestCountdownIv);
+  renderContestCountdown('cw-countdown');
+  _contestCountdownIv = setInterval(()=>renderContestCountdown('cw-countdown'), 60000);
+}
+
+function renderContestCountdown(elId){
+  const el = document.getElementById(elId); if(!el||!_contest) return;
+  const ms = new Date(_contest.ends_at) - Date.now();
+  if(ms <= 0){ el.textContent = 'Contest ended'; return; }
+  const d = Math.floor(ms/86400000);
+  const h = Math.floor((ms%86400000)/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  el.textContent = '⏱ '+d+'d '+h+'h '+m+'m left';
+}
+
+async function loadContestWinners(){
+  try{
+    const sb = getSupabase(); if(!sb) return;
+    const {data} = await sb.from('contests')
+      .select('title,winner_name,reward_sats,ends_at')
+      .in('status',['awarded','closed'])
+      .not('winner_name','is',null)
+      .order('ends_at',{ascending:false}).limit(5);
+    const el = document.getElementById('contest-winners'); if(!el) return;
+    if(!data||!data.length){
+      el.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:8px">No winners yet — be the first!</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉','🏅','🏅'];
+    el.innerHTML = data.map((w,i)=>`
+      <div class="cw-winner">
+        <span class="cw-winner-medal">${medals[i]||'🏅'}</span>
+        <div>
+          <div class="cw-winner-name">${w.winner_name}</div>
+          <div class="cw-winner-detail">${w.title} · +${w.reward_sats} sats</div>
+        </div>
+      </div>`).join('');
+  }catch(e){}
+}
+
+// Call check_contest_progress when relevant events happen
+function _contestMilestoneCheck(val){
+  if(!_contest||!_contestEntry||!_authUser) return;
+  if(_contest.type === 'big_win' && val > (_contestEntry.best_value||0)){
+    const sb = getSupabase(); if(!sb) return;
+    sb.rpc('update_contest_best',{p_contest_id:_contest.id,p_user_id:_authUser.id,p_value:val}).then(()=>{
+      if(_contestEntry) _contestEntry.best_value = Math.max(_contestEntry.best_value||0, val);
+      contestCheckProgress();
+    });
+  } else {
+    contestCheckProgress();
+  }
+}
+
 /* START SYSTEMS */
 function startSystems(){
   if(_systemsStarted)return;_systemsStarted=true;
   scheduleNextAd();
+  setTimeout(loadContest, 2000); // load contest after auth settles
   setInterval(()=>{
     SESSION_MINS=Math.floor((Date.now()-SESSION_START)/60000);
     const el=document.getElementById('session-time');if(el)el.textContent=SESSION_MINS+'m';

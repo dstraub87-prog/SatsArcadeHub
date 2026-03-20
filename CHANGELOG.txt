@@ -6,6 +6,23 @@ Telegram Mini App: t.me/SatsArcadeHubBot/SatsArcadeHub
 GD Game ID: 1cec31a16cf34305acec31364182b7fb
 =====================================
 
+v1.0.3 - Weekly Contests & Ad Improvements (2026-03-19)
+------------------------------------------
+- Weekly contest system added (5 contest types, randomly generated each Monday)
+- Contest popup on game load with Join button and progress tracking
+- Contest widget in hub showing live countdown to Sunday 22:00 CST
+- Previous winners hall on leaderboard tab
+- Contest progress tracked server-side from time of joining (baseline snapshot)
+- Auto-close and award via pg_cron Monday 04:00 UTC
+- Auto-generate new contest via pg_cron Monday 04:01 UTC
+- Monetag vignette interstitial (zone 10752877) added to rewarded ad buttons
+- Removed Monetag push notification script (wrong ad type)
+- Ad waterfall updated: Adsterra → House ad (Clickadu placeholder ready)
+- Telegram bot posts expanded from 30 to 30 new posts (game spotlights, tips, engagement)
+- Telegram and Reddit posts separated into individual files
+- Verification meta tags added for Monetag and Clickadu
+
+
 v1.0.2 - Jackpot Alerts & Polish (2026-03-15)
 ------------------------------------------
 - Win popup title changed from "BIG WIN!" to "JACKPOT!"
