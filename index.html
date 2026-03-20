@@ -959,6 +959,35 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .hdr-account{width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.6rem;cursor:pointer;flex-shrink:0;transition:border-color .2s;}
 .hdr-account.signed-in{border-color:var(--btc);}
 .hdr-account:active{transform:scale(.9);}
+
+/* ── GLOBAL CLICK/TAP GLOW RIPPLE ───────────────────────── */
+.sah-ripple{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;
+  background:radial-gradient(circle,rgba(247,147,26,.55) 0%,rgba(255,215,0,.25) 40%,transparent 70%);
+  transform:scale(0);animation:sahRipple .5s cubic-bezier(.2,.8,.4,1) forwards;}
+@keyframes sahRipple{
+  0%{transform:scale(0);opacity:1;}
+  70%{opacity:.6;}
+  100%{transform:scale(1);opacity:0;}
+}
+
+/* ── DAILY MISSIONS ─────────────────────────────────────── */
+.missions-card{background:var(--bg3);border:1px solid rgba(0,229,255,.18);border-radius:12px;padding:10px;margin-bottom:8px;}
+.missions-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.missions-title{font-family:'Bebas Neue',sans-serif;font-size:.88rem;letter-spacing:2px;color:var(--cyan);}
+.missions-reset{font-family:'Space Mono',monospace;font-size:.5rem;color:var(--muted);}
+.mission-row{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:8px 10px;margin-bottom:6px;}
+.mission-row:last-child{margin-bottom:0;}
+.mission-row.done{border-color:rgba(0,229,255,.25);background:rgba(0,229,255,.05);}
+.mission-top{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.mission-ico{font-size:1.1rem;flex-shrink:0;}
+.mission-info{flex:1;min-width:0;}
+.mission-label{font-family:'Bebas Neue',sans-serif;font-size:.78rem;letter-spacing:1px;color:var(--text);}
+.mission-row.done .mission-label{color:var(--muted);}
+.mission-reward{font-size:.52rem;color:var(--gold);}
+.mission-status{font-family:'Bebas Neue',sans-serif;font-size:.72rem;flex-shrink:0;}
+.mission-prog-bg{background:rgba(255,255,255,.07);border-radius:999px;height:4px;overflow:hidden;}
+.mission-prog-bar{height:100%;background:linear-gradient(90deg,var(--cyan),rgba(0,229,255,.5));border-radius:999px;transition:width .4s;}
+.mission-claim-btn{width:100%;margin-top:6px;padding:6px;border:none;border-radius:6px;background:linear-gradient(135deg,var(--cyan),rgba(0,200,255,.7));color:#000;font-family:'Bebas Neue',sans-serif;font-size:.72rem;letter-spacing:1px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -1365,6 +1394,16 @@ window.declineAge = function() {
           <div class="awc-desc">Watch a longer ad for a bigger coin reward. Unlimited plays. Coins only — no ₿.</div>
         </div>
         <button class="awc-btn gold" onclick="watchAdForBigCoins()">WATCH</button>
+      </div>
+      <!-- DAILY MISSIONS -->
+      <div class="missions-card">
+        <div class="missions-hdr">
+          <div class="missions-title">🎯 DAILY MISSIONS</div>
+          <div class="missions-reset" id="missions-reset">Resets at 06:00 UTC</div>
+        </div>
+        <div id="missions-list">
+          <div style="text-align:center;color:var(--muted);font-size:.6rem;padding:10px">Loading missions...</div>
+        </div>
       </div>
       <div class="streak-card">
         <div class="sc-hdr">
@@ -3347,6 +3386,7 @@ function _contestMilestoneCheck(val){
 
 function trackGame(){
   GAMES_PLAYED++; saveProfileState(); updateLevel(true);
+  missionProgress('games_played', 1);
   // Use session counter (not GAMES_PLAYED) so %3 is never offset by saved data
   window._gdGameCount++;
   if(window._gdGameCount%3===0) setTimeout(showGDAd, 500);
@@ -3377,6 +3417,7 @@ function earnCoins(n,label){
   if(_sessionCoinsEarned+n>_MAX_COINS_SESSION)return;
   _sessionCoinsEarned+=n;
   COINS+=n;LIFETIME_COINS+=n;
+  missionProgress('coins_earned', n);
   syncAll();saveState();saveProfileState();debouncedSyncToServer();
   if(label)addFeedWin(label,n);if(Math.random()<.012)setTimeout(triggerJackpot,800);
   if(label&&n>0){
@@ -3458,7 +3499,7 @@ function navTo(s){
   document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
   document.getElementById('screen-'+s).classList.add('active');
   ['hub','rewards','redeem','legal'].forEach(id=>{const b=document.getElementById('bn-'+id);if(b)b.classList.toggle('active',id===s);});
-  if(s==='rewards'){renderStreakRewards();renderWeeklyMiles();renderMonthlyMiles();renderTimeTiers();}
+  if(s==='rewards'){renderStreakRewards();renderWeeklyMiles();renderMonthlyMiles();renderTimeTiers();renderMissions();}
   if(s==='plinko')setTimeout(pInit,60);
   if(s==='slots'){sInitGrid();sBuildPaytable();}
   if(s==='arcade')aDrawWheel();
@@ -3778,6 +3819,7 @@ function renderStreakRewards(){
 function claimStreak(){
   const _today=_todayISO();
   if(LAST_CLAIM===_today){hubToast('\u2705 Come back tomorrow!');return;}
+  missionProgress('streak_claim', 1);
   const idx=STREAK%7;
   const r=STREAK_DEFS[idx];
   earnCoins(r.coins,'Daily Streak');
@@ -4181,6 +4223,7 @@ function pDrop(){
   PLINKO.activeDrops=PLINKO.multi;
   PLINKO.roundTotal=0;PLINKO.roundBest=0;
   trackGame();
+  missionProgress('specific_game', 1, 'plinko');
   _pUpdateBtn();
   const dropX=_pAimX; // capture aim position at moment of drop
   for(let i=0;i<PLINKO.multi;i++){
@@ -4267,7 +4310,7 @@ function sInitGrid(){const grid=document.getElementById('s-grid');if(!grid)retur
 function sToggleHold(i){if(SS.spinning)return;SS.held[i]=!SS.held[i];document.getElementById('sc'+i).classList.toggle('held',SS.held[i]);}
 function sClearHolds(){SS.held.fill(false);for(let i=0;i<9;i++){const el=document.getElementById('sc'+i);if(el)el.classList.remove('held');}}
 function sBuildPaytable(){const pg=document.getElementById('s-pay-grid');if(!pg)return;pg.innerHTML=SYMS.filter(s=>s.m>0).map(s=>`<div class="s-pay-row"><span class="s-pay-syms">${s.e}${s.e}${s.e}</span><span class="s-pay-rew">${s.m}\u00D7 Bet</span></div>`).join('');}
-function sSpin(){if(SS.spinning)return;SFX.slotSpin();const isFree=SS.freeSpins>0;if(!isFree&&!spendCoins(SS.bet))return;if(isFree){SS.freeSpins--;sFreeUI();}trackGame();SS.spinning=true;const btn=document.getElementById('s-spin-btn');btn.disabled=true;btn.classList.add('spinning');btn.textContent='\u23F3...';sSetResult('','');for(let i=0;i<9;i++){const el=document.getElementById('sc'+i);if(el)el.classList.remove('winning');}const ns=[...SS.symbols];for(let i=0;i<9;i++)if(!SS.held[i])ns[i]=sRand();const toSpin=[];for(let i=0;i<9;i++)if(!SS.held[i])toSpin.push(i);if(!toSpin.length){sFinalize(ns);return;}let done=0;toSpin.forEach(i=>{const cell=document.getElementById('sc'+i),em=document.getElementById('se'+i);if(!cell||!em)return;cell.classList.add('spinning');const dur=560+(i%3)*150+Math.random()*100,maxF=~~(dur/75);let f=0;const iv=setInterval(()=>{em.textContent=SYMS[sRand()].e;f++;if(f>=maxF){clearInterval(iv);cell.classList.remove('spinning');em.textContent=SYMS[ns[i]].e;SFX.slotStop();done++;if(done===toSpin.length)sFinalize(ns);}},75);});}
+function sSpin(){if(SS.spinning)return;SFX.slotSpin();const isFree=SS.freeSpins>0;if(!isFree&&!spendCoins(SS.bet))return;if(isFree){SS.freeSpins--;sFreeUI();}trackGame();missionProgress('specific_game',1,'slots');SS.spinning=true;const btn=document.getElementById('s-spin-btn');btn.disabled=true;btn.classList.add('spinning');btn.textContent='\u23F3...';sSetResult('','');for(let i=0;i<9;i++){const el=document.getElementById('sc'+i);if(el)el.classList.remove('winning');}const ns=[...SS.symbols];for(let i=0;i<9;i++)if(!SS.held[i])ns[i]=sRand();const toSpin=[];for(let i=0;i<9;i++)if(!SS.held[i])toSpin.push(i);if(!toSpin.length){sFinalize(ns);return;}let done=0;toSpin.forEach(i=>{const cell=document.getElementById('sc'+i),em=document.getElementById('se'+i);if(!cell||!em)return;cell.classList.add('spinning');const dur=560+(i%3)*150+Math.random()*100,maxF=~~(dur/75);let f=0;const iv=setInterval(()=>{em.textContent=SYMS[sRand()].e;f++;if(f>=maxF){clearInterval(iv);cell.classList.remove('spinning');em.textContent=SYMS[ns[i]].e;SFX.slotStop();done++;if(done===toSpin.length)sFinalize(ns);}},75);});}
 function sFinalize(ns){SS.symbols=ns;SS.spinning=false;const btn=document.getElementById('s-spin-btn');btn.disabled=false;btn.classList.remove('spinning');btn.textContent='\u{1F3B0} SPIN';sClearHolds();syncAll();sEval();if(SS.autoActive&&SS.autoCount>0){SS.autoCount--;sAutoUI();if(SS.autoCount===0)sStopAuto();else SS.autoTimer=setTimeout(sSpin,750);}}
 function sEval(){const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let coinWin=0,freeWin=0,jackpotHit=false;const winCells=new Set();lines.forEach(line=>{const[a,b,c]=line;if(SS.symbols[a]===SS.symbols[b]&&SS.symbols[b]===SS.symbols[c]){const sym=SYMS[SS.symbols[a]];line.forEach(i=>winCells.add(i));if(sym.jackpot)jackpotHit=true;else if(sym.fs)freeWin+=sym.fs;else if(sym.bonus)coinWin+=sym.bonus;else if(sym.m>0)coinWin+=~~(SS.bet*sym.m);}});winCells.forEach(i=>{const el=document.getElementById('sc'+i);if(el)el.classList.add('winning');});if(jackpotHit){const jp=SS.jackpot;SS.jackpot=500;earnCoins(jp,'SatSlots Jackpot');const jel=document.getElementById('s-jp-amt');if(jel)jel.textContent=SS.jackpot+' COINS';sSetResult('\u20BF JACKPOT! +'+jp+'!','win');sAddHist('JACKPOT!','win');_recordJackpotWin(jp,'SatSlots');triggerJackpot();sStopAuto();}else if(coinWin>0||freeWin>0){let parts=[];if(coinWin>0){earnCoins(coinWin,'SatSlots');parts.push('+'+coinWin+' COINS');}if(freeWin>0){SS.freeSpins+=freeWin;sFreeUI();parts.push('+'+freeWin+' FREE');}const txt=parts.join(' \u00B7 ');sSetResult(txt,'win');sAddHist(txt,'win');
   showWinPopup(coinWin,'SatSlots',coinWin>=SS.bet*5?'\u{1F4B0}':'\u{1F389}');
@@ -5346,6 +5389,7 @@ document.addEventListener('DOMContentLoaded',async function(){
     }
   }catch(e){}
   try{buildFeed();}catch(e){console.error('buildFeed:',e);}
+  try{_loadMissionState();}catch(e){}
   try{syncAll();}catch(e){console.error('syncAll:',e);}
   try{renderStreakHub();}catch(e){console.error('renderStreakHub:',e);}
   try{renderRedeemHist();}catch(e){console.error('renderRedeemHist:',e);}
@@ -6405,6 +6449,7 @@ function scNewCard(){
   const t=SC_TYPES[scType];
   if(!spendCoins(t.cost))return;
   trackGame();
+  missionProgress('specific_game',1,'scratch');
   scBoard=scGenBoard();scScratched=new Array(scBoard.length).fill(false);scDone=false;
   scRender();
 }
@@ -6471,7 +6516,7 @@ function bjAddBet(n){
   if(COINS<bjBet+n){hubToast('Not enough coins!');return;}
   bjBet+=n;bjUpdateStats();
 }
-function bjDeal(){SFX.shuffle();setTimeout(()=>SFX.deal(),300);trackGame();
+function bjDeal(){SFX.shuffle();setTimeout(()=>SFX.deal(),300);trackGame();missionProgress('specific_game',1,'blackjack');
   if(bjBet<=0){hubToast('Place a bet first!');return;}
   if(!spendCoins(bjBet))return;
   if(bjDeck.length<15)bjDeck=bjBuildDeck();
@@ -6786,6 +6831,7 @@ async function syncToServer(){
 function showWinPopup(coins, game, emoji){
   if(coins>=500) SFX.bigwin(); else if(coins>0) SFX.win();
   if(!coins||coins<=0)return;
+  if(coins >= 500) missionProgress('big_win', coins);
   const emoji_map={big:'\u{1F4B0}',jackpot:'\u{1F3B0}',default:'\u{1F389}'};
   document.getElementById('win-popup-emoji').textContent=emoji||(coins>=500?'\u{1F4B0}':coins>=100?'\u{1F38A}':'\u{1F389}');
   document.getElementById('win-popup-title').textContent=coins>=500?'BIG WIN!':'YOU WIN!';
@@ -6937,6 +6983,186 @@ async function authInit(){
     if(event==='SIGNED_OUT'){_authUser=null;updateAccountBtn(false);}
   });
 }
+
+
+// ── DAILY MISSIONS ───────────────────────────────────────
+// 3 missions per day, seeded by day-of-week (0=Sun..6=Sat)
+// Stored locally as {date, completed:[], progress:{}}
+// Reset when UTC date >= 06:00 changes
+
+const MISSION_DEFS = [
+  // id, icon, label, type, goal, coins, sats
+  // type: games_played | coins_earned | big_win | streak_claim | specific_game
+  { id:'gp5',  ico:'🎮', label:'Play 5 games',           type:'games_played',  goal:5,     coins:1000, sats:1 },
+  { id:'gp10', ico:'🕹️', label:'Play 10 games',          type:'games_played',  goal:10,    coins:2000, sats:2 },
+  { id:'gp15', ico:'🔥', label:'Play 15 games today',    type:'games_played',  goal:15,    coins:3500, sats:3 },
+  { id:'ce2k', ico:'🪙', label:'Earn 2,000 coins',       type:'coins_earned',  goal:2000,  coins:1500, sats:1 },
+  { id:'ce5k', ico:'💰', label:'Earn 5,000 coins',       type:'coins_earned',  goal:5000,  coins:3000, sats:3 },
+  { id:'ce10k',ico:'💎', label:'Earn 10,000 coins',      type:'coins_earned',  goal:10000, coins:5000, sats:5 },
+  { id:'bw5',  ico:'⚡', label:'Hit a 500+ coin win',    type:'big_win',       goal:500,   coins:2000, sats:2 },
+  { id:'bw1k', ico:'🚀', label:'Hit a 1,000+ coin win',  type:'big_win',       goal:1000,  coins:3500, sats:3 },
+  { id:'bw2k', ico:'🌟', label:'Hit a 2,000+ coin win',  type:'big_win',       goal:2000,  coins:5000, sats:5 },
+  { id:'sc',   ico:'🔥', label:'Claim your daily streak', type:'streak_claim',  goal:1,     coins:1000, sats:1 },
+  { id:'pl3',  ico:'🎱', label:'Drop 3 Plinko balls',    type:'specific_game', game:'plinko', goal:3, coins:1500, sats:2 },
+  { id:'sl5',  ico:'🎰', label:'Spin Slots 5 times',     type:'specific_game', game:'slots',  goal:5, coins:2000, sats:2 },
+  { id:'sc3',  ico:'🎟️', label:'Play 3 Scratch Cards',   type:'specific_game', game:'scratch',goal:3, coins:1500, sats:2 },
+  { id:'bj3',  ico:'🂡', label:'Play 3 Blackjack hands', type:'specific_game', game:'blackjack',goal:3,coins:1500,sats:2 },
+];
+
+// 3 missions per day, seeded by day number from epoch (UTC, resets 06:00)
+function _missionDateKey(){
+  const now = new Date();
+  // Treat 00:00–05:59 UTC as previous day (reset at 06:00 UTC)
+  const utcH = now.getUTCHours();
+  const ms = now.getTime() - (utcH < 6 ? 86400000 : 0);
+  const d = new Date(ms);
+  return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+}
+
+function _getTodayMissions(){
+  const key = _missionDateKey();
+  // Seed by summing char codes of date string — gives stable daily set
+  const seed = key.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const pool = [...MISSION_DEFS];
+  // Fisher-Yates seeded shuffle
+  for(let i=pool.length-1;i>0;i--){
+    const j=(seed*(i+1)*2654435761>>>0)%pool.length;
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  return pool.slice(0,3);
+}
+
+let _missionState = { date:'', completed:[], progress:{} };
+
+function _loadMissionState(){
+  try{
+    const s = JSON.parse(localStorage.getItem('sah_missions')||'{}');
+    const today = _missionDateKey();
+    if(s.date === today){
+      _missionState = s;
+    } else {
+      // New day — reset
+      _missionState = { date: today, completed:[], progress:{} };
+      _saveMissionState();
+    }
+  }catch(e){ _missionState = { date: _missionDateKey(), completed:[], progress:{} }; }
+}
+
+function _saveMissionState(){
+  try{ localStorage.setItem('sah_missions', JSON.stringify(_missionState)); }catch(e){}
+}
+
+function renderMissions(){
+  _loadMissionState();
+  const missions = _getTodayMissions();
+  const list = document.getElementById('missions-list');
+  if(!list) return;
+
+  // Countdown to next reset (06:00 UTC)
+  const resetEl = document.getElementById('missions-reset');
+  if(resetEl){
+    const now = new Date();
+    let nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 6, 0, 0));
+    if(now.getUTCHours() >= 6) nextReset.setUTCDate(nextReset.getUTCDate()+1);
+    const diff = nextReset - now;
+    const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+    resetEl.textContent = 'Resets in '+h+'h '+m+'m';
+  }
+
+  list.innerHTML = missions.map(m => {
+    const done = _missionState.completed.includes(m.id);
+    const prog = _missionState.progress[m.id] || 0;
+    const pct = Math.min(100, Math.round(prog/m.goal*100));
+    const ready = !done && prog >= m.goal;
+
+    return `<div class="mission-row${done?' done':''}">
+      <div class="mission-top">
+        <div class="mission-ico">${m.ico}</div>
+        <div class="mission-info">
+          <div class="mission-label">${m.label}</div>
+          <div class="mission-reward">+${m.coins.toLocaleString()} 🪙${m.sats?' · ₿'+m.sats:''}</div>
+        </div>
+        <div class="mission-status" style="color:${done?'var(--cyan)':ready?'var(--gold)':'var(--muted)'}">
+          ${done ? '✓ DONE' : prog+'/'+m.goal}
+        </div>
+      </div>
+      <div class="mission-prog-bg">
+        <div class="mission-prog-bar" style="width:${done?100:pct}%"></div>
+      </div>
+      ${ready && !done ? '<button class="mission-claim-btn" onclick="claimMission(''+m.id+'')">⚡ CLAIM REWARD</button>' : ''}
+    </div>`;
+  }).join('');
+}
+
+function claimMission(id){
+  _loadMissionState();
+  if(_missionState.completed.includes(id)) return;
+  const missions = _getTodayMissions();
+  const m = missions.find(x=>x.id===id);
+  if(!m) return;
+  const prog = _missionState.progress[id]||0;
+  if(prog < m.goal){ hubToast('Mission not complete yet!'); return; }
+  _missionState.completed.push(id);
+  _saveMissionState();
+  earnCoins(m.coins, 'Daily Mission');
+  if(m.sats > 0) awardSats(m.sats, 'mission').then(got=>{ if(got>0) showSatDrop(got,'Mission'); });
+  SFX.streak();
+  showRewardPopup('🎯','Mission Complete!',[
+    {ico:'🪙',val:'+'+m.coins.toLocaleString()+' Coins'},
+    {ico:'₿',val:m.sats>0?'₿'+m.sats+' Sats':'Keep going!'}
+  ],'var(--cyan)');
+  confetti();
+  renderMissions();
+}
+
+// Called from game events to update mission progress
+function missionProgress(type, value, game){
+  _loadMissionState();
+  const missions = _getTodayMissions();
+  let changed = false;
+  missions.forEach(m => {
+    if(_missionState.completed.includes(m.id)) return;
+    if(m.type === type){
+      if(type === 'specific_game' && m.game !== game) return;
+      if(type === 'big_win'){
+        // big_win: value must exceed goal in a single hit
+        if(value >= m.goal && !(_missionState.progress[m.id] >= m.goal)){
+          _missionState.progress[m.id] = m.goal;
+          changed = true;
+        }
+      } else {
+        _missionState.progress[m.id] = (_missionState.progress[m.id]||0) + value;
+        changed = true;
+      }
+    }
+  });
+  if(changed){
+    _saveMissionState();
+    // Refresh if rewards tab is active
+    const rewardsScreen = document.getElementById('screen-rewards');
+    if(rewardsScreen && rewardsScreen.classList.contains('active')) renderMissions();
+  }
+}
+
+// ── GLOBAL TAP GLOW RIPPLE ───────────────────────────────
+(function(){
+  function spawnRipple(x, y){
+    const size = 80;
+    const el = document.createElement('div');
+    el.className = 'sah-ripple';
+    el.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+(x-size/2)+'px;top:'+(y-size/2)+'px;';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 520);
+  }
+  // Only fire on interactive elements — not bare divs
+  const SELECTORS = 'button,a,[onclick],.bn,.a-tab,.bj-chip,.pk-chip,.rl-bet-btn,.a-bet-pre,.s-preset,.s-tab,.lb-tab,.auth-tab,.sc-type-btn,.a-btn,.a-btn2,.p-drop-btn,.p-mseg,.awc-btn,.sh-btn,.sd,.sd2,.mr-btn,.tt-btn,.feat-card,.a-mem-card,.bng-cell,.a-kn,.a-mine,.shop-pkg,.a-hilo-btns button,.cp-btn-join,.cp-btn-skip,.cwo-btn,.jp-close-btn,.rp-close,.win-popup-btn';
+  document.addEventListener('pointerdown', function(e){
+    const target = e.target.closest(SELECTORS);
+    if(!target) return;
+    spawnRipple(e.clientX, e.clientY);
+  }, {passive:true, capture:true});
+})();
+
 </script>
 
 <!-- AUTH MODAL -->

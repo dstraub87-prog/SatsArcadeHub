@@ -1,3 +1,15 @@
+v1.0.5 - Daily Missions & Global Tap Glow (2026-03-20)
+------------------------------------------
+- Daily Missions added to Rewards tab (3 missions per day, seeded by date)
+- 14 mission types: games played, coins earned, big wins, streak claim, specific games
+- Missions reset at 06:00 UTC daily
+- Mission rewards: 1,000–5,000 coins + 1–5 sats per mission
+- Missions tracked locally with localStorage, progress updates in real-time
+- Mission claim triggers full reward popup with confetti
+- Global tap glow ripple effect: orange/gold burst on every button/chip/card tap
+- Ripple fires on all interactive elements: nav tabs, bet chips, game cards, action buttons
+- Contest win notification upgraded from toast to full-screen jackpot-style overlay
+
 SATS ARCADE HUB - VERSION CHANGELOG
 =====================================
 GitHub: github.com/dstraub87-prog/SatsArcadeHub
@@ -12,7 +24,8 @@ v1.0.4 - Contest Tracking & Flow Fixes (2026-03-19)
 - Fixed games_played contest not updating: trackGame() now syncs to server before checking progress
 - Added missing trackGame() calls to Scratch Cards, Video Poker, Bingo, HiLo, Keno, and Crash
 - All 19 game entry points now correctly increment games_played and fire contest progress checks
-- Fixed contest widget description showing broken text ("Tap to join this week's challenge!")
+- Fixed contest widget description showing broken text
+- Contest win notification upgraded from toast to full-screen popup (trophy overlay with confetti) ("Tap to join this week's challenge!")
 
 
 v1.0.3 - Weekly Contests & Ad Improvements (2026-03-19)
