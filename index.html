@@ -3268,7 +3268,7 @@ function renderContestWidget(){
   const c = _contest;
   const titleEl = document.getElementById('cw-title'); if(titleEl) titleEl.textContent = c.title;
   const descEl = document.getElementById('cw-desc');
-  if(descEl) descEl.textContent = _contestEntry ? c.description : 'Tap to join this week's challenge!';
+  if(descEl) descEl.textContent = _contestEntry ? c.description : "Tap to join this week's challenge!";
   if(_contestEntry && _contestEntry.best_value > 0){
     updateContestProgressUI(_contestEntry.best_value, c.goal);
   }
