@@ -6,6 +6,15 @@ Telegram Mini App: t.me/SatsArcadeHubBot/SatsArcadeHub
 GD Game ID: 1cec31a16cf34305acec31364182b7fb
 =====================================
 
+v1.0.4 - Contest Tracking & Flow Fixes (2026-03-19)
+------------------------------------------
+- Fixed game freeze after age gate + demo disclaimer (unescaped apostrophe broke entire script block)
+- Fixed games_played contest not updating: trackGame() now syncs to server before checking progress
+- Added missing trackGame() calls to Scratch Cards, Video Poker, Bingo, HiLo, Keno, and Crash
+- All 19 game entry points now correctly increment games_played and fire contest progress checks
+- Fixed contest widget description showing broken text ("Tap to join this week's challenge!")
+
+
 v1.0.3 - Weekly Contests & Ad Improvements (2026-03-19)
 ------------------------------------------
 - Weekly contest system added (5 contest types, randomly generated each Monday)
