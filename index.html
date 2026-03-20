@@ -3145,6 +3145,179 @@ loadState();
 
 /* COINS ONLY operations */
 function spendCoins(n){if(COINS<n){SFX.error();hubToast('Need more coins! \u{1F6D2}');openShop();return false;}SFX.buy();COINS-=n;syncAll();saveState();return true;}
+/* ============================================================
+   WEEKLY CONTEST SYSTEM
+   ============================================================ */
+// _contest, _contestEntry, _contestCountdownIv declared at top of file
+
+// Load active contest from Supabase
+async function loadContest(){
+  try{
+    const sb = getSupabase(); if(!sb) return;
+    const {data} = await sb.from('contests')
+      .select('*').eq('status','active').order('created_at',{ascending:false}).limit(1).single();
+    if(!data) return;
+    _contest = data;
+    // Load player entry if logged in
+    if(_authUser){
+      const {data:entry} = await sb.from('contest_entries')
+        .select('*').eq('contest_id',data.id).eq('user_id',_authUser.id).single();
+      _contestEntry = entry || null;
+    }
+    renderContestWidget();
+    loadContestWinners();
+    // Show popup once per contest if not joined and not dismissed
+    const dismissed = localStorage.getItem('contest_dismissed_'+data.id);
+    if(!_contestEntry && !dismissed && _authUser){
+      setTimeout(()=>openContestPopup(), 3000);
+    }
+  }catch(e){ console.warn('[Contest]',e); }
+}
+
+function openContestPopup(){
+  if(!_contest) return;
+  const c = _contest;
+  document.getElementById('cp-title').textContent = c.title;
+  document.getElementById('cp-desc').textContent = c.description;
+  document.getElementById('cp-reward').textContent = '🏆 Prize: '+c.reward_sats+' SATS';
+  renderContestCountdown('cp-countdown');
+  // If already joined show progress
+  if(_contestEntry){
+    document.getElementById('cp-join-btn').textContent = '✓ JOINED — VIEW PROGRESS';
+    document.getElementById('cp-join-btn').onclick = contestCheckProgress;
+    document.getElementById('cp-progress-wrap').style.display = 'block';
+    updateContestProgressUI(_contestEntry.best_value, c.goal);
+  } else {
+    document.getElementById('cp-join-btn').textContent = '⚡ JOIN CONTEST';
+    document.getElementById('cp-join-btn').onclick = contestJoin;
+    document.getElementById('cp-progress-wrap').style.display = 'none';
+  }
+  document.getElementById('contest-popup').classList.add('show');
+}
+
+function contestDismiss(){
+  document.getElementById('contest-popup').classList.remove('show');
+  if(_contest) try{ localStorage.setItem('contest_dismissed_'+_contest.id,'1'); }catch(e){}
+}
+
+async function contestJoin(){
+  if(!_authUser){ hubToast('Sign in to join contests!'); return; }
+  if(!_contest){ contestDismiss(); return; }
+  const btn = document.getElementById('cp-join-btn');
+  btn.textContent = 'Joining...'; btn.disabled = true;
+  try{
+    const sb = getSupabase();
+    const {data,error} = await sb.rpc('join_contest',{
+      p_contest_id: _contest.id, p_user_id: _authUser.id
+    });
+    if(error||data?.error){ hubToast('Could not join: '+(data?.error||error.message)); return; }
+    // Reload entry
+    const {data:entry} = await sb.from('contest_entries')
+      .select('*').eq('contest_id',_contest.id).eq('user_id',_authUser.id).single();
+    _contestEntry = entry;
+    hubToast('🏆 You joined the contest! Good luck!');
+    renderContestWidget();
+    btn.textContent = '✓ JOINED!'; btn.disabled = false;
+    setTimeout(contestDismiss, 1200);
+  }catch(e){
+    hubToast('Error joining contest'); btn.textContent = '⚡ JOIN CONTEST'; btn.disabled = false;
+  }
+}
+
+async function contestCheckProgress(){
+  if(!_authUser||!_contest||!_contestEntry) return;
+  try{
+    const sb = getSupabase();
+    const {data} = await sb.rpc('check_contest_progress',{
+      p_contest_id: _contest.id, p_user_id: _authUser.id
+    });
+    if(data?.won){
+      hubToast('🏆 YOU WON THE CONTEST! +'+_contest.reward_sats+' sats!');
+      contestDismiss();
+      loadContest();
+      return;
+    }
+    if(data?.progress !== undefined){
+      updateContestProgressUI(data.progress, data.goal);
+      document.getElementById('cp-progress-wrap').style.display = 'block';
+    }
+  }catch(e){}
+}
+
+function updateContestProgressUI(progress, goal){
+  const pct = Math.min(100, Math.round(progress/goal*100));
+  const bar = document.getElementById('cp-bar'); if(bar) bar.style.width = pct+'%';
+  const pctEl = document.getElementById('cp-pct');
+  if(pctEl) pctEl.textContent = progress.toLocaleString()+' / '+goal.toLocaleString()+' ('+pct+'%)';
+  const wbar = document.getElementById('cw-bar'); if(wbar) wbar.style.width = pct+'%';
+  const wpct = document.getElementById('cw-pct'); if(wpct) wpct.textContent = pct+'% complete';
+}
+
+function renderContestWidget(){
+  if(!_contest) return;
+  const c = _contest;
+  const titleEl = document.getElementById('cw-title'); if(titleEl) titleEl.textContent = c.title;
+  const descEl = document.getElementById('cw-desc');
+  if(descEl) descEl.textContent = _contestEntry ? c.description : 'Tap to join this week's challenge!';
+  if(_contestEntry && _contestEntry.best_value > 0){
+    updateContestProgressUI(_contestEntry.best_value, c.goal);
+  }
+  // Start countdown interval
+  if(_contestCountdownIv) clearInterval(_contestCountdownIv);
+  renderContestCountdown('cw-countdown');
+  _contestCountdownIv = setInterval(()=>renderContestCountdown('cw-countdown'), 60000);
+}
+
+function renderContestCountdown(elId){
+  const el = document.getElementById(elId); if(!el||!_contest) return;
+  const ms = new Date(_contest.ends_at) - Date.now();
+  if(ms <= 0){ el.textContent = 'Contest ended'; return; }
+  const d = Math.floor(ms/86400000);
+  const h = Math.floor((ms%86400000)/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  el.textContent = '⏱ '+d+'d '+h+'h '+m+'m left';
+}
+
+async function loadContestWinners(){
+  try{
+    const sb = getSupabase(); if(!sb) return;
+    const {data} = await sb.from('contests')
+      .select('title,winner_name,reward_sats,ends_at')
+      .in('status',['awarded','closed'])
+      .not('winner_name','is',null)
+      .order('ends_at',{ascending:false}).limit(5);
+    const el = document.getElementById('contest-winners'); if(!el) return;
+    if(!data||!data.length){
+      el.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:8px">No winners yet — be the first!</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉','🏅','🏅'];
+    el.innerHTML = data.map((w,i)=>`
+      <div class="cw-winner">
+        <span class="cw-winner-medal">${medals[i]||'🏅'}</span>
+        <div>
+          <div class="cw-winner-name">${w.winner_name}</div>
+          <div class="cw-winner-detail">${w.title} · +${w.reward_sats} sats</div>
+        </div>
+      </div>`).join('');
+  }catch(e){}
+}
+
+// Call check_contest_progress when relevant events happen
+function _contestMilestoneCheck(val){
+  if(!_contest||!_contestEntry||!_authUser) return;
+  if(_contest.type === 'big_win' && val > (_contestEntry.best_value||0)){
+    const sb = getSupabase(); if(!sb) return;
+    sb.rpc('update_contest_best',{p_contest_id:_contest.id,p_user_id:_authUser.id,p_value:val}).then(()=>{
+      if(_contestEntry) _contestEntry.best_value = Math.max(_contestEntry.best_value||0, val);
+      contestCheckProgress();
+    });
+  } else {
+    contestCheckProgress();
+  }
+}
+
+
 function trackGame(){
   if(_contest&&_contestEntry&&_contest.type==='games_played') setTimeout(()=>contestCheckProgress(),500);
   GAMES_PLAYED++;saveProfileState();updateLevel(true);
@@ -3154,15 +3327,17 @@ function trackGame(){
 }
 // Session security counters - reset each page load
 let _sessionSatsEarned=0, _sessionCoinsEarned=0;
+let _contest=null,_contestEntry=null,_contestCountdownIv=null; // contest system
 const _MAX_SATS_SESSION=500, _MAX_COINS_SESSION=500000, _MAX_SINGLE_SAT=200, _MAX_SINGLE_COIN=10000;
 let _adPopupOpenTime=0; // track when ad popup was actually opened
 
 function earnCoins(n,label){
-  // Contest milestone check for coins_earned and big_win contests
+  // Contest milestone check
   if(n>0&&_contest&&_contestEntry){
     if(_contest.type==='coins_earned') setTimeout(()=>contestCheckProgress(),500);
     if(_contest.type==='big_win') _contestMilestoneCheck(n);
-  }SFX.coin();
+  }
+  SFX.coin();
   if(typeof n!=='number'||isNaN(n)||n<=0)return;
   n=Math.min(Math.floor(n),_MAX_SINGLE_COIN);
   if(_sessionCoinsEarned+n>_MAX_COINS_SESSION)return;
@@ -3720,180 +3895,6 @@ function renderRedeemHist(){
   const el=document.getElementById('rdm-hist-list');if(!el)return;
   if(!REDEEM_HIST.length){el.innerHTML='<div class="rh-empty">No redemptions yet.</div>';return;}
   el.innerHTML=REDEEM_HIST.map(r=>`<div class="rh-item"><div><div class="rhi-addr">\u26A1 ${r.addr}</div><div class="rhi-date">${r.date}</div></div><div style="text-align:right"><div class="rhi-amt">\u20BF${r.amount.toLocaleString()}</div><span class="rhi-st ${r.status}">${r.status.toUpperCase()}</span></div></div>`).join('');
-}
-
-/* ============================================================
-   WEEKLY CONTEST SYSTEM
-   ============================================================ */
-let _contest = null;          // active contest object
-let _contestEntry = null;     // player's entry
-let _contestCountdownIv = null;
-
-// Load active contest from Supabase
-async function loadContest(){
-  try{
-    const sb = getSupabase(); if(!sb) return;
-    const {data} = await sb.from('contests')
-      .select('*').eq('status','active').order('created_at',{ascending:false}).limit(1).single();
-    if(!data) return;
-    _contest = data;
-    // Load player entry if logged in
-    if(_authUser){
-      const {data:entry} = await sb.from('contest_entries')
-        .select('*').eq('contest_id',data.id).eq('user_id',_authUser.id).single();
-      _contestEntry = entry || null;
-    }
-    renderContestWidget();
-    loadContestWinners();
-    // Show popup once per contest if not joined and not dismissed
-    const dismissed = localStorage.getItem('contest_dismissed_'+data.id);
-    if(!_contestEntry && !dismissed && _authUser){
-      setTimeout(()=>openContestPopup(), 3000);
-    }
-  }catch(e){ console.warn('[Contest]',e); }
-}
-
-function openContestPopup(){
-  if(!_contest) return;
-  const c = _contest;
-  document.getElementById('cp-title').textContent = c.title;
-  document.getElementById('cp-desc').textContent = c.description;
-  document.getElementById('cp-reward').textContent = '🏆 Prize: '+c.reward_sats+' SATS';
-  renderContestCountdown('cp-countdown');
-  // If already joined show progress
-  if(_contestEntry){
-    document.getElementById('cp-join-btn').textContent = '✓ JOINED — VIEW PROGRESS';
-    document.getElementById('cp-join-btn').onclick = contestCheckProgress;
-    document.getElementById('cp-progress-wrap').style.display = 'block';
-    updateContestProgressUI(_contestEntry.best_value, c.goal);
-  } else {
-    document.getElementById('cp-join-btn').textContent = '⚡ JOIN CONTEST';
-    document.getElementById('cp-join-btn').onclick = contestJoin;
-    document.getElementById('cp-progress-wrap').style.display = 'none';
-  }
-  document.getElementById('contest-popup').classList.add('show');
-}
-
-function contestDismiss(){
-  document.getElementById('contest-popup').classList.remove('show');
-  if(_contest) try{ localStorage.setItem('contest_dismissed_'+_contest.id,'1'); }catch(e){}
-}
-
-async function contestJoin(){
-  if(!_authUser){ hubToast('Sign in to join contests!'); return; }
-  if(!_contest){ contestDismiss(); return; }
-  const btn = document.getElementById('cp-join-btn');
-  btn.textContent = 'Joining...'; btn.disabled = true;
-  try{
-    const sb = getSupabase();
-    const {data,error} = await sb.rpc('join_contest',{
-      p_contest_id: _contest.id, p_user_id: _authUser.id
-    });
-    if(error||data?.error){ hubToast('Could not join: '+(data?.error||error.message)); return; }
-    // Reload entry
-    const {data:entry} = await sb.from('contest_entries')
-      .select('*').eq('contest_id',_contest.id).eq('user_id',_authUser.id).single();
-    _contestEntry = entry;
-    hubToast('🏆 You joined the contest! Good luck!');
-    renderContestWidget();
-    btn.textContent = '✓ JOINED!'; btn.disabled = false;
-    setTimeout(contestDismiss, 1200);
-  }catch(e){
-    hubToast('Error joining contest'); btn.textContent = '⚡ JOIN CONTEST'; btn.disabled = false;
-  }
-}
-
-async function contestCheckProgress(){
-  if(!_authUser||!_contest||!_contestEntry) return;
-  try{
-    const sb = getSupabase();
-    const {data} = await sb.rpc('check_contest_progress',{
-      p_contest_id: _contest.id, p_user_id: _authUser.id
-    });
-    if(data?.won){
-      hubToast('🏆 YOU WON THE CONTEST! +'+_contest.reward_sats+' sats!');
-      contestDismiss();
-      loadContest();
-      return;
-    }
-    if(data?.progress !== undefined){
-      updateContestProgressUI(data.progress, data.goal);
-      document.getElementById('cp-progress-wrap').style.display = 'block';
-    }
-  }catch(e){}
-}
-
-function updateContestProgressUI(progress, goal){
-  const pct = Math.min(100, Math.round(progress/goal*100));
-  const bar = document.getElementById('cp-bar'); if(bar) bar.style.width = pct+'%';
-  const pctEl = document.getElementById('cp-pct');
-  if(pctEl) pctEl.textContent = progress.toLocaleString()+' / '+goal.toLocaleString()+' ('+pct+'%)';
-  const wbar = document.getElementById('cw-bar'); if(wbar) wbar.style.width = pct+'%';
-  const wpct = document.getElementById('cw-pct'); if(wpct) wpct.textContent = pct+'% complete';
-}
-
-function renderContestWidget(){
-  if(!_contest) return;
-  const c = _contest;
-  const titleEl = document.getElementById('cw-title'); if(titleEl) titleEl.textContent = c.title;
-  const descEl = document.getElementById('cw-desc');
-  if(descEl) descEl.textContent = _contestEntry ? c.description : 'Tap to join this week's challenge!';
-  if(_contestEntry && _contestEntry.best_value > 0){
-    updateContestProgressUI(_contestEntry.best_value, c.goal);
-  }
-  // Start countdown interval
-  if(_contestCountdownIv) clearInterval(_contestCountdownIv);
-  renderContestCountdown('cw-countdown');
-  _contestCountdownIv = setInterval(()=>renderContestCountdown('cw-countdown'), 60000);
-}
-
-function renderContestCountdown(elId){
-  const el = document.getElementById(elId); if(!el||!_contest) return;
-  const ms = new Date(_contest.ends_at) - Date.now();
-  if(ms <= 0){ el.textContent = 'Contest ended'; return; }
-  const d = Math.floor(ms/86400000);
-  const h = Math.floor((ms%86400000)/3600000);
-  const m = Math.floor((ms%3600000)/60000);
-  el.textContent = '⏱ '+d+'d '+h+'h '+m+'m left';
-}
-
-async function loadContestWinners(){
-  try{
-    const sb = getSupabase(); if(!sb) return;
-    const {data} = await sb.from('contests')
-      .select('title,winner_name,reward_sats,ends_at')
-      .in('status',['awarded','closed'])
-      .not('winner_name','is',null)
-      .order('ends_at',{ascending:false}).limit(5);
-    const el = document.getElementById('contest-winners'); if(!el) return;
-    if(!data||!data.length){
-      el.innerHTML = '<div style="font-size:.7rem;color:var(--muted);text-align:center;padding:8px">No winners yet — be the first!</div>';
-      return;
-    }
-    const medals = ['🥇','🥈','🥉','🏅','🏅'];
-    el.innerHTML = data.map((w,i)=>`
-      <div class="cw-winner">
-        <span class="cw-winner-medal">${medals[i]||'🏅'}</span>
-        <div>
-          <div class="cw-winner-name">${w.winner_name}</div>
-          <div class="cw-winner-detail">${w.title} · +${w.reward_sats} sats</div>
-        </div>
-      </div>`).join('');
-  }catch(e){}
-}
-
-// Call check_contest_progress when relevant events happen
-function _contestMilestoneCheck(val){
-  if(!_contest||!_contestEntry||!_authUser) return;
-  if(_contest.type === 'big_win' && val > (_contestEntry.best_value||0)){
-    const sb = getSupabase(); if(!sb) return;
-    sb.rpc('update_contest_best',{p_contest_id:_contest.id,p_user_id:_authUser.id,p_value:val}).then(()=>{
-      if(_contestEntry) _contestEntry.best_value = Math.max(_contestEntry.best_value||0, val);
-      contestCheckProgress();
-    });
-  } else {
-    contestCheckProgress();
-  }
 }
 
 /* START SYSTEMS */
