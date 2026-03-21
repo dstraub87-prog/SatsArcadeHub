@@ -2361,18 +2361,17 @@ window.declineAge = function() {
 <div id="hub-toast"></div>
 <div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">🎰 JACKPOT!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
 <!-- SHARE REMINDER POPUP -->
-<div id="share-popup">
-  <div class="sp-card" style="position:relative;">
-    <button class="sp-dismiss" onclick="closeSharePopup()">✕</button>
-    <div class="sp-emoji">🎮</div>
-    <div class="sp-title">Share & Earn 10,000 Coins!</div>
-    <div class="sp-sub">Send your referral link to a friend. When they sign up you both win — you get 10,000 free coins instantly.</div>
-    <div class="sp-link-box" id="sp-ref-link">satsarcadehub.com</div>
-    <div class="sp-btns">
-      <button class="sp-btn-share" onclick="shareFromPopup()">⚡ SHARE NOW</button>
-      <button class="sp-btn-copy" id="sp-copy-btn" onclick="copyFromPopup()">📋 COPY</button>
-    </div>
-    <div class="sp-reward-note">Every referral = +10,000 🪙 for you + your friend</div>
+<div id="share-popup" style="display:none;position:fixed;inset:0;z-index:880;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);">
+  <div style="background:linear-gradient(145deg,#0d0e1a,#131525);border:1px solid #F7931A;border-radius:18px;padding:22px 20px 18px;max-width:320px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(247,147,26,.15);position:relative;">
+    <button onclick="closeSharePopup()" style="position:absolute;top:12px;right:14px;background:transparent;border:none;color:rgba(255,255,255,.35);font-size:1.1rem;cursor:pointer;padding:4px 8px;line-height:1;">✕</button>
+    <div style="background:#F7931A;color:#000;font-family:'Bebas Neue',sans-serif;font-size:.65rem;letter-spacing:2px;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:10px;">🔗 REFER A FRIEND</div>
+    <div style="font-size:2.2rem;margin-bottom:6px;">🎮</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:#fff;margin-bottom:8px;">Share &amp; Earn!</div>
+    <div style="font-size:.78rem;color:#ddd;line-height:1.6;margin-bottom:12px;">Invite friends to Sats Arcade Hub. When they sign up using your link, you both earn <strong style="color:#FFD700">10,000 free coins</strong> instantly!</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;color:#FFD700;margin-bottom:14px;letter-spacing:1px;">🪙 +10,000 Coins Per Referral</div>
+    <div id="sp-ref-link" onclick="copyFromPopup()" style="background:rgba(0,0,0,.4);border:1px solid rgba(247,147,26,.3);border-radius:8px;padding:9px 12px;font-family:'Space Mono',monospace;font-size:.52rem;color:#F7931A;word-break:break-all;margin-bottom:14px;cursor:pointer;">satsarcadehub.com</div>
+    <button onclick="shareFromPopup()" style="width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#F7931A,#ffb347);color:#000;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;margin-bottom:8px;">⚡ SHARE MY LINK</button>
+    <button id="sp-copy-btn" onclick="copyFromPopup()" style="width:100%;padding:9px;border:1px solid rgba(247,147,26,.3);border-radius:10px;background:transparent;color:rgba(255,255,255,.5);font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:1px;cursor:pointer;">📋 COPY LINK</button>
   </div>
 </div>
 <div id="contest-win-overlay">
@@ -7227,7 +7226,7 @@ function openSharePopup(){
     const el=document.getElementById(id);
     if(!el) return false;
     return el.classList.contains('show') || el.style.opacity==='1' ||
-           (el.style.display && el.style.display !== 'none');
+           el.style.display==='flex' || el.style.display==='block';
   });
   if(blocked){ _scheduleSharePopup(); return; }
 
@@ -7236,12 +7235,13 @@ function openSharePopup(){
   if(linkEl) linkEl.textContent = link;
   const copyBtn = document.getElementById('sp-copy-btn');
   if(copyBtn) copyBtn.textContent = '📋 COPY';
-  document.getElementById('share-popup').classList.add('show');
+  const _sp=document.getElementById('share-popup');
+  _sp.style.display='flex';
   _sharePopupShown = true;
 }
 
 function closeSharePopup(){
-  document.getElementById('share-popup').classList.remove('show');
+  document.getElementById('share-popup').style.display='none';
   _scheduleSharePopup(); // schedule next reminder
 }
 
