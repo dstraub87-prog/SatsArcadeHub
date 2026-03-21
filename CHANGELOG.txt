@@ -1,3 +1,25 @@
+v1.0.8 - Sat Tuning, Share Popup & Ad Waterfall (2026-03-20)
+------------------------------------------
+- Watch Ad for Coins no longer awards sats (coins only, no double dipping)
+- GD SDK rewarded coins ad no longer awards sats
+- All random ad sat drops reduced from 1-5 to 1-3
+- All random game sat drops (TX Hold'em, 5-Card, Roulette, Video Poker) capped at 1-3
+- earnCoins sat drop suppressed for all ad-watch sources to prevent double dipping
+- Progressive rewards (streak, milestones, time, missions) unchanged
+- Share reminder popup added: fires 90 seconds after login then every 20-30 minutes
+- Share popup shows personalized referral link, native share button, and copy button
+- Share popup respects other overlays (won't interrupt jackpots, contest wins, etc.)
+- Added Tier 2 ad network to waterfall (Adsterra → Tier 2 → House ad)
+- Reddit community house ad added, alternates with Telegram house ad
+
+v1.0.7 - Ad Waterfall & House Ad Expansion (2026-03-20)
+------------------------------------------
+- Added Tier 2 ad network (stupid-police.com) to waterfall between Adsterra and house ads
+- Waterfall order: Adsterra (2.5s) → Tier 2 (2.5s) → House ad
+- Added Reddit community house ad (r/SatsArcadeHub) alongside Telegram channel ad
+- House ads now alternate: Telegram on odd showings, Reddit on even showings
+- Reduces house ad frequency vs paid tiers to maximize revenue
+
 v1.0.6 - Streak Fix & Verification Tags (2026-03-20)
 ------------------------------------------
 - Fixed daily streak stuck/frozen: _applyStreakState now normalizes ISO datetime strings to date-only before comparison

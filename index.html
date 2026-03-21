@@ -1036,14 +1036,13 @@ window["GD_OPTIONS"] = {
             hubToast('\u{1F3B1} +3 free balls!');
           } else if(rt==='coins'){
             earnCoins(50,'Ad Watch');
-            awardSats(Math.floor(Math.random()*5)+1,'ad').then(function(got){if(got>0)showSatToast(got,'Ad Watch');});
             AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
             hubToast('\u{1F4FA} +50 coins!');
           } else if(rt==='bigcoins'){
             earnCoins(250,'Ad Watch Big');
             hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
           } else {
-            awardSats(Math.floor(Math.random()*5)+1,'ad').then(function(got){if(got>0)showSatToast(got,'Ad');});
+            awardSats(Math.floor(Math.random()*3)+1,'ad').then(function(got){if(got>0)showSatToast(got,'Ad');});
           }
         })();
         break;
@@ -2361,6 +2360,21 @@ window.declineAge = function() {
 </nav>
 <div id="hub-toast"></div>
 <div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">🎰 JACKPOT!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
+<!-- SHARE REMINDER POPUP -->
+<div id="share-popup">
+  <div class="sp-card" style="position:relative;">
+    <button class="sp-dismiss" onclick="closeSharePopup()">✕</button>
+    <div class="sp-emoji">🎮</div>
+    <div class="sp-title">Share & Earn 10,000 Coins!</div>
+    <div class="sp-sub">Send your referral link to a friend. When they sign up you both win — you get 10,000 free coins instantly.</div>
+    <div class="sp-link-box" id="sp-ref-link">satsarcadehub.com</div>
+    <div class="sp-btns">
+      <button class="sp-btn-share" onclick="shareFromPopup()">⚡ SHARE NOW</button>
+      <button class="sp-btn-copy" id="sp-copy-btn" onclick="copyFromPopup()">📋 COPY</button>
+    </div>
+    <div class="sp-reward-note">Every referral = +10,000 🪙 for you + your friend</div>
+  </div>
+</div>
 <div id="contest-win-overlay">
   <div class="cwo-emoji">🏆</div>
   <div class="cwo-title">CONTEST WON!</div>
@@ -3424,8 +3438,12 @@ function earnCoins(n,label){
   syncAll();saveState();saveProfileState();debouncedSyncToServer();
   if(label)addFeedWin(label,n);if(Math.random()<.012)setTimeout(triggerJackpot,800);
   if(label&&n>0){
-    var _roll=Math.random(),_thr=n>=100?0.18:n>=50?0.10:n>=20?0.06:0.04;
-    if(_roll<_thr){var _sa=n>=200?3:n>=100?2:1;setTimeout(async function(){const got=await awardSats(_sa,'drop');if(got>0)showSatDrop(got,label);},600);}
+    // Never drop sats on ad-watch or mission coin rewards — prevents double dipping
+    var _adLabel=label.indexOf('Ad')!==-1||label.indexOf('ad')!==-1;
+    if(!_adLabel){
+      var _roll=Math.random(),_thr=n>=100?0.18:n>=50?0.10:n>=20?0.06:0.04;
+      if(_roll<_thr){var _sa=n>=200?3:n>=100?2:1;setTimeout(async function(){const got=await awardSats(_sa,'drop');if(got>0)showSatDrop(got,label);},600);}
+    }
   }
 }
 /* SATS ONLY operations - earned free via loyalty */
@@ -3772,14 +3790,14 @@ function closeAdPopup(){
     PLINKO.balls+=3;if(typeof _pUpdateUI==='function')_pUpdateUI();
     hubToast('\u{1F3B1} +3 free balls!');
   } else if(_adWatchType==='coins'){
-    earnCoins(50,'Ad Watch');const sr=Math.floor(Math.random()*5)+1;awardSats(sr,'ad').then(got=>{if(got>0){showSatToast(got,'Ad Watch');}});
+    earnCoins(50,'Ad Watch');
     AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
     hubToast('\u{1F4FA} +50 coins!');
   } else if(_adWatchType==='bigcoins'){
     earnCoins(250,'Ad Watch Big');
     hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
   } else {
-    const satReward=Math.floor(Math.random()*5)+1;
+    const satReward=Math.floor(Math.random()*3)+1;
     awardSats(satReward,'ad').then(got=>{if(got>0)showSatToast(got,'Ad');});
     scheduleNextAd();
   }
@@ -4042,6 +4060,8 @@ function startSystems(){
   setInterval(()=>{JACKPOT+=Math.floor(Math.random()*3)+1;if(JACKPOT>99999)JACKPOT=500;document.getElementById('global-jackpot').textContent=JACKPOT.toLocaleString();},4000);
   // Sync to server every 60 seconds regardless of activity
   setInterval(()=>{ if(_authUser) syncToServer(); },60000);
+  // Share reminder — first fires from login hook, then recurs every 20-30 min
+  _scheduleSharePopup();
   // Final sync before tab closes
   window.addEventListener('beforeunload',()=>{ if(_authUser) syncToServer(); });
 }
@@ -5784,7 +5804,7 @@ function txShowdown(){
     earnCoins(txPot*2,'Texas Hold\'em');showWinPopup(txPot*2,'Texas Hold\'em','\u{1F0CF}');
     txWins++;txStreak++;
     txSetResult('YOU WIN! \u{1F3C6}','win');confetti();
-    if(txStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Hold\'em');});}
+    if(txStreak>=2&&Math.random()<.15){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Hold\'em');});}
   } else if(cmp<0){
     txLosses++;txStreak=0;
     txSetResult('DEALER WINS','lose');
@@ -5945,7 +5965,7 @@ function fcShowdown(){
     earnCoins(fcPot*2,'5-Card Draw');
     fcWins++;fcStreak++;
     fcSetResult('YOU WIN! \u{1F3C6}','win');confetti();if(hint)hint.textContent='';
-    if(pEval.rank>=7&&Math.random()<.25){const s=~~(Math.random()*8)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'5-Card Draw');});}
+    if(pEval.rank>=7&&Math.random()<.25){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'5-Card Draw');});}
     else if(fcStreak>=3&&Math.random()<.12){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'5-Card Draw');});}
   } else if(cmp<0){
     fcLosses++;fcStreak=0;
@@ -6100,7 +6120,7 @@ function rlSpin(){SFX.rouletteSpin();trackGame();
       rlWins++;rlStreak++;rlProfit+=prize-rlBet;
       res.textContent=col+' '+landNum+'  -  WIN! +'+prize+'\u{1FA99}';
       res.className='rl-result win';confetti();
-      if(rlStreak>=2&&Math.random()<.15){const s=~~(Math.random()*5)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Roulette');});}
+      if(rlStreak>=2&&Math.random()<.15){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Roulette');});}
     } else {
       rlLosses++;rlStreak=0;rlProfit-=rlBet;
       res.textContent=col+' '+landNum+'  -  No win';
@@ -6240,7 +6260,7 @@ function vpDraw(){
     res.className='vp-result win';
     if(mult>=25)confetti();
     hint.textContent=mult>=25?'\u{1F48E} Big win! Deal again!':'Deal again!';
-    if(rank>=7&&Math.random()<.2){const s=~~(Math.random()*8)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Video Poker');});}
+    if(rank>=7&&Math.random()<.2){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Video Poker');});}
     else if(vpStreak>=3&&Math.random()<.1){const s=~~(Math.random()*3)+1;awardSats(s,'game').then(got=>{if(got>0)showSatDrop(got,'Video Poker');});}
   } else {
     vpLosses++;vpStreak=0;vpProfit-=vpBet;
@@ -6828,6 +6848,7 @@ async function onAuthSuccess(user,displayName){
     // Suppress tutorial if already completed (server or localStorage)
     if(existing.tutorial_done) window._tutSuppressed = true;
     hubToast('Welcome back, '+PLAYER_NAME+'! &#x2713;');
+    _triggerShareOnLogin();
   }
   updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
 }
@@ -6977,6 +6998,7 @@ async function authInit(){
         syncAll();saveState();
         if(existing.tutorial_done) window._tutSuppressed=true;
         hubToast('Welcome back, '+PLAYER_NAME+' ⚡');
+        _triggerShareOnLogin();
       } else {
         // New TG user - upsert on tg_id to prevent duplicates
         const newId=crypto.randomUUID();
@@ -7002,6 +7024,7 @@ async function authInit(){
           }
         }catch(e){console.error('[Ref TG] award error:',e);}
         hubToast('Welcome to Sats Arcade! ⚡');
+        _triggerShareOnLogin();
       }
       window._authInitDone = true;
       updateAccountBtn(true);refreshAvatarUI();updateLevel(false);
@@ -7183,6 +7206,70 @@ function missionProgress(type, value, game){
     const rewardsScreen = document.getElementById('screen-rewards');
     if(rewardsScreen && rewardsScreen.classList.contains('active')) renderMissions();
   }
+}
+
+
+// ── SHARE REMINDER POPUP ─────────────────────────────────
+let _sharePopupShown = false;
+let _sharePopupTimer = null;
+
+function _scheduleSharePopup(){
+  if(_sharePopupTimer) clearTimeout(_sharePopupTimer);
+  // Random interval 20-30 minutes in ms
+  const delay = (20 + Math.random() * 10) * 60000;
+  _sharePopupTimer = setTimeout(openSharePopup, delay);
+}
+
+function openSharePopup(){
+  // Don't show if another overlay is open
+  const blockers = ['jp-overlay','contest-win-overlay','ad-popup','reward-popup','win-popup','auth-modal','profile-sheet'];
+  const blocked = blockers.some(id=>{
+    const el=document.getElementById(id);
+    if(!el) return false;
+    return el.classList.contains('show') || el.style.opacity==='1' ||
+           (el.style.display && el.style.display !== 'none');
+  });
+  if(blocked){ _scheduleSharePopup(); return; }
+
+  const link = getReferralLink();
+  const linkEl = document.getElementById('sp-ref-link');
+  if(linkEl) linkEl.textContent = link;
+  const copyBtn = document.getElementById('sp-copy-btn');
+  if(copyBtn) copyBtn.textContent = '📋 COPY';
+  document.getElementById('share-popup').classList.add('show');
+  _sharePopupShown = true;
+}
+
+function closeSharePopup(){
+  document.getElementById('share-popup').classList.remove('show');
+  _scheduleSharePopup(); // schedule next reminder
+}
+
+function shareFromPopup(){
+  closeSharePopup();
+  shareReferralLink();
+}
+
+function copyFromPopup(){
+  const link = getReferralLink();
+  navigator.clipboard?.writeText(link).then(()=>{
+    const btn = document.getElementById('sp-copy-btn');
+    if(btn){ btn.textContent = '✓ COPIED!'; setTimeout(()=>btn.textContent='📋 COPY', 2000); }
+  }).catch(()=>{
+    const el=document.createElement('textarea');el.value=link;
+    document.body.appendChild(el);el.select();document.execCommand('copy');
+    document.body.removeChild(el);
+    const btn=document.getElementById('sp-copy-btn');
+    if(btn){ btn.textContent='✓ COPIED!'; setTimeout(()=>btn.textContent='📋 COPY',2000); }
+  });
+}
+
+// Show on login (after auth resolves, with a short delay)
+function _triggerShareOnLogin(){
+  // Only show if user hasn't been reminded this session
+  if(_sharePopupShown) return;
+  // Wait 90 seconds after login before first popup — let them settle in
+  setTimeout(openSharePopup, 90000);
 }
 
 // ── GLOBAL TAP GLOW RIPPLE ───────────────────────────────
