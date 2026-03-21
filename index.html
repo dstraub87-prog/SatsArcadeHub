@@ -1036,8 +1036,9 @@ window["GD_OPTIONS"] = {
             hubToast('\u{1F3B1} +3 free balls!');
           } else if(rt==='coins'){
             earnCoins(50,'Ad Watch');
+            const _gdSr=Math.floor(Math.random()*3)+1;awardSats(_gdSr,'ad').then(function(got){if(got>0)showSatToast(got,'Ad Watch');});
             AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
-            hubToast('\u{1F4FA} +50 coins!');
+            hubToast('\u{1F4FA} +50 \u{1FA99} & \u{20BF}sats!');
           } else if(rt==='bigcoins'){
             earnCoins(250,'Ad Watch Big');
             hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
@@ -1382,8 +1383,8 @@ window.declineAge = function() {
       <div class="ad-watch-card">
         <div class="awc-ico">📺</div>
         <div class="awc-body">
-          <div class="awc-title">Watch Ad → Free Coins</div>
-          <div class="awc-desc">Short ad earns 50 free coins. Ads fund the Sat prize pool.</div>
+          <div class="awc-title">Watch Ad → Free Sats</div>
+          <div class="awc-desc">Short ad earns +50 🪙 coins &amp; +1–3 ₿ sats. Ads fund the prize pool.</div>
         </div>
         <button class="awc-btn" id="ad-watch-btn" onclick="watchAdForCoins()">WATCH</button>
       </div>
@@ -3790,8 +3791,9 @@ function closeAdPopup(){
     hubToast('\u{1F3B1} +3 free balls!');
   } else if(_adWatchType==='coins'){
     earnCoins(50,'Ad Watch');
+    const _adSr=Math.floor(Math.random()*3)+1;awardSats(_adSr,'ad').then(got=>{if(got>0)showSatToast(got,'Ad Watch');});
     AD_WATCH_NEXT=Date.now()+1800000;saveState();updateAdWatchBtn();
-    hubToast('\u{1F4FA} +50 coins!');
+    hubToast('\u{1F4FA} +50 \u{1FA99} & \u{20BF}sats!');
   } else if(_adWatchType==='bigcoins'){
     earnCoins(250,'Ad Watch Big');
     hubToast('\u{1F3AC} +250 \u{1FA99} earned!');
