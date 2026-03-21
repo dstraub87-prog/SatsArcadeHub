@@ -1,3 +1,12 @@
+v1.0.6 - Streak Fix & Verification Tags (2026-03-20)
+------------------------------------------
+- Fixed daily streak stuck/frozen: _applyStreakState now normalizes ISO datetime strings to date-only before comparison
+- Fixed negative diff edge case in streak logic (clock drift / timezone mismatch returned undefined)
+- _todayISO now uses UTC dates to match server-stored values
+- LAST_CLAIM normalized to date-only on load from Supabase (both regular and Telegram auth paths)
+- Streak claim guard hardened with .slice(0,10) normalization
+- Added verification meta tag for new ad/analytics network
+
 v1.0.5 - Daily Missions & Global Tap Glow (2026-03-20)
 ------------------------------------------
 - Daily Missions added to Rewards tab (3 missions per day, seeded by date)

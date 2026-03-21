@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="monetag" content="b49a59ca44e2ab565da275c5da7de7e5">
 <meta name="clckd" content="72b454f09f68db84277b8c15d37c7094" />
+<meta name="86a026e2176a7f93ceccf207703ebbb60f53c86a" content="86a026e2176a7f93ceccf207703ebbb60f53c86a" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <!-- Adsterra Anti-Popup-Blocker Pop-under -->
@@ -3136,13 +3137,15 @@ function loadSoundPrefs(){
 
 let COINS=1000, SATS=0, JACKPOT=1247;
 let STREAK=0, LAST_CLAIM='', CLAIMED_TODAY=false;
-function _todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _todayISO(){const d=new Date();return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');}
 function _applyStreakState(lastClaim,streak){
   // Returns {streak, claimedToday} based on lastClaim date vs today
   const today=_todayISO();
   if(!lastClaim) return {streak:0,claimedToday:false};
-  const diff=Math.floor((new Date(today)-new Date(lastClaim))/86400000);
-  if(diff===0) return {streak:streak,claimedToday:true};   // claimed today
+  // Normalize lastClaim to date-only (strip time/timezone from ISO strings)
+  const lastDate = String(lastClaim).slice(0,10);
+  const diff=Math.floor((new Date(today)-new Date(lastDate))/86400000);
+  if(diff<=0) return {streak:streak,claimedToday:true};    // claimed today (or future clock drift)
   if(diff===1) return {streak:streak,claimedToday:false};  // claimed yesterday, can claim today
   return {streak:0,claimedToday:false};                    // missed a day, streak broken
 }
@@ -3818,7 +3821,7 @@ function renderStreakRewards(){
 }
 function claimStreak(){
   const _today=_todayISO();
-  if(LAST_CLAIM===_today){hubToast('\u2705 Come back tomorrow!');return;}
+  if(LAST_CLAIM.slice(0,10)===_today){hubToast('\u2705 Come back tomorrow!');return;}
   missionProgress('streak_claim', 1);
   const idx=STREAK%7;
   const r=STREAK_DEFS[idx];
@@ -6776,7 +6779,7 @@ async function onAuthSuccess(user,displayName){
       if(_nextAd>Date.now()) AD_WATCH_NEXT=_nextAd;
       else AD_WATCH_NEXT=0;
     }
-    LAST_CLAIM=existing.last_claim??'';PLAYER_NAME=sanitizeName(existing.display_name??name);
+    LAST_CLAIM=(existing.last_claim||'').slice(0,10);PLAYER_NAME=sanitizeName(existing.display_name??name);
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
     try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
@@ -6918,7 +6921,7 @@ async function authInit(){
         COINS=existing.coins??1000;SATS=existing.sats??0;
         LIFETIME_COINS=existing.lifetime_coins??0;LIFETIME_SATS=existing.lifetime_sats??0;
         GAMES_PLAYED=existing.games_played??0;STREAK=existing.streak??0;
-        LAST_CLAIM=existing.last_claim??'';PLAYER_AVATAR=existing.avatar??'⚡';
+        LAST_CLAIM=(existing.last_claim||'').slice(0,10);PLAYER_AVATAR=existing.avatar??'⚡';
         PLAYER_LEVEL=existing.player_level??1;
         try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
