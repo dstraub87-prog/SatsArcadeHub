@@ -7089,7 +7089,7 @@ function renderMissions(){
       <div class="mission-prog-bg">
         <div class="mission-prog-bar" style="width:${done?100:pct}%"></div>
       </div>
-      ${ready && !done ? '<button class="mission-claim-btn" onclick="claimMission(''+m.id+'')">⚡ CLAIM REWARD</button>' : ''}
+      ${ready && !done ? `<button class="mission-claim-btn" onclick="claimMission('${m.id}')">⚡ CLAIM REWARD</button>` : ''}
     </div>`;
   }).join('');
 }
