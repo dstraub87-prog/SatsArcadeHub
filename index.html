@@ -7487,7 +7487,7 @@ const SI = {
 function siInit(){
   const can = document.getElementById('si-canvas'); if(!can) return;
   const wrap = document.getElementById('screen-spaceinvaders');
-  const W = Math.min(wrap ? wrap.offsetWidth - 16 : 380, 400);
+  const _siRaw = wrap ? wrap.offsetWidth : 0; const W = Math.min(_siRaw > 20 ? _siRaw - 16 : 370, 400);
   const H = 440;
   can.width = W; can.height = H; can.style.width=W+'px';
   SI.W=W; SI.H=H; SI.ctx=can.getContext('2d');
@@ -7544,7 +7544,7 @@ function siSpawnWave(){
 }
 
 function siStart(){
-  if(SI.over){siInit();return;}
+  if(SI.over)siInit();
   if(SI.running)return;
   trackGame();missionProgress('specific_game',1,'spaceinvaders');
   SI.running=true;SI.over=false;
@@ -7991,6 +7991,9 @@ function astInit(){
     addBtn('ast-right-btn',()=>AST.keys.right=true,()=>AST.keys.right=false);
     addBtn('ast-thrust-btn',()=>AST.keys.thrust=true,()=>AST.keys.thrust=false);
     addBtn('ast-shoot-btn',()=>astShoot());
+    // Tap canvas to start
+    can.addEventListener('click',()=>{ if(!AST.running)astStart(); });
+    can.addEventListener('touchstart',e=>{e.preventDefault();if(!AST.running)astStart();},{passive:false});
   }
 }
 
@@ -8018,7 +8021,7 @@ function astAddAsteroid(x,y,size,vel){
 }
 
 function astStart(){
-  if(AST.over){astInit();return;}
+  if(AST.over)astInit();
   if(AST.running)return;
   trackGame();missionProgress('specific_game',1,'asteroids');
   AST.running=true;AST.over=false;
