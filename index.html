@@ -654,9 +654,9 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .bj-card{width:58px;height:86px;border-radius:7px;background:linear-gradient(145deg,#fff,#f0f0f0);border:1px solid rgba(0,0,0,.15);display:flex;flex-direction:column;justify-content:space-between;padding:4px;box-shadow:0 3px 10px rgba(0,0,0,.5),0 1px 0 rgba(255,255,255,.2);flex-shrink:0;position:relative;}
 .bj-card.red .bj-rank{color:#c0392b;}
 .bj-card.red .bj-suit{color:#c0392b;}
-.bj-rank{font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;color:#fff;line-height:1;}
-.bj-suit{font-size:.9rem;line-height:1;}
-.bj-suit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6rem;}
+.bj-rank{font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;color:#111;line-height:1;}
+.bj-suit{font-size:.9rem;line-height:1;color:#111;}
+.bj-suit-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.6rem;color:#111;}
 .bj-card.face-down{background:repeating-linear-gradient(45deg,#1a0050 0,#1a0050 4px,#2a0080 4px,#2a0080 8px);border-color:rgba(100,0,200,.4);}
 .bj-card.deal-anim{animation:cardDeal .25s cubic-bezier(.34,1.56,.64,1);}
 @keyframes cardDeal{from{transform:translateY(-30px) scale(.8);opacity:0;}to{transform:none;opacity:1;}}
@@ -705,8 +705,8 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .pk-card.red .pk-rank,.pk-card.red .pk-suit{color:#c0392b;}
 .pk-card.red .pk-suit-c{color:#c0392b;}
 .pk-rank{font-family:'Space Mono',monospace;font-size:.55rem;font-weight:700;color:#111;line-height:1;}
-.pk-suit{font-size:.65rem;line-height:1;}
-.pk-suit-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;}
+.pk-suit{font-size:.65rem;line-height:1;color:#111;}
+.pk-suit-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2rem;color:#111;}
 .pk-card.back{background:repeating-linear-gradient(135deg,#0a3d1a 0,#0a3d1a 4px,#0d4a20 4px,#0d4a20 8px);border-color:rgba(0,200,80,.35);}
 .pk-card.deal-in{animation:pkDeal .22s cubic-bezier(.34,1.56,.64,1);}
 .pk-card.selected{transform:translateY(-10px);box-shadow:0 8px 20px rgba(247,147,26,.5);border-color:var(--btc);}
@@ -3698,7 +3698,21 @@ function syncAll(){
 }
 
 /* NAVIGATION */
+function stopAllLoops(){
+  // Cancel retro game RAF loops and intervals when navigating away
+  try{if(SI.raf){cancelAnimationFrame(SI.raf);SI.raf=null;SI.running=false;}}catch(e){}
+  try{if(AST.raf){cancelAnimationFrame(AST.raf);AST.raf=null;AST.running=false;}}catch(e){}
+  try{if(BD.raf){cancelAnimationFrame(BD.raf);BD.raf=null;BD.running=false;}}catch(e){}
+  try{if(pongAF){cancelAnimationFrame(pongAF);pongAF=null;pongRunning=false;}}catch(e){}
+  try{if(brickAF){cancelAnimationFrame(brickAF);brickAF=null;}}catch(e){}
+  try{if(flappyAF){cancelAnimationFrame(flappyAF);flappyAF=null;flappyRunning=false;}}catch(e){}
+  try{if(snakeIv){clearInterval(snakeIv);snakeIv=null;}}catch(e){}
+  try{if(aWhackIv){clearInterval(aWhackIv);aWhackIv=null;}if(aWhackMoleIv){clearInterval(aWhackMoleIv);aWhackMoleIv=null;}}catch(e){}
+  try{if(MSW.timerIv){clearInterval(MSW.timerIv);MSW.timerIv=null;}}catch(e){}
+  try{if(bngAutoIv){clearInterval(bngAutoIv);bngAutoIv=null;}}catch(e){}
+}
 function navTo(s){
+  stopAllLoops();
   // Show demo reminder when visiting redeem page
   if(s==='redeem'){
     try{
@@ -3720,6 +3734,7 @@ function navTo(s){
   if(s==='blackjack'){if(bjDeck.length<15)bjDeck=bjBuildDeck();}
 }
 function openGame(g,sub){
+  stopAllLoops();
   document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
   document.getElementById('screen-'+g).classList.add('active');
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('active'));
@@ -4585,7 +4600,7 @@ function sTab(t){['pays','history'].forEach((x,i)=>{const tab=document.querySele
 /* === ARCADE === */
 let aCurrent='wheel';
 const ATABS=['wheel','coinflip','dice','hilo','keno','crash','mines','memory','reaction','snake','brick','flappy','whack','pong'];
-function aSwitch(g){aCurrent=g;document.querySelectorAll('.a-screen').forEach(s=>s.classList.remove('active'));const scr=document.getElementById('a-screen-'+g);if(scr)scr.classList.add('active');document.querySelectorAll('.a-tab').forEach((t,i)=>t.classList.toggle('active',ATABS[i]===g));if(g==='keno')aInitKeno();if(g==='mines')aInitMinesGrid();if(g==='memory')aStartMemory();if(g==='whack')aInitWhack();if(g==='hilo')aHiLoNewCard();if(g==='wheel')aDrawWheel();if(g==='flappy')setTimeout(aInitFlappy,60);if(g==='pong')setTimeout(aInitPong,60);}
+function aSwitch(g){aCurrent=g;document.querySelectorAll('.a-screen').forEach(s=>s.classList.remove('active'));const scr=document.getElementById('a-screen-'+g);if(scr)scr.classList.add('active');document.querySelectorAll('.a-tab').forEach((t,i)=>t.classList.toggle('active',ATABS[i]===g));if(g==='keno')aInitKeno();if(g==='mines')aInitMinesGrid();if(g==='memory')aStartMemory();if(g==='whack')aInitWhack();if(g==='hilo')aHiLoNewCard();if(g==='wheel')aDrawWheel();if(g==='dice')aInitDice();if(g==='flappy')setTimeout(aInitFlappy,60);if(g==='pong')setTimeout(aInitPong,60);}
 let aToastT;function aToast(m){const t=document.getElementById('a-toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(aToastT);aToastT=setTimeout(()=>t.classList.remove('show'),2200);}
 function aResult(id,m,c){const el=document.getElementById(id);if(!el)return;el.textContent=m;el.className='a-result '+(c||'');}
 
@@ -5021,7 +5036,7 @@ function bacInit(){
   bacUpdateBet();
   ['bac-btn-player','bac-btn-banker','bac-btn-tie'].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=false;});
 }
-function bacAddBet(n){if(bacBet===0||true){bacBet+=n;bacUpdateBet();}}
+function bacAddBet(n){bacBet+=n;bacUpdateBet();}
 function bacUpdateBet(){
   const e=document.getElementById('bac-bet-display');if(e)e.textContent=bacBet;
   const c=document.getElementById('bac-coins-bar');if(c)c.textContent=COINS;
@@ -6920,7 +6935,15 @@ function getSupabase(){
   if(!_supa&&typeof supabase!=='undefined')_supa=supabase.createClient(SUPA_URL,SUPA_KEY);
   return _supa;
 }
-function openAuthModal(){document.getElementById('auth-modal').classList.add('show');}
+function openAuthModal(){
+  document.getElementById('auth-modal').classList.add('show');
+  // Turnstile won't auto-render inside a hidden element; trigger it explicitly
+  try{
+    if(typeof turnstile!=='undefined'){
+      turnstile.render('#cf-turnstile-widget',{sitekey:'0x4AAAAAACp77a5bQIiumGut',theme:'dark'});
+    }
+  }catch(e){}
+}
 function closeAuthModal(){document.getElementById('auth-modal').classList.remove('show');}
 function authSetTab(t){
   document.getElementById('auth-panel-in').style.display=t==='in'?'':'none';
@@ -7819,8 +7842,8 @@ function bdKey(dir){
   if(dir==='down')bdMoveDown();
   if(dir==='space'){while(bdValid(BD.cur,0,1))BD.cur.y++;bdLock();}
 }
-function bdKeyDown(dir){BD.keys[dir]=true;bdKey(dir);BD.keyTimers[dir]=setInterval(()=>{if(BD.keys[dir])bdKey(dir);},90);}
-function bdKeyUp(dir){BD.keys[dir]=false;clearInterval(BD.keyTimers[dir]);}
+function bdKeyDown(dir){BD.keys[dir]=true;bdKey(dir);clearInterval(BD.keyTimers[dir]);BD.keyTimers[dir]=setInterval(()=>{if(BD.keys[dir])bdKey(dir);},90);}
+function bdKeyUp(dir){BD.keys[dir]=false;clearInterval(BD.keyTimers[dir]);BD.keyTimers[dir]=null;}
 function bdTogglePause(){if(!BD.running)return;BD.paused=!BD.paused;}
 
 function bdMoveDown(){
@@ -8196,6 +8219,7 @@ function mswSetDiff(d){
 }
 
 function mswNew(){
+  clearTimeout(MSW.longPressTimer);
   if(MSW.timerIv)clearInterval(MSW.timerIv);
   const cfg=MSW.DIFFS[MSW.diff];
   MSW.cols=cfg.cols;MSW.rows=cfg.rows;MSW.mines=cfg.mines;
