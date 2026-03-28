@@ -7553,8 +7553,8 @@ function siInit(){
 
 function siSpawnWave(){
   SI.bullets=[];SI.ibullets=[];SI.drop=false;SI.dir=1;
-  SI.invSpeed=0.9+SI.wave*0.18;
-  const rows=5,cols=10,iw=26,ih=18,px=6,py=6;
+  SI.invSpeed=0.3+SI.wave*0.06;
+  const rows=4,cols=10,iw=26,ih=18,px=6,py=6;
   const sx=(SI.W-(cols*(iw+px)))/2;
   const sy=44;
   SI.invaders=[];
@@ -8017,7 +8017,7 @@ function astInit(){
       el.addEventListener('pointerdown',e=>{e.preventDefault();dn();});
       el.addEventListener('pointerup',e=>{e.preventDefault();up&&up();});
       el.addEventListener('pointercancel',e=>{e.preventDefault();up&&up();}); // finger lifted off screen
-      el.addEventListener('pointerleave',()=>{up&&up();}); // finger slid off button
+      // NOTE: pointerleave intentionally omitted — fires immediately on mobile touch, releasing keys instantly
       el.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
     };
     addBtn('ast-left-btn',()=>AST.keys.left=true,()=>AST.keys.left=false);
@@ -8026,7 +8026,7 @@ function astInit(){
     addBtn('ast-shoot-btn',()=>astShoot());
     // Tap canvas to start
     can.addEventListener('click',()=>{ if(!AST.running)astStart(); });
-    can.addEventListener('touchstart',e=>{e.preventDefault();if(!AST.running)astStart();},{passive:false});
+    can.addEventListener('touchstart',e=>{e.preventDefault();if(!AST.running)astStart();else astShoot();},{passive:false});
   }
 }
 
