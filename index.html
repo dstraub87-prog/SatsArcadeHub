@@ -7516,6 +7516,7 @@ function siInit(){
   SI.W=W; SI.H=H; SI.ctx=can.getContext('2d');
   SI.score=0;SI.lives=3;SI.wave=1;SI.over=false;SI.running=false;
   SI.r500=false;SI.r1000=false;SI.r2000=false;
+  SI.keys={left:false,right:false}; // reset on every init — prevents stuck keys after navigation
   SI.player={x:W/2,y:H-28,w:34,h:18,speed:4.5};
   SI.bullets=[];SI.ibullets=[];
   siSpawnWave();
@@ -7533,7 +7534,12 @@ function siInit(){
       if(e.key==='ArrowRight'||e.key==='d')SI.keys.right=false;
     });
     let _siTouchX=null;
-    can.addEventListener('touchstart',e=>{e.preventDefault();_siTouchX=e.touches[0].clientX;siShoot();},{passive:false});
+    // touchstart must handle both start AND shoot — e.preventDefault() blocks the click event
+    can.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      _siTouchX=e.touches[0].clientX;
+      if(!SI.running||SI.over)siStart(); else siShoot();
+    },{passive:false});
     can.addEventListener('touchmove',e=>{
       e.preventDefault();
       if(_siTouchX===null)return;
@@ -7985,6 +7991,8 @@ function astInit(){
   AST.W=W;AST.H=420;AST.ctx=can.getContext('2d');
   AST.score=0;AST.lives=3;AST.wave=1;AST.over=false;AST.running=false;
   AST.r500=false;AST.r1500=false;AST.r3000=false;
+  AST.iFrames=0; // reset — prevents phantom invincibility from previous session
+  AST.keys={left:false,right:false,thrust:false,shoot:false}; // reset stuck keys
   AST.bullets=[];AST.asteroids=[];AST.particles=[];
   AST.ship={x:W/2,y:210,vx:0,vy:0,angle:0,radius:12,dead:false};
   astSpawnWave();
@@ -8008,6 +8016,8 @@ function astInit(){
       const el=document.getElementById(id);if(!el)return;
       el.addEventListener('pointerdown',e=>{e.preventDefault();dn();});
       el.addEventListener('pointerup',e=>{e.preventDefault();up&&up();});
+      el.addEventListener('pointercancel',e=>{e.preventDefault();up&&up();}); // finger lifted off screen
+      el.addEventListener('pointerleave',()=>{up&&up();}); // finger slid off button
       el.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
     };
     addBtn('ast-left-btn',()=>AST.keys.left=true,()=>AST.keys.left=false);
@@ -8101,7 +8111,7 @@ function astUpdate(dt){
         for(let i=0;i<8;i++)AST.particles.push({x:a.x,y:a.y,
           vx:(Math.random()-0.5)*120,vy:(Math.random()-0.5)*120,
           life:0.5+Math.random()*0.5,r:2+Math.random()*2,c:a.size===3?'#4ade80':a.size===2?'#F7931A':'#FFD700'});
-        if(a.size>1){astAddAsteroid(a.x,a.y,a.size-1,a.vx);astAddAsteroid(a.x,a.y,a.size-1,a.vy);}
+        if(a.size>1){const _spd=Math.hypot(a.vx,a.vy);astAddAsteroid(a.x,a.y,a.size-1,_spd||null);astAddAsteroid(a.x,a.y,a.size-1,_spd||null);}
         SFX.explode&&SFX.explode();
         if(!AST.r500&&AST.score>=500){AST.r500=true;earnCoins(500,'Asteroids');hubToast('🚀 +500 🪙');}
         if(!AST.r1500&&AST.score>=1500){AST.r1500=true;earnCoins(1500,'Asteroids');hubToast('🚀 +1,500 🪙');awardSats(1,'game');}
