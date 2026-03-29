@@ -2503,14 +2503,16 @@ window.declineAge = function() {
         <div class="retro-stat"><div class="retro-stat-val" id="ast-lives" style="color:#4ade80">&#x1F680;&#x1F680;&#x1F680;</div><div class="retro-stat-lbl">Ships</div></div>
       </div>
       <canvas class="retro-canvas" id="ast-canvas" width="380" height="420"></canvas>
-      <div class="retro-hint">TAP left/right to rotate &nbsp;|&nbsp; TAP centre to thrust &nbsp;|&nbsp; Double-tap to shoot</div>
-      <div style="display:flex;gap:6px;margin-top:4px;width:100%;max-width:380px;">
-        <div class="retro-dpad-btn" style="flex:1;border-radius:9px;padding:10px;font-size:.8rem;font-family:'Bebas Neue'" id="ast-left-btn">&#x21BA; LEFT</div>
-        <div class="retro-dpad-btn" style="flex:1;border-radius:9px;padding:10px;font-size:.8rem;font-family:'Bebas Neue'" id="ast-thrust-btn">&#x25B2; THRUST</div>
-        <div class="retro-dpad-btn" style="flex:1;border-radius:9px;padding:10px;font-size:.8rem;font-family:'Bebas Neue'" id="ast-right-btn">&#x21BB; RIGHT</div>
+      <div class="retro-hint">Joystick: rotate &amp; thrust &nbsp;|&nbsp; ⚡ button to shoot &nbsp;|&nbsp; Keyboard: A/D/W/Space</div>
+      <div id="ast-controls" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;max-width:380px;margin-top:6px;touch-action:none;">
+        <!-- Virtual joystick -->
+        <canvas id="ast-joystick" width="130" height="130" style="border-radius:50%;flex-shrink:0;touch-action:none;"></canvas>
+        <!-- Right side: start + shoot stacked -->
+        <div style="display:flex;flex-direction:column;gap:8px;flex:1;align-items:center;">
+          <button class="retro-btn" onclick="astStart()" style="width:100%;font-size:.78rem;padding:8px;">&#x25B6; START</button>
+          <div id="ast-shoot-btn" style="width:100%;height:70px;background:linear-gradient(135deg,#f7931a,#ff6b00);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#000;letter-spacing:2px;cursor:pointer;touch-action:none;user-select:none;box-shadow:0 4px 16px rgba(247,147,26,.4);">&#x26A1; SHOOT</div>
+        </div>
       </div>
-      <div class="retro-dpad-btn" style="width:100%;max-width:380px;border-radius:9px;padding:10px;font-size:.8rem;font-family:'Bebas Neue';text-align:center;" id="ast-shoot-btn">&#x26A1; SHOOT</div>
-      <button class="retro-btn" onclick="astStart()" style="margin-top:4px;">&#x25B6; START</button>
     </div></div>
   </div>
 </div>
@@ -7997,8 +7999,25 @@ function astInit(){
   AST.ship={x:W/2,y:210,vx:0,vy:0,angle:0,radius:12,dead:false};
   astSpawnWave();
   astRender();astSyncUI();
+  // Draw idle joystick on every init (canvas is cleared by the browser on resize/reinit)
+  (function(){
+    const jc=document.getElementById('ast-joystick');if(!jc)return;
+    const jx=jc.getContext('2d');
+    jx.clearRect(0,0,130,130);
+    jx.beginPath();jx.arc(65,65,55,0,Math.PI*2);
+    jx.fillStyle='rgba(255,255,255,0.06)';jx.fill();
+    jx.strokeStyle='rgba(247,147,26,0.35)';jx.lineWidth=2;jx.stroke();
+    jx.fillStyle='rgba(255,255,255,0.18)';jx.font='bold 9px monospace';jx.textAlign='center';
+    jx.fillText('THRUST',65,33);jx.fillText('L',31,69);jx.fillText('R',99,69);
+    jx.textAlign='left';
+    jx.beginPath();jx.arc(65,65,22,0,Math.PI*2);
+    jx.fillStyle='rgba(247,147,26,0.55)';jx.fill();
+    jx.strokeStyle='rgba(247,147,26,0.9)';jx.lineWidth=2;jx.stroke();
+  })();
   if(!AST._ctrlsSet){
     AST._ctrlsSet=true;
+
+    // ── Keyboard (desktop) ──────────────────────────────────────────
     document.addEventListener('keydown',e=>{
       if(!document.getElementById('screen-asteroids').classList.contains('active'))return;
       if(e.key==='ArrowLeft'||e.key==='a')AST.keys.left=true;
@@ -8011,27 +8030,115 @@ function astInit(){
       if(e.key==='ArrowRight'||e.key==='d')AST.keys.right=false;
       if(e.key==='ArrowUp'||e.key==='w')AST.keys.thrust=false;
     });
-    // Mobile buttons
-    const addBtn=(id,dn,up)=>{
-      const el=document.getElementById(id);if(!el)return;
-      // Use touch events — pointer events get cancelled by the browser on mobile
-      // when the touch is held (pointercancel), making held controls impossible.
-      // Touch events never cancel mid-hold and are the reliable ground truth.
-      el.addEventListener('touchstart',e=>{e.preventDefault();dn();},{passive:false});
-      el.addEventListener('touchend',e=>{e.preventDefault();up&&up();},{passive:false});
-      el.addEventListener('touchcancel',e=>{e.preventDefault();up&&up();},{passive:false});
-      // Keyboard/mouse fallback for desktop
-      el.addEventListener('mousedown',e=>{e.preventDefault();dn();});
-      el.addEventListener('mouseup',e=>{e.preventDefault();up&&up();});
-      el.addEventListener('mouseleave',()=>{up&&up();});
-    };
-    addBtn('ast-left-btn',()=>AST.keys.left=true,()=>AST.keys.left=false);
-    addBtn('ast-right-btn',()=>AST.keys.right=true,()=>AST.keys.right=false);
-    addBtn('ast-thrust-btn',()=>AST.keys.thrust=true,()=>AST.keys.thrust=false);
-    addBtn('ast-shoot-btn',()=>astShoot());
-    // Tap canvas to start
+
+    // ── Virtual joystick ───────────────────────────────────────────
+    // Drawn on a canvas so there are zero DOM event conflicts.
+    // Left/right zone rotates ship; upper zone thrusts.
+    const jsCan=document.getElementById('ast-joystick');
+    const jsCtx=jsCan.getContext('2d');
+    const JS={cx:65,cy:65,r:55,knobR:22,kx:65,ky:65,active:false,tid:-1};
+
+    function jsDrawIdle(){
+      jsCtx.clearRect(0,0,130,130);
+      // Outer ring
+      jsCtx.beginPath();jsCtx.arc(JS.cx,JS.cy,JS.r,0,Math.PI*2);
+      jsCtx.fillStyle='rgba(255,255,255,0.06)';jsCtx.fill();
+      jsCtx.strokeStyle='rgba(247,147,26,0.35)';jsCtx.lineWidth=2;jsCtx.stroke();
+      // Zone labels
+      jsCtx.fillStyle='rgba(255,255,255,0.18)';jsCtx.font='bold 9px monospace';jsCtx.textAlign='center';
+      jsCtx.fillText('THRUST',JS.cx,JS.cy-32);
+      jsCtx.fillText('L',JS.cx-34,JS.cy+4);
+      jsCtx.fillText('R',JS.cx+34,JS.cy+4);
+      jsCtx.textAlign='left';
+      // Centre knob
+      jsCtx.beginPath();jsCtx.arc(JS.kx,JS.ky,JS.knobR,0,Math.PI*2);
+      jsCtx.fillStyle='rgba(247,147,26,0.55)';jsCtx.fill();
+      jsCtx.strokeStyle='rgba(247,147,26,0.9)';jsCtx.lineWidth=2;jsCtx.stroke();
+    }
+
+    function jsDrawActive(){
+      jsCtx.clearRect(0,0,130,130);
+      jsCtx.beginPath();jsCtx.arc(JS.cx,JS.cy,JS.r,0,Math.PI*2);
+      jsCtx.fillStyle='rgba(255,255,255,0.08)';jsCtx.fill();
+      jsCtx.strokeStyle='rgba(247,147,26,0.6)';jsCtx.lineWidth=2;jsCtx.stroke();
+      jsCtx.textAlign='left';
+      // Active knob — brighter
+      jsCtx.beginPath();jsCtx.arc(JS.kx,JS.ky,JS.knobR,0,Math.PI*2);
+      jsCtx.fillStyle='rgba(247,147,26,0.85)';jsCtx.fill();
+      jsCtx.strokeStyle='#fff';jsCtx.lineWidth=1.5;jsCtx.stroke();
+    }
+
+    function jsUpdate(px,py){
+      // px,py relative to joystick canvas top-left
+      const dx=px-JS.cx, dy=py-JS.cy;
+      const dist=Math.min(Math.hypot(dx,dy),JS.r-JS.knobR);
+      const angle=Math.atan2(dy,dx);
+      // Clamp knob inside ring
+      JS.kx=JS.cx+Math.cos(angle)*dist;
+      JS.ky=JS.cy+Math.sin(angle)*dist;
+      // Dead zone = 14px
+      const DEAD=14;
+      AST.keys.left  = dx < -DEAD;
+      AST.keys.right = dx >  DEAD;
+      AST.keys.thrust= dy < -DEAD;
+      jsDrawActive();
+    }
+
+    function jsRelease(){
+      JS.kx=JS.cx;JS.ky=JS.cy;JS.active=false;JS.tid=-1;
+      AST.keys.left=false;AST.keys.right=false;AST.keys.thrust=false;
+      jsDrawIdle();
+    }
+
+    jsCan.addEventListener('touchstart',e=>{
+      e.preventDefault();
+      const t=e.changedTouches[0];
+      JS.tid=t.identifier;JS.active=true;
+      const r=jsCan.getBoundingClientRect();
+      jsUpdate(t.clientX-r.left,t.clientY-r.top);
+    },{passive:false});
+
+    jsCan.addEventListener('touchmove',e=>{
+      e.preventDefault();
+      for(let i=0;i<e.changedTouches.length;i++){
+        if(e.changedTouches[i].identifier===JS.tid){
+          const r=jsCan.getBoundingClientRect();
+          jsUpdate(e.changedTouches[i].clientX-r.left,e.changedTouches[i].clientY-r.top);
+          break;
+        }
+      }
+    },{passive:false});
+
+    jsCan.addEventListener('touchend',e=>{e.preventDefault();jsRelease();},{passive:false});
+    jsCan.addEventListener('touchcancel',e=>{e.preventDefault();jsRelease();},{passive:false});
+
+    // Mouse fallback (desktop)
+    jsCan.addEventListener('mousedown',e=>{
+      JS.active=true;
+      const r=jsCan.getBoundingClientRect();
+      jsUpdate(e.clientX-r.left,e.clientY-r.top);
+    });
+    jsCan.addEventListener('mousemove',e=>{
+      if(!JS.active)return;
+      const r=jsCan.getBoundingClientRect();
+      jsUpdate(e.clientX-r.left,e.clientY-r.top);
+    });
+    jsCan.addEventListener('mouseup',()=>jsRelease());
+    jsCan.addEventListener('mouseleave',()=>{if(JS.active)jsRelease();});
+
+    // Draw idle joystick immediately
+    jsDrawIdle();
+
+    // ── Shoot button ───────────────────────────────────────────────
+    const shootBtn=document.getElementById('ast-shoot-btn');
+    if(shootBtn){
+      shootBtn.addEventListener('touchstart',e=>{e.preventDefault();astShoot();},{passive:false});
+      shootBtn.addEventListener('mousedown',e=>{e.preventDefault();astShoot();});
+    }
+
+    // ── Canvas tap: start game ──────────────────────────────────────
     can.addEventListener('click',()=>{ if(!AST.running)astStart(); });
-    can.addEventListener('touchstart',e=>{e.preventDefault();if(!AST.running)astStart();else astShoot();},{passive:false});
+    can.addEventListener('touchstart',e=>{e.preventDefault();if(!AST.running)astStart();},{passive:false});
   }
 }
 
