@@ -1005,7 +1005,7 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 /* Dpad for mobile */
 .retro-dpad{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:4px;}
 .retro-dpad-row{display:flex;gap:2px;}
-.retro-dpad-btn{width:44px;height:44px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.retro-dpad-btn{width:44px;height:44px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
 .retro-dpad-btn:active{background:rgba(247,147,26,.25);border-color:var(--btc);}
 
 /* ═══════════════════════════════════════════════════
@@ -8014,11 +8014,16 @@ function astInit(){
     // Mobile buttons
     const addBtn=(id,dn,up)=>{
       const el=document.getElementById(id);if(!el)return;
-      el.addEventListener('pointerdown',e=>{e.preventDefault();dn();});
-      el.addEventListener('pointerup',e=>{e.preventDefault();up&&up();});
-      el.addEventListener('pointercancel',e=>{e.preventDefault();up&&up();}); // finger lifted off screen
-      // NOTE: pointerleave intentionally omitted — fires immediately on mobile touch, releasing keys instantly
-      el.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+      // Use touch events — pointer events get cancelled by the browser on mobile
+      // when the touch is held (pointercancel), making held controls impossible.
+      // Touch events never cancel mid-hold and are the reliable ground truth.
+      el.addEventListener('touchstart',e=>{e.preventDefault();dn();},{passive:false});
+      el.addEventListener('touchend',e=>{e.preventDefault();up&&up();},{passive:false});
+      el.addEventListener('touchcancel',e=>{e.preventDefault();up&&up();},{passive:false});
+      // Keyboard/mouse fallback for desktop
+      el.addEventListener('mousedown',e=>{e.preventDefault();dn();});
+      el.addEventListener('mouseup',e=>{e.preventDefault();up&&up();});
+      el.addEventListener('mouseleave',()=>{up&&up();});
     };
     addBtn('ast-left-btn',()=>AST.keys.left=true,()=>AST.keys.left=false);
     addBtn('ast-right-btn',()=>AST.keys.right=true,()=>AST.keys.right=false);
