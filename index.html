@@ -39,6 +39,19 @@ body::after{content:'';position:fixed;inset:0;z-index:0;background:radial-gradie
 .app-main{flex:1;position:relative;overflow:hidden;z-index:2;}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s;}
 .screen.active{opacity:1;pointer-events:all;transform:translateY(0);}
+/* Game fullscreen — covers header and bottom nav completely */
+.screen.fullscreen{position:fixed;inset:0;z-index:300;transform:none!important;}
+.screen.fullscreen.active{opacity:1;pointer-events:all;}
+/* Floating exit button */
+#fs-exit-btn{display:none;position:fixed;top:10px;right:10px;z-index:400;
+  width:40px;height:40px;border-radius:50%;
+  background:rgba(7,8,16,.88);border:1.5px solid rgba(247,147,26,.5);
+  color:var(--btc);font-size:1.1rem;line-height:1;
+  align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 2px 12px rgba(0,0,0,.6);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
+#fs-exit-btn.show{display:flex;}
+#fs-exit-btn:active{transform:scale(.88);}
 /* HUB */
 .hub-body{flex:1;display:flex;flex-direction:column;padding:7px 9px 80px;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;gap:6px;}
 .wins-bar{flex-shrink:0;background:rgba(0,0,0,.35);border:1px solid rgba(57,255,20,.1);border-radius:5px;padding:3px 7px;display:flex;align-items:center;gap:5px;overflow:hidden;height:24px;}
@@ -1263,7 +1276,7 @@ window.declineAge = function() {
   </div>
 </div>
 <!-- HEADER -->
-<header class="hdr">
+<header class="hdr" id="app-hdr">
   <div class="hdr-avatar" id="hdr-avatar" onclick="onAccountBtnClick()">
     <span id="hdr-ava-inner">🎮</span>
     <div class="hdr-lvl-badge" id="hdr-lvl-badge">1</div>
@@ -2553,6 +2566,7 @@ window.declineAge = function() {
   <button class="bn" id="bn-leaderboard" onclick="navTo('leaderboard');lbBuild()"><div class="bn-ico">🏆</div><div class="bn-lbl">Ranks</div></button>
 </nav>
 <div id="hub-toast"></div>
+<button id="fs-exit-btn" onclick="exitFullscreen()" title="Exit game">✕</button>
 <div id="jp-overlay"><div class="jp-emoji">🎉⚡🎉</div><div class="jp-title">🎰 JACKPOT!</div><div class="jp-amount" id="jp-amount">+500 COINS</div><div class="jp-sub">Added to your coin balance</div><button class="jp-close-btn" onclick="closeJackpot()">🎰 AWESOME!</button></div>
 <!-- SHARE REMINDER POPUP -->
 <div id="share-popup" style="display:none;position:fixed;inset:0;z-index:880;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px);">
@@ -3715,6 +3729,11 @@ function stopAllLoops(){
 }
 function navTo(s){
   stopAllLoops();
+  // Always exit fullscreen when navigating via nav or ← HUB
+  document.querySelectorAll('.screen.fullscreen').forEach(el=>el.classList.remove('fullscreen'));
+  document.getElementById('fs-exit-btn').classList.remove('show');
+  const hdr=document.getElementById('app-hdr');if(hdr)hdr.style.display='';
+  const bnav=document.querySelector('.bnav');if(bnav)bnav.style.display='';
   // Show demo reminder when visiting redeem page
   if(s==='redeem'){
     try{
@@ -3735,11 +3754,36 @@ function navTo(s){
   if(s==='scratch')scInit();
   if(s==='blackjack'){if(bjDeck.length<15)bjDeck=bjBuildDeck();}
 }
+function exitFullscreen(){
+  // Remove fullscreen from whichever screen has it
+  document.querySelectorAll('.screen.fullscreen').forEach(el=>el.classList.remove('fullscreen'));
+  document.getElementById('fs-exit-btn').classList.remove('show');
+  // Show header and bottom nav again
+  const hdr=document.getElementById('app-hdr');if(hdr)hdr.style.display='';
+  document.querySelector('.bnav').style.display='';
+  // If a retro game was running tell it to resize
+  try{if(SI.running||SI.over)setTimeout(siInit,60);}catch(e){}
+  try{if(AST.running||AST.over)setTimeout(astInit,60);}catch(e){}
+  try{if(BD.running)setTimeout(bdInit,60);}catch(e){}
+  try{if(typeof pInit==='function'&&document.getElementById('screen-plinko').classList.contains('active'))setTimeout(pInit,60);}catch(e){}
+}
+
+function enterFullscreen(screenEl){
+  screenEl.classList.add('fullscreen');
+  document.getElementById('fs-exit-btn').classList.add('show');
+  // Hide header and bottom nav to reclaim all vertical space
+  const hdr=document.getElementById('app-hdr');if(hdr)hdr.style.display='none';
+  document.querySelector('.bnav').style.display='none';
+}
+
 function openGame(g,sub){
   stopAllLoops();
-  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
-  document.getElementById('screen-'+g).classList.add('active');
+  document.querySelectorAll('.screen').forEach(el=>{el.classList.remove('active');el.classList.remove('fullscreen');});
+  const scr=document.getElementById('screen-'+g);
+  scr.classList.add('active');
   document.querySelectorAll('.bn').forEach(b=>b.classList.remove('active'));
+  // Enter fullscreen for all games (not nav/legal screens)
+  enterFullscreen(scr);
   if(g==='arcade'){aDrawWheel();aSwitch(sub||'wheel');}
   if(g==='plinko')setTimeout(pInit,60);
   if(g==='slots'){sInitGrid();sBuildPaytable();}
