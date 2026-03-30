@@ -3410,6 +3410,7 @@ function loadState(){
     if(LAST_CLAIM){
       const _sc=_applyStreakState(LAST_CLAIM,STREAK);
       STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;
+      if(_sc.claimedToday) window._streakClaimedDate=_todayISO();
     }
   }catch(e){}
 }
@@ -4105,7 +4106,9 @@ const STREAK_LABELS=['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7 \u{1
 function renderStreakHub(){
   const row=document.getElementById('hub-streak-row');if(!row)return;
   const dayIdx=CLAIMED_TODAY?(STREAK-1)%7:STREAK%7;
-  row.innerHTML=STREAK_DEFS.map((r,i)=>{
+  // Show TOTAL streak above cycle so users know their streak didn't reset after day 7
+  const totalLabel=STREAK>0?`<div style="text-align:center;font-size:.52rem;color:var(--btc);letter-spacing:1px;font-family:'Bebas Neue',sans-serif;margin-bottom:3px;width:100%;">\uD83D\uDD25 ${STREAK} DAY STREAK</div>`:'';
+  row.innerHTML=totalLabel+STREAK_DEFS.map((r,i)=>{
     const done=i<dayIdx||(i===dayIdx&&CLAIMED_TODAY);
     const isToday=i===dayIdx&&!CLAIMED_TODAY;
     return `<div class="sd ${done?'done':''} ${isToday?'today':''}" onclick="claimStreak()">
@@ -4120,8 +4123,8 @@ function renderStreakRewards(){
   const num=document.getElementById('rwd-streak-num');
   if(!days)return;
   const dayIdx=CLAIMED_TODAY?(STREAK-1)%7:STREAK%7;
-  const cycleDay=CLAIMED_TODAY?(((STREAK-1)%7)+1):(STREAK%7+1);
-  if(num)num.textContent=cycleDay;
+  // Show TOTAL streak, not cycle day — prevents 'Day 1' confusion after week 1 completes
+  if(num)num.textContent=STREAK;
   days.innerHTML=STREAK_DEFS.map((r,i)=>{
     const done=i<dayIdx||(i===dayIdx&&CLAIMED_TODAY);
     const isToday=i===dayIdx&&!CLAIMED_TODAY;
@@ -4134,20 +4137,33 @@ function renderStreakRewards(){
 }
 function claimStreak(){
   const _today=_todayISO();
-  if(LAST_CLAIM.slice(0,10)===_today){hubToast('\u2705 Come back tomorrow!');return;}
+  // Triple guard: in-memory flag, LAST_CLAIM string, session-level flag
+  // The session flag survives localStorage.clear() and logout race conditions
+  if(CLAIMED_TODAY||LAST_CLAIM.slice(0,10)===_today||window._streakClaimedDate===_today){
+    hubToast('\u2705 Already claimed today! Come back tomorrow.');return;
+  }
+  // Lock FIRST before any async work so rapid double-taps can't sneak through
+  CLAIMED_TODAY=true;LAST_CLAIM=_today;window._streakClaimedDate=_today;
   missionProgress('streak_claim', 1);
   const idx=STREAK%7;
   const r=STREAK_DEFS[idx];
   earnCoins(r.coins,'Daily Streak');
   if(r.sats>0)awardSats(r.sats,'streak');
-  const cycleDay=idx+1;
-  STREAK=STREAK+1;CLAIMED_TODAY=true;LAST_CLAIM=_todayISO();
+  const totalDays=STREAK+1; // total streak days including this claim
+  const cycleDay=idx+1;     // position in current 7-day cycle (1-7)
+  STREAK=totalDays;
   SFX.streak();
-  saveState();renderStreakHub();renderStreakRewards();
-  // Sync immediately
+  // Cancel debounced sync then write directly — prevents two concurrent server writes racing
+  clearTimeout(window._syncTimer);
+  try{localStorage.setItem('sah_v5',JSON.stringify({
+    c:COINS,s:SATS,j:JACKPOT,st:STREAK,lc:LAST_CLAIM,ct:CLAIMED_TODAY,
+    wc:WEEKLY_CLAIMS,mc:MONTHLY_CLAIMS,tc:TIME_CLAIMED,awn:AD_WATCH_NEXT,
+    rh:REDEEM_HIST,dr:DAILY_REDEEMED,drd:DAILY_REDEEM_DATE,pb:PLINKO.balls
+  }));}catch(e){}
+  renderStreakHub();renderStreakRewards();
   syncToServer();
   const isWeek7=cycleDay===7;
-  showRewardPopup('\u{1F525}',isWeek7?'Week Complete! \u{1F525}':'Day '+cycleDay+' Streak!',[{ico:'\u{1FA99}',val:'+'+r.coins+' Coins'},{ico:'\u20BF',val:'\u20BF'+r.sats}],'var(--btc)');
+  showRewardPopup('\u{1F525}',isWeek7?'Week Complete! \u{1F525}':'Day '+totalDays+' Streak!',[{ico:'\u{1FA99}',val:'+'+r.coins+' Coins'},{ico:'\u20BF',val:'\u20BF'+r.sats}],'var(--btc)');
   confetti();
 }
 
@@ -7106,9 +7122,13 @@ async function onAuthSuccess(user,displayName){
     PLAYER_AVATAR=existing.avatar??'&#x1F3AE;';PLAYER_LEVEL=existing.player_level??1;
     try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
     try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
-    // Recalculate CLAIMED_TODAY and STREAK from LAST_CLAIM
-    if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
-    else{CLAIMED_TODAY=false;}
+    // Recalculate CLAIMED_TODAY and STREAK from server's authoritative last_claim
+    if(LAST_CLAIM){
+      const _sc=_applyStreakState(LAST_CLAIM,STREAK);
+      STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;
+      // Restore session-level guard so logout/re-login can't bypass the claim block
+      if(_sc.claimedToday) window._streakClaimedDate=_todayISO();
+    } else {CLAIMED_TODAY=false;}
     syncAll();saveState();
     // Suppress tutorial if already completed (server or localStorage)
     if(existing.tutorial_done) window._tutSuppressed = true;
@@ -7249,8 +7269,11 @@ async function authInit(){
         PLAYER_LEVEL=existing.player_level??1;
         try{WEEKLY_CLAIMS=existing.weekly_claims?JSON.parse(existing.weekly_claims):{};}catch(e){WEEKLY_CLAIMS={};}
         try{MONTHLY_CLAIMS=existing.monthly_claims?JSON.parse(existing.monthly_claims):{};}catch(e){MONTHLY_CLAIMS={};}
-        if(LAST_CLAIM){const _sc=_applyStreakState(LAST_CLAIM,STREAK);STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;}
-        else{CLAIMED_TODAY=false;}
+        if(LAST_CLAIM){
+          const _sc=_applyStreakState(LAST_CLAIM,STREAK);
+          STREAK=_sc.streak;CLAIMED_TODAY=_sc.claimedToday;
+          if(_sc.claimedToday) window._streakClaimedDate=_todayISO();
+        } else {CLAIMED_TODAY=false;}
         // Restore ad watch cooldown from server
         if(existing.last_ad_sat){
           const _lastAd=new Date(existing.last_ad_sat).getTime();
